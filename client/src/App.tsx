@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import CodeComparison from './components/CodeComparison'
-import PRReview from './components/PRReview/PRReview'
+import { useState } from 'react'
+import CodeComparison from './components/Abby/CodeComparison'
+import PRReview from './components/Actice/PRReview'
 import './App.css'
 
 function App() {

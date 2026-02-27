@@ -1,3 +1,4 @@
+import ReactMarkdown from 'react-markdown'
 import './Evaluation.css'
 
 function Evaluation({ evaluation, onReset }) {
@@ -6,7 +7,9 @@ function Evaluation({ evaluation, onReset }) {
       <h2>Evaluation Results</h2>
 
       <div className="evaluation-content">
-        <div className="evaluation-text">{evaluation}</div>
+        <div className="evaluation-text">
+          <ReactMarkdown>{evaluation}</ReactMarkdown>
+        </div>
       </div>
 
       <button className="reset-button" onClick={onReset}>

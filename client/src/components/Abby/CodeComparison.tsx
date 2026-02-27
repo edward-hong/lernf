@@ -2,6 +2,12 @@ import { useState } from 'react'
 import axios from 'axios'
 import CodeBlock from './CodeBlock'
 import Evaluation from './Evaluation'
+import LanguageSelector from './LanguageSelector'
+import {
+  generateComparisonPrompt,
+  LANGUAGES,
+} from '../../prompts/promptComparison'
+import { evaluateOptions } from '../../prompts/evaluateOptions'
 import './CodeComparison.css'
 
 function CodeComparison() {
@@ -11,6 +17,7 @@ function CodeComparison() {
   const [reasoning, setReasoning] = useState('')
   const [evaluation, setEvaluation] = useState(null)
   const [evaluating, setEvaluating] = useState(false)
+  const [language, setLanguage] = useState('javascript')
 
   // Generate a new scenario
   const generateScenario = async () => {
@@ -21,35 +28,34 @@ function CodeComparison() {
     setEvaluation(null)
 
     try {
+      const prompt = generateComparisonPrompt(language)
+
       const response = await axios.post('http://localhost:5000/api/deepseek', {
-        prompt: `Generate two JavaScript functions that accomplish the same task, but one is better than the other.
-
-Format your response as JSON:
-{
-  "context": "Brief description of what the functions do (e.g., 'Find maximum number in array')",
-  "optionA": {
-    "code": "function code here",
-    "approach": "Brief description of approach (e.g., 'Uses reduce method')"
-  },
-  "optionB": {
-    "code": "function code here", 
-    "approach": "Brief description of approach (e.g., 'Uses for loop')"
-  },
-  "correctAnswer": "A or B",
-  "reason": "Why one is better (performance, readability, best practices, etc.)"
-}
-
-Make the difference subtle but meaningful. Focus on real-world scenarios like:
-- Performance differences
-- Readability/maintainability
-- Edge case handling
-- Memory efficiency
-- Best practices
-
-Only return valid JSON, no markdown or other text.`,
+        prompt,
       })
 
-      const scenarioData = JSON.parse(response.data.output)
+      // response.data.output is a string like: "{\n  \"context\": ..."
+      let outputString = response.data.output
+
+      // Sometimes AI adds markdown code blocks, strip them
+      outputString = outputString
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+
+      // Parse the JSON string
+      const scenarioData = JSON.parse(outputString)
+
+      // Validate it has the expected structure
+      if (
+        !scenarioData.context ||
+        !scenarioData.optionA ||
+        !scenarioData.optionB
+      ) {
+        throw new Error('Invalid scenario structure')
+      }
+
+      console.log(scenarioData)
+
       setScenario(scenarioData)
     } catch (error) {
       console.error('Error generating scenario:', error)
@@ -70,23 +76,7 @@ Only return valid JSON, no markdown or other text.`,
 
     try {
       const response = await axios.post('http://localhost:5000/api/deepseek', {
-        prompt: `Context: ${scenario.context}
-
-Option A: ${scenario.optionA.code}
-Option B: ${scenario.optionB.code}
-
-User selected: Option ${selectedOption}
-User's reasoning: ${reasoning}
-
-The correct answer is Option ${scenario.correctAnswer} because: ${scenario.reason}
-
-Evaluate the user's answer:
-1. Did they select the correct option?
-2. How good was their reasoning?
-3. What did they miss?
-4. Provide constructive feedback.
-
-Keep the evaluation concise but helpful (3-5 sentences).`,
+        prompt: evaluateOptions(scenario, reasoning, selectedOption),
       })
 
       setEvaluation(response.data.output)
@@ -115,6 +105,14 @@ Keep the evaluation concise but helpful (3-5 sentences).`,
         </p>
       </header>
 
+      {!scenario && (
+        <LanguageSelector
+          value={language}
+          languages={LANGUAGES}
+          onChange={(language) => setLanguage(language)}
+        />
+      )}
+
       {!scenario && !loading && (
         <div className="start-section">
           <button className="generate-button" onClick={generateScenario}>
@@ -139,6 +137,7 @@ Keep the evaluation concise but helpful (3-5 sentences).`,
 
           <div className="options">
             <CodeBlock
+              language={language}
               label="Option A"
               code={scenario.optionA.code}
               isSelected={selectedOption === 'A'}
@@ -146,6 +145,7 @@ Keep the evaluation concise but helpful (3-5 sentences).`,
             />
 
             <CodeBlock
+              language={language}
               label="Option B"
               code={scenario.optionB.code}
               isSelected={selectedOption === 'B'}

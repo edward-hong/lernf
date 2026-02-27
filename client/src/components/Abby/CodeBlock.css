@@ -1,0 +1,51 @@
+.code-block {
+  border: 2px solid #d0d7de;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.code-block:hover {
+  border-color: #8c959f;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.code-block.selected {
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.12);
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d0d7de;
+  background: #f6f8fa;
+}
+
+.code-block.selected .code-header {
+  background: #ddf4ff;
+  border-bottom-color: rgba(9, 105, 218, 0.2);
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #24292f;
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0969da;
+  background: rgba(9, 105, 218, 0.15);
+  border-radius: 12px;
+}
+
+/* Ensure code block fills container */
+.code-block pre {
+  margin: 0 !important;
+}
