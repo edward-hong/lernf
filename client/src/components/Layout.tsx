@@ -1,10 +1,15 @@
 // src/components/Layout.tsx
 import { Outlet, Link, useLocation } from 'react-router-dom'
 
+interface NavItem {
+  path: string
+  label: string
+}
+
 export function Layout() {
   const location = useLocation()
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { path: '/', label: 'Home' },
     { path: '/practice/code-comparison', label: 'Code Comparison' },
     { path: '/practice/pr-review', label: 'PR Review' },

@@ -8,13 +8,14 @@ import {
   LANGUAGES,
 } from '../../prompts/promptComparison'
 import { evaluateOptions } from '../../prompts/evaluateOptions'
+import type { CodeScenario, SelectedOption } from '../../types/comparison'
 
 function CodeComparison() {
   const [loading, setLoading] = useState(false)
-  const [scenario, setScenario] = useState(null)
-  const [selectedOption, setSelectedOption] = useState(null)
+  const [scenario, setScenario] = useState<CodeScenario | null>(null)
+  const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(null)
   const [reasoning, setReasoning] = useState('')
-  const [evaluation, setEvaluation] = useState(null)
+  const [evaluation, setEvaluation] = useState<string | null>(null)
   const [evaluating, setEvaluating] = useState(false)
   const [language, setLanguage] = useState('javascript')
 
@@ -66,7 +67,7 @@ function CodeComparison() {
 
   // Submit answer for evaluation
   const submitAnswer = async () => {
-    if (!selectedOption || !reasoning.trim()) {
+    if (!scenario || !selectedOption || !reasoning.trim()) {
       alert('Please select an option and provide your reasoning.')
       return
     }

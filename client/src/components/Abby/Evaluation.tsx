@@ -1,6 +1,11 @@
 import ReactMarkdown from 'react-markdown'
 
-function Evaluation({ evaluation, onReset }) {
+interface EvaluationProps {
+  evaluation: string
+  onReset: () => void
+}
+
+function Evaluation({ evaluation, onReset }: EvaluationProps) {
   return (
     <div className="max-w-[800px] mx-auto mt-6 p-6 bg-white rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.1)]">
       <h2 className="mt-0 text-gray-800 text-2xl">Evaluation Results</h2>

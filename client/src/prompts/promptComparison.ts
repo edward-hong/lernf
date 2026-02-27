@@ -1,4 +1,10 @@
-export const LANGUAGES = [
+export interface Language {
+  value: string
+  label: string
+  icon: string
+}
+
+export const LANGUAGES: Language[] = [
   { value: 'javascript', label: 'JavaScript', icon: '🟨' },
   { value: 'typescript', label: 'TypeScript', icon: '🔷' },
   { value: 'python', label: 'Python', icon: '🐍' },
@@ -11,8 +17,14 @@ export const LANGUAGES = [
   { value: 'swift', label: 'Swift', icon: '🍎' },
 ]
 
+interface LanguageGuidance {
+  name: string
+  focus: string
+  avoid: string
+}
+
 export function generateComparisonPrompt(language: string): string {
-  const languageGuidance = {
+  const languageGuidance: Record<string, LanguageGuidance> = {
     javascript: {
       name: 'JavaScript',
       focus: 'modern ES6+ features, async patterns, functional vs imperative',

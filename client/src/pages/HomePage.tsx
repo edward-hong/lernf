@@ -1,8 +1,16 @@
 // src/pages/HomePage.tsx
 import { Link } from 'react-router-dom'
 
+interface Feature {
+  title: string
+  description: string
+  path: string
+  status: 'ready' | 'coming-soon'
+  icon: string
+}
+
 export function HomePage() {
-  const features = [
+  const features: Feature[] = [
     {
       title: 'Code Comparison',
       description: 'Practice identifying better code patterns',
