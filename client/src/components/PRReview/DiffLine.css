@@ -1,0 +1,66 @@
+.diff-line {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  position: relative;
+}
+
+.diff-line:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.diff-line.marked {
+  background-color: #fef3c7;
+  border-left: 3px solid #f59e0b;
+}
+
+.line-number {
+  min-width: 50px;
+  color: #6b7280;
+  text-align: right;
+  margin-right: 16px;
+  user-select: none;
+}
+
+.line-prefix {
+  min-width: 20px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.diff-added {
+  background-color: #d1fae5;
+}
+
+.diff-added .line-prefix {
+  color: #059669;
+}
+
+.diff-removed {
+  background-color: #fee2e2;
+}
+
+.diff-removed .line-prefix {
+  color: #dc2626;
+}
+
+.diff-context {
+  background-color: #f9fafb;
+}
+
+.line-content {
+  flex: 1;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.marked-indicator {
+  position: absolute;
+  right: 12px;
+  font-size: 16px;
+}
