@@ -1,4 +1,10 @@
-export function evaluateOptions(scenario, reasoning, selectedOption): string {
+import type { ComparisonScenario } from '../types/comparison'
+
+export function evaluateOptions(
+  scenario: ComparisonScenario,
+  reasoning: string,
+  selectedOption: 'A' | 'B'
+): string {
   return `Context: ${scenario.context}
 
 Option A: ${scenario.optionA.code}

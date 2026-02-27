@@ -1,6 +1,8 @@
+import type { Language } from '../../types/comparison'
+
 interface LanguageSelectorProps {
   value: string
-  languages: any
+  languages: Language[]
   onChange: (value: string) => void
 }
 

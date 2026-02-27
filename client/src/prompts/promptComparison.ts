@@ -1,4 +1,6 @@
-export const LANGUAGES = [
+import type { Language } from '../types/comparison'
+
+export const LANGUAGES: Language[] = [
   { value: 'javascript', label: 'JavaScript', icon: '🟨' },
   { value: 'typescript', label: 'TypeScript', icon: '🔷' },
   { value: 'python', label: 'Python', icon: '🐍' },
@@ -11,8 +13,14 @@ export const LANGUAGES = [
   { value: 'swift', label: 'Swift', icon: '🍎' },
 ]
 
+interface LanguageGuidance {
+  name: string
+  focus: string
+  avoid: string
+}
+
 export function generateComparisonPrompt(language: string): string {
-  const languageGuidance = {
+  const languageGuidance: Record<string, LanguageGuidance> = {
     javascript: {
       name: 'JavaScript',
       focus: 'modern ES6+ features, async patterns, functional vs imperative',
@@ -46,8 +54,8 @@ export function generateComparisonPrompt(language: string): string {
     },
   }
 
-  const guidance =
-    languageGuidance[language.toLowerCase()] || languageGuidance.javascript
+  const guidance: LanguageGuidance =
+    languageGuidance[language.toLowerCase()] ?? languageGuidance['javascript']!
 
   return `Generate two ${guidance.name} functions that accomplish the same task, but one is better than the other.
 
@@ -59,7 +67,7 @@ Format your response as JSON:
     "approach": "Brief description of approach"
   },
   "optionB": {
-    "code": "function code here", 
+    "code": "function code here",
     "approach": "Brief description of approach"
   },
   "correctAnswer": "A or B",
