@@ -43,11 +43,7 @@ function CodeBlock({
         language={language}
         style={ghcolors}
         customStyle={{
-          margin: '0 8px',
-          backgroundColor: isSelected ? '#ddf4ff' : '#ffffff',
-          borderRadius: '8px',
-          padding: '1rem',
-          cursor: 'pointer',
+          border: 'none',
         }}
       >
         {code}
