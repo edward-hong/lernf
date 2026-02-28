@@ -41,10 +41,10 @@ const caseStudies: CaseStudy[] = [
 
 const COLORS = {
   bg: '#ffffff',
-  textPrimary: '#1e293b',
-  textSecondary: '#64748b',
-  quadrantLine: '#cbd5e1',
-  ringBorder: '#94a3b8',
+  textPrimary: '#0f172a',
+  textSecondary: '#475569',
+  quadrantLine: '#94a3b8',
+  ringBorder: '#64748b',
   parasitic: '#dc2626',
   dangerous: '#ea580c',
   transition: '#ca8a04',
@@ -52,7 +52,7 @@ const COLORS = {
   recovery: '#8b5cf6',
 }
 
-const RING_TINTS = ['#fecaca', '#fed7aa', '#fef08a', '#bbf7d0', '#86efac']
+const RING_TINTS = ['#fca5a5', '#fdba74', '#fde047', '#86efac', '#4ade80']
 
 const RING_LABELS = [
   'Ring 1: Parasitic',
@@ -226,10 +226,10 @@ export function GripCompass() {
           endAngle: 2 * Math.PI,
         }))
         .attr('fill', RING_TINTS[i])
-        .attr('opacity', 0.25 + i * 0.05)
+        .attr('opacity', 0.35 + i * 0.05)
         .attr('class', `ring-fill ring-${i + 1}`)
         .on('mouseenter', function () {
-          d3.select(this).transition().duration(200).attr('opacity', 0.4 + i * 0.05)
+          d3.select(this).transition().duration(200).attr('opacity', 0.5 + i * 0.05)
           // Show ring label tooltip
           const rMid = (rOuter + rInner) / 2
           g.append('text')
@@ -246,7 +246,7 @@ export function GripCompass() {
             .text(RING_LABELS[i])
         })
         .on('mouseleave', function () {
-          d3.select(this).transition().duration(200).attr('opacity', 0.25 + i * 0.05)
+          d3.select(this).transition().duration(200).attr('opacity', 0.35 + i * 0.05)
           g.selectAll('.ring-tooltip').remove()
         })
 
@@ -255,8 +255,8 @@ export function GripCompass() {
         .attr('r', rOuter)
         .attr('fill', 'none')
         .attr('stroke', COLORS.ringBorder)
-        .attr('stroke-opacity', 0.3)
-        .attr('stroke-width', 0.5)
+        .attr('stroke-opacity', 0.5)
+        .attr('stroke-width', 1)
     }
 
     // Innermost circle border
@@ -264,8 +264,8 @@ export function GripCompass() {
       .attr('r', innerRadius)
       .attr('fill', 'none')
       .attr('stroke', COLORS.ringBorder)
-      .attr('stroke-opacity', 0.3)
-      .attr('stroke-width', 0.5)
+      .attr('stroke-opacity', 0.5)
+      .attr('stroke-width', 1)
 
     // ─── Ring labels (subtle, along the right side) ────────────
 
@@ -276,7 +276,8 @@ export function GripCompass() {
         .attr('y', -rMid + 4)
         .attr('fill', COLORS.textSecondary)
         .attr('font-size', '9px')
-        .attr('opacity', 0.5)
+        .attr('font-weight', '600')
+        .attr('opacity', 0.7)
         .text(`R${i + 1}`)
     }
 
@@ -289,7 +290,7 @@ export function GripCompass() {
       .attr('stroke', COLORS.quadrantLine)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,4')
-      .attr('opacity', 0.6)
+      .attr('opacity', 0.8)
 
     // Vertical line
     g.append('line')
@@ -298,7 +299,7 @@ export function GripCompass() {
       .attr('stroke', COLORS.quadrantLine)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,4')
-      .attr('opacity', 0.6)
+      .attr('opacity', 0.8)
 
     // ─── Quadrant Labels ───────────────────────────────────────
 
@@ -346,7 +347,7 @@ export function GripCompass() {
       }))
       .attr('fill', 'none')
       .attr('stroke', COLORS.textSecondary)
-      .attr('stroke-opacity', 0.2)
+      .attr('stroke-opacity', 0.35)
       .attr('stroke-width', 1.5)
       .attr('marker-end', 'url(#drift-arrow)')
 
@@ -361,25 +362,34 @@ export function GripCompass() {
         .attr('text-anchor', 'middle')
         .attr('fill', COLORS.textSecondary)
         .attr('font-size', '8px')
-        .attr('opacity', 0.35)
+        .attr('font-weight', '500')
+        .attr('opacity', 0.5)
         .text(stage)
     })
 
     // ─── Kangxi Recovery Trajectory (Case 13) ─────────────────
+    // Trajectory connects Rasputin (Ring 1, R) to Kangxi (Ring 5, R)
 
-    const kangxiAngleRad = (45 * Math.PI) / 180 // R quadrant
-    const trajectoryStartR = outerRadius - 0.5 * ringWidth  // Ring 1
-    const trajectoryEndR = outerRadius - 4.5 * ringWidth     // Ring 5
+    const kangxiCase = caseStudies.find(c => c.id === 13)!
+    const rasputinCase = caseStudies.find(c => c.id === 4)!
+    const kangxiRing = 5
+    const kangxiAngleDeg = quadrantAngle(kangxiCase.quadrant)
+    const kangxiAngleRad = (kangxiAngleDeg * Math.PI) / 180
+    const kangxiRadius = outerRadius - (kangxiRing - 0.5) * ringWidth
+    const kangxiPos = { x: kangxiRadius * Math.cos(kangxiAngleRad), y: -kangxiRadius * Math.sin(kangxiAngleRad) }
+    const recoveryDimmed = isDimmed({ quadrant: 'R', type: 'recovery' } as CaseStudy)
 
-    // Create a curved path from outer to inner with a slight sweep
+    // Create a curved path from Rasputin to Kangxi with a sinusoidal sweep
     const trajectoryPoints: [number, number][] = []
     const steps = 40
+    const rasputinAngleRad = (quadrantAngle(rasputinCase.quadrant) * Math.PI) / 180
+    const trajectoryStartR = outerRadius - 0.5 * ringWidth  // Ring 1 radius
+    const trajectoryEndR = kangxiRadius                       // Ring 5 radius
     for (let i = 0; i <= steps; i++) {
       const t = i / steps
       const r = trajectoryStartR + (trajectoryEndR - trajectoryStartR) * t
-      // Add a sinusoidal sweep to make the path curved
       const angleOffset = Math.sin(t * Math.PI) * 0.3
-      const angle = kangxiAngleRad + angleOffset
+      const angle = rasputinAngleRad + angleOffset
       trajectoryPoints.push([
         r * Math.cos(angle),
         -r * Math.sin(angle),
@@ -391,29 +401,30 @@ export function GripCompass() {
       .y(d => d[1])
       .curve(d3.curveBasis)
 
-    // Trajectory path (background)
+    // Trajectory path
     g.append('path')
       .attr('d', lineGen(trajectoryPoints))
       .attr('fill', 'none')
       .attr('stroke', COLORS.recovery)
       .attr('stroke-width', 2.5)
       .attr('stroke-dasharray', '6,4')
-      .attr('opacity', isDimmed({ quadrant: 'R', type: 'recovery' } as CaseStudy) ? 0.1 : 0.5)
+      .attr('opacity', recoveryDimmed ? 0.1 : 0.6)
       .attr('marker-end', 'url(#arrowhead)')
+      .attr('class', 'recovery-trajectory')
 
     // Animated traveling dot along the trajectory
     const travelDot = g.append('circle')
       .attr('r', 3)
       .attr('fill', COLORS.recovery)
-      .attr('opacity', isDimmed({ quadrant: 'R', type: 'recovery' } as CaseStudy) ? 0.1 : 0.8)
+      .attr('opacity', recoveryDimmed ? 0.1 : 0.9)
 
     function animateTravelDot() {
-      const pathNode = g.select('path[stroke="' + COLORS.recovery + '"]').node() as SVGPathElement | null
+      const pathNode = g.select('.recovery-trajectory').node() as SVGPathElement | null
       if (!pathNode) return
       const totalLength = pathNode.getTotalLength()
 
       travelDot
-        .attr('opacity', isDimmed({ quadrant: 'R', type: 'recovery' } as CaseStudy) ? 0.1 : 0.8)
+        .attr('opacity', recoveryDimmed ? 0.1 : 0.9)
         .transition()
         .duration(4000)
         .ease(d3.easeLinear)
@@ -435,15 +446,141 @@ export function GripCompass() {
 
     // Trajectory label
     const labelR = (trajectoryStartR + trajectoryEndR) / 2
-    const labelAngle = kangxiAngleRad + 0.15
+    const labelAngle = rasputinAngleRad + 0.15
     g.append('text')
       .attr('x', (labelR + 20) * Math.cos(labelAngle + 0.25))
       .attr('y', -(labelR + 20) * Math.sin(labelAngle + 0.25))
       .attr('fill', COLORS.recovery)
       .attr('font-size', '10px')
+      .attr('font-weight', '600')
       .attr('font-style', 'italic')
-      .attr('opacity', isDimmed({ quadrant: 'R', type: 'recovery' } as CaseStudy) ? 0.1 : 0.7)
+      .attr('opacity', recoveryDimmed ? 0.1 : 0.8)
       .text('Recovery Trajectory')
+
+    // ─── Kangxi/Aobai Dot (Case 13) — placed at Ring 5, R ───
+
+    const kangxiDotGroup = g.append('g')
+      .attr('class', 'case-dot case-13')
+      .attr('transform', `translate(${kangxiPos.x},${kangxiPos.y})`)
+      .style('cursor', 'pointer')
+      .attr('opacity', recoveryDimmed ? 0.12 : 1)
+
+    kangxiDotGroup.append('circle')
+      .attr('r', 18)
+      .attr('fill', COLORS.recovery)
+      .attr('opacity', 0)
+      .attr('class', 'glow-ring')
+
+    kangxiDotGroup.append('circle')
+      .attr('r', 10)
+      .attr('fill', COLORS.recovery)
+      .attr('opacity', 1)
+      .attr('stroke', COLORS.bg)
+      .attr('stroke-width', 2)
+
+    kangxiDotGroup.append('text')
+      .attr('x', 15)
+      .attr('y', 4)
+      .attr('fill', COLORS.textPrimary)
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('paint-order', 'stroke')
+      .attr('stroke', COLORS.bg)
+      .attr('stroke-width', 3)
+      .text(kangxiCase.shortLabel)
+
+    kangxiDotGroup.on('mouseenter', function () {
+      if (recoveryDimmed) return
+      d3.select(this).raise()
+      d3.select(this).select('.glow-ring')
+        .transition().duration(200)
+        .attr('opacity', 0.25)
+        .attr('r', 22)
+      d3.select(this).select('circle:nth-child(2)')
+        .transition().duration(200)
+        .attr('r', 13)
+
+      const tooltipG = g.append('g').attr('class', 'tooltip-group')
+        .attr('transform', `translate(${kangxiPos.x},${kangxiPos.y})`)
+        .style('pointer-events', 'none')
+
+      const tooltipY = -30
+      const padding = 10
+      const lineHeight = 16
+
+      const tooltipBg = tooltipG.append('rect')
+        .attr('rx', 6).attr('ry', 6)
+        .attr('fill', '#ffffff')
+        .attr('stroke', COLORS.recovery)
+        .attr('stroke-width', 1)
+        .attr('opacity', 0.95)
+
+      const nameText = tooltipG.append('text')
+        .attr('y', tooltipY)
+        .attr('text-anchor', 'middle')
+        .attr('fill', COLORS.textPrimary)
+        .attr('font-size', '12px')
+        .attr('font-weight', '700')
+        .text(kangxiCase.label)
+
+      tooltipG.append('text')
+        .attr('y', tooltipY + lineHeight)
+        .attr('text-anchor', 'middle')
+        .attr('fill', COLORS.recovery)
+        .attr('font-size', '11px')
+        .attr('font-weight', '600')
+        .text(kangxiCase.pattern)
+
+      const maxChars = 45
+      const oneLinerLines: string[] = []
+      const words = kangxiCase.oneLiner.split(' ')
+      let currentLine = ''
+      words.forEach(word => {
+        if ((currentLine + ' ' + word).trim().length > maxChars) {
+          oneLinerLines.push(currentLine.trim())
+          currentLine = word
+        } else {
+          currentLine = (currentLine + ' ' + word).trim()
+        }
+      })
+      if (currentLine) oneLinerLines.push(currentLine.trim())
+
+      oneLinerLines.forEach((line, li) => {
+        tooltipG.append('text')
+          .attr('y', tooltipY + lineHeight * 2 + 4 + li * 13)
+          .attr('text-anchor', 'middle')
+          .attr('fill', COLORS.textSecondary)
+          .attr('font-size', '10px')
+          .attr('font-style', 'italic')
+          .text(line)
+      })
+
+      const nameBox = (nameText.node() as SVGTextElement).getBBox()
+      const totalHeight = lineHeight * 2 + 4 + oneLinerLines.length * 13 + padding
+      const tooltipWidth = Math.max(nameBox.width + padding * 2, 200)
+
+      tooltipBg
+        .attr('x', -tooltipWidth / 2)
+        .attr('y', tooltipY - padding - 4)
+        .attr('width', tooltipWidth)
+        .attr('height', totalHeight + padding)
+    })
+    .on('mouseleave', function () {
+      d3.select(this).select('.glow-ring')
+        .transition().duration(200)
+        .attr('opacity', 0)
+        .attr('r', 18)
+      d3.select(this).select('circle:nth-child(2)')
+        .transition().duration(200)
+        .attr('r', 10)
+      g.selectAll('.tooltip-group')
+        .transition().duration(200)
+        .attr('opacity', 0)
+        .remove()
+    })
+    .on('click', () => {
+      if (!recoveryDimmed) setSelectedCase(prev => prev?.id === kangxiCase.id ? null : kangxiCase)
+    })
 
     // ─── Case Study Dots ───────────────────────────────────────
 
@@ -469,7 +606,7 @@ export function GripCompass() {
       dotGroup.append('circle')
         .attr('r', 10)
         .attr('fill', c.color)
-        .attr('opacity', 0.85)
+        .attr('opacity', 1)
         .attr('stroke', COLORS.bg)
         .attr('stroke-width', 2)
 
@@ -479,7 +616,7 @@ export function GripCompass() {
         .attr('y', 4)
         .attr('fill', COLORS.textPrimary)
         .attr('font-size', '10px')
-        .attr('font-weight', '500')
+        .attr('font-weight', '600')
         .attr('paint-order', 'stroke')
         .attr('stroke', COLORS.bg)
         .attr('stroke-width', 3)
