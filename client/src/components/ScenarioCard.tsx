@@ -113,9 +113,13 @@ export function ScenarioCard({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 hover:shadow-md transition-all">
+    <article
+      className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 hover:shadow-md transition-all focus-within:ring-2 focus-within:ring-blue-500"
+      role="listitem"
+      aria-label={`${title} — ${statusConfig.label}`}
+    >
       {/* Header strip */}
-      <div className="px-5 pt-5 pb-3">
+      <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3">
         {/* Top row: category + status */}
         <div className="flex items-center justify-between mb-3">
           <span
@@ -126,7 +130,7 @@ export function ScenarioCard({
           <span
             className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.text}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} aria-hidden="true" />
             {statusConfig.label}
           </span>
         </div>
@@ -138,13 +142,14 @@ export function ScenarioCard({
         <p className="text-sm text-gray-500 mb-3 line-clamp-2">{subtitle}</p>
 
         {/* GRIP Focus chips */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <span className="text-xs text-gray-400 mr-1">GRIP:</span>
+        <div className="flex items-center gap-1.5 mb-3" role="list" aria-label="GRIP focus areas">
+          <span className="text-xs text-gray-400 mr-1" aria-hidden="true">GRIP:</span>
           {gripFocus.map((dim) => (
             <span
               key={dim}
               className="inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold bg-gray-100 text-gray-600"
               title={GRIP_LABELS[dim]}
+              role="listitem"
             >
               {dim}
             </span>
@@ -164,7 +169,7 @@ export function ScenarioCard({
 
       {/* Score bar (only if completed) */}
       {progress.lastAttempt && (
-        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+        <div className="px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-gray-500">Last GRIP Scores</span>
             <span className={`text-sm font-bold ${getScoreColor(progress.lastAttempt.compositeScore)}`}>
@@ -182,7 +187,14 @@ export function ScenarioCard({
                       {score}
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                  <div
+                    className="h-1.5 rounded-full bg-gray-200 overflow-hidden"
+                    role="meter"
+                    aria-label={`${GRIP_LABELS[dim]} score`}
+                    aria-valuenow={score}
+                    aria-valuemin={1}
+                    aria-valuemax={5}
+                  >
                     <div
                       className={`h-full rounded-full ${getBarColor(score)} transition-all duration-500`}
                       style={{ width: `${(score / 5) * 100}%` }}
@@ -196,14 +208,15 @@ export function ScenarioCard({
       )}
 
       {/* Action button */}
-      <div className="px-5 py-3 border-t border-gray-100">
+      <div className="px-4 sm:px-5 py-3 border-t border-gray-100">
         <Link
           to={`/practice/workplace-scenarios/${scenarioId}`}
-          className={`block w-full text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors ${buttonStyle}`}
+          className={`block w-full text-center py-2 px-4 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${buttonStyle}`}
+          aria-label={`${buttonLabel} scenario: ${title}`}
         >
           {buttonLabel}
         </Link>
       </div>
-    </div>
+    </article>
   )
 }
