@@ -8,6 +8,7 @@ import { ProgressDashboard } from './components/ProgressDashboard'
 // Lazy-loaded routes for non-critical pages (code-split)
 const CodeComparison = lazy(() => import('./pages/tools/CodeComparison'))
 const PRReview = lazy(() => import('./pages/tools/PRReview'))
+const AiIntent = lazy(() => import('./pages/tools/AiIntent'))
 const ScenarioLibrary = lazy(() => import('./pages/tools/ScenarioLibrary'))
 const ScenarioPlayer = lazy(() => import('./pages/tools/ScenarioPlayer'))
 const ScenarioResultsRoute = lazy(() => import('./pages/tools/ScenarioResults'))
@@ -91,6 +92,10 @@ export const router = createBrowserRouter([
       {
         path: 'practice/pr-review',
         element: <Lazy><PRReview /></Lazy>,
+      },
+      {
+        path: 'practice/ai-intent',
+        element: <Lazy><AiIntent /></Lazy>,
       },
       {
         path: 'practice/ai-coding',
