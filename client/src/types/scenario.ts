@@ -30,6 +30,7 @@ export type ScenarioCategory =
   | 'emotional-dependency'
   | 'role-clarity'
   | 'institutional-memory'
+  | 'leadership-communication'
 
 /**
  * Something the user should discover during the scenario but is not told

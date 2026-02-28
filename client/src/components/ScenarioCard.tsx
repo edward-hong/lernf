@@ -34,6 +34,7 @@ const CATEGORY_LABELS: Record<ScenarioCategory, string> = {
   'emotional-dependency': 'Emotional Dependency',
   'role-clarity': 'Role Clarity',
   'institutional-memory': 'Institutional Memory',
+  'leadership-communication': 'Leadership & Communication',
 }
 
 const CATEGORY_COLORS: Record<ScenarioCategory, { bg: string; text: string }> = {
@@ -43,6 +44,7 @@ const CATEGORY_COLORS: Record<ScenarioCategory, { bg: string; text: string }> = 
   'emotional-dependency': { bg: 'bg-rose-100', text: 'text-rose-700' },
   'role-clarity': { bg: 'bg-teal-100', text: 'text-teal-700' },
   'institutional-memory': { bg: 'bg-amber-100', text: 'text-amber-700' },
+  'leadership-communication': { bg: 'bg-green-100', text: 'text-green-700' },
 }
 
 // ---- Status Badge ---------------------------------------------------------
