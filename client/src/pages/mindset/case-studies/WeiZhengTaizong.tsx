@@ -1,4 +1,4 @@
-import content from '../Case Studies/case-09-wei-zheng-taizong.md?raw'
+import content from '../case-studies-md/case-09-wei-zheng-taizong.md?raw'
 import { MarkdownPage } from '../../../components/mindset/MarkdownPage'
 
 export function WeiZhengTaizong() {
