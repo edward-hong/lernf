@@ -1,13 +1,25 @@
 import React from 'react'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { ghcolors } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import type { DiffLine as DiffLineType } from '../../types/pr'
 
 interface Props {
   line: DiffLineType
   isMarked: boolean
   onToggle: () => void
+  language: string
 }
 
-const DiffLine: React.FC<Props> = ({ line, isMarked, onToggle }) => {
+const normalizeLanguage = (lang: string): string => {
+  const map: Record<string, string> = {
+    react: 'jsx',
+    vue: 'markup',
+    html: 'markup',
+  }
+  return map[lang.toLowerCase()] ?? lang.toLowerCase()
+}
+
+const DiffLine: React.FC<Props> = ({ line, isMarked, onToggle, language }) => {
   const getLineClasses = () => {
     const base =
       'flex items-center px-3 py-1 font-mono text-sm leading-[1.6] cursor-pointer transition-colors relative hover:bg-blue-500/10'
@@ -43,7 +55,28 @@ const DiffLine: React.FC<Props> = ({ line, isMarked, onToggle }) => {
       <span className={`min-w-[20px] font-bold select-none ${getPrefixColor()}`}>
         {getPrefix()}
       </span>
-      <code className="flex-1 whitespace-pre overflow-x-auto">{line.content}</code>
+      <SyntaxHighlighter
+        language={normalizeLanguage(language)}
+        style={ghcolors}
+        customStyle={{
+          background: 'transparent',
+          padding: 0,
+          margin: 0,
+          flex: '1 1 0%',
+          whiteSpace: 'pre',
+          overflowX: 'auto',
+          fontSize: 'inherit',
+          fontFamily: 'inherit',
+          lineHeight: 'inherit',
+        }}
+        codeTagProps={{
+          style: {
+            background: 'transparent',
+          },
+        }}
+      >
+        {line.content}
+      </SyntaxHighlighter>
       {isMarked && <span className="absolute right-3 text-base">🚩</span>}
     </div>
   )
