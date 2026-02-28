@@ -26,6 +26,8 @@ interface AIMessageWithIntentProps {
   colors: ScenarioColorConfig
   /** Visualization settings. */
   settings: IntentVisualizationSettings
+  /** Whether intent is currently being analyzed. */
+  isAnalyzing?: boolean
 }
 
 function getColorsForMessage(
@@ -62,11 +64,12 @@ function AIMessageWithIntentInner({
   previousIntent,
   colors,
   settings,
+  isAnalyzing = false,
 }: AIMessageWithIntentProps) {
   const messageColors = getColorsForMessage(message, colors)
 
-  // If intent visualization is disabled or no analysis, render standard bubble
-  if (!settings.enabled || !intentAnalysis) {
+  // If intent visualization is disabled or (no analysis and not analyzing), render standard bubble
+  if (!settings.enabled || (!intentAnalysis && !isAnalyzing)) {
     return (
       <div className="flex justify-start px-3 sm:px-4 py-1.5" role="listitem">
         <div className="max-w-[90%] sm:max-w-[80%] md:max-w-[75%]">
@@ -119,34 +122,39 @@ function AIMessageWithIntentInner({
     )
   }
 
-  // Smooth intent with previous turn
-  const smoothedIntent = smoothIntent(
-    intentAnalysis.intent,
-    previousIntent,
-    settings.smoothingFactor,
-  )
+  // Smooth intent with previous turn (use neutral values while analyzing)
+  const smoothedIntent = intentAnalysis
+    ? smoothIntent(intentAnalysis.intent, previousIntent, settings.smoothingFactor)
+    : undefined
 
-  // Convert to colour
-  const spineColor = intentToColor(smoothedIntent)
-  const intentLabel = getIntentLabel(smoothedIntent)
+  // Show gray spine while analyzing, coloured spine once analyzed
+  const spineColor = isAnalyzing || !smoothedIntent
+    ? '#d1d5db'
+    : intentToColor(smoothedIntent)
+  const intentLabel = smoothedIntent ? getIntentLabel(smoothedIntent) : undefined
 
   return (
     <div className="flex justify-start px-3 sm:px-4 py-1.5" role="listitem">
       <div className="max-w-[90%] sm:max-w-[80%] md:max-w-[75%]">
         <div
-          className={`relative rounded-lg rounded-tl-sm overflow-hidden px-3 sm:px-4 py-3 ${messageColors.bg}`}
+          className={`relative rounded-lg rounded-tl-sm overflow-hidden px-3 sm:px-4 py-3 transition-all duration-300 ${messageColors.bg}`}
           style={{
             borderLeft: `6px solid ${spineColor}`,
           }}
         >
-          {/* Speaker name with optional intent label */}
+          {/* Speaker name with optional intent label or analyzing indicator */}
           <div className="flex items-center gap-2">
             <span
               className={`block text-xs font-semibold ${messageColors.label}`}
             >
               {message.speakerName}
             </span>
-            {settings.showTooltip && (
+            {isAnalyzing && (
+              <span className="text-xs font-normal text-gray-400 animate-pulse">
+                Analyzing...
+              </span>
+            )}
+            {!isAnalyzing && settings.showTooltip && intentLabel && (
               <span className="text-xs font-normal text-gray-400">
                 ({intentLabel})
               </span>
@@ -186,8 +194,10 @@ function AIMessageWithIntentInner({
             </div>
           )}
 
-          {/* Intent tooltip (hover "i" icon) */}
-          {settings.showTooltip && <IntentTooltip intent={smoothedIntent} />}
+          {/* Intent tooltip (hover "i" icon) — only when analysis is complete */}
+          {!isAnalyzing && settings.showTooltip && smoothedIntent && (
+            <IntentTooltip intent={smoothedIntent} previousIntent={previousIntent} />
+          )}
         </div>
 
         {/* Timestamp */}
