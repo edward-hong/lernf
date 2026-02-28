@@ -9,6 +9,8 @@ import { AiMapping } from './pages/mindset/AiMapping'
 import { GripFramework } from './pages/mindset/GripFramework'
 import { IndividualAudit } from './pages/mindset/IndividualAudit'
 import { OrganisationalAudit } from './pages/mindset/OrganisationalAudit'
+import { CaseStudiesIndex } from './pages/mindset/case-studies/CaseStudiesIndex'
+import { WeiZhongxianTianqi } from './pages/mindset/case-studies/WeiZhongxianTianqi'
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +58,15 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/organisational-audit',
         element: <OrganisationalAudit />,
+      },
+      // Case Studies routes
+      {
+        path: 'mindset/case-studies',
+        element: <CaseStudiesIndex />,
+      },
+      {
+        path: 'mindset/case-studies/wei-zhongxian-tianqi',
+        element: <WeiZhongxianTianqi />,
       },
     ],
   },

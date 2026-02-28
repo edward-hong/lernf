@@ -58,6 +58,10 @@ export function Layout() {
           path: '/mindset/organisational-audit',
           label: 'Organisational Audit',
         },
+        {
+          path: '/mindset/case-studies',
+          label: 'Case Studies',
+        },
       ],
     },
   ]
