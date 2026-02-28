@@ -24,16 +24,32 @@ export function Layout() {
       items: [
         { path: '/practice/code-comparison', label: 'Code Comparison' },
         { path: '/practice/pr-review', label: 'PR Review' },
-        { path: '/practice/ai-coding', label: 'AI Assisted Coding', placeholder: true },
-        { path: '/practice/workplace-scenarios', label: 'Workplace Scenarios', placeholder: true },
+        {
+          path: '/practice/ai-coding',
+          label: 'AI Assisted Coding',
+          placeholder: true,
+        },
+        {
+          path: '/practice/workplace-scenarios',
+          label: 'Workplace Scenarios',
+          placeholder: true,
+        },
       ],
     },
     {
       label: 'Mindset',
       items: [
-        { path: '/mindset/historical-mapping', label: 'Historical Mapping', placeholder: true },
+        {
+          path: '/mindset/historical-mapping',
+          label: 'Historical Context',
+          placeholder: true,
+        },
         { path: '/mindset/ai-mapping', label: 'AI Mapping', placeholder: true },
-        { path: '/mindset/grip-framework', label: 'GRIP Framework', placeholder: true },
+        {
+          path: '/mindset/grip-framework',
+          label: 'GRIP Framework',
+          placeholder: true,
+        },
       ],
     },
   ]
@@ -120,7 +136,9 @@ export function Layout() {
                         >
                           {item.label}
                           {item.placeholder && (
-                            <span className="text-xs text-gray-400 ml-2">Soon</span>
+                            <span className="text-xs text-gray-400 ml-2">
+                              Soon
+                            </span>
                           )}
                         </Link>
                       ))}
