@@ -16,6 +16,7 @@ import type { ScenarioProgressInfo, ScenarioCompletionStatus } from '../../utils
 import { useScenarioStore } from '../../state/scenarioState'
 import { PROD_INCIDENT_001 } from '../../data/scenarios/prod-incident-001'
 import { PROJECT_LEAD_DELAYS_002 } from '../../data/scenarios/project-lead-delays-002'
+import { PERF_REVIEW_PROMOTION_003 } from '../../data/scenarios/perf-review-promotion-003'
 
 // ---- Scenario Registry Metadata -------------------------------------------
 
@@ -29,7 +30,7 @@ interface ScenarioMeta {
 }
 
 function buildScenarioMeta(): ScenarioMeta[] {
-  const bundles = [PROD_INCIDENT_001, PROJECT_LEAD_DELAYS_002]
+  const bundles = [PROD_INCIDENT_001, PROJECT_LEAD_DELAYS_002, PERF_REVIEW_PROMOTION_003]
   return bundles.map((bundle) => {
     const def: ScenarioDefinition = bundle.buildScenario()
     return {
@@ -53,6 +54,7 @@ const CATEGORY_LABELS: Record<ScenarioCategory, string> = {
   'role-clarity': 'Role Clarity',
   'institutional-memory': 'Institutional Memory',
   'leadership-communication': 'Leadership & Communication',
+  'career-advancement': 'Career Advancement',
 }
 
 const ALL_CATEGORIES: ScenarioCategory[] = [
@@ -63,6 +65,7 @@ const ALL_CATEGORIES: ScenarioCategory[] = [
   'role-clarity',
   'institutional-memory',
   'leadership-communication',
+  'career-advancement',
 ]
 
 const ALL_GRIP: GripDimension[] = ['G', 'R', 'I', 'P']

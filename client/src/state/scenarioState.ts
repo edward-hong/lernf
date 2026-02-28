@@ -21,6 +21,7 @@ import type { AiPersonaVariant } from '../data/scenarios/prod-incident-001'
 import type { CompletionDetectionResult } from '../ai/completionDetector'
 import { PROD_INCIDENT_001 } from '../data/scenarios/prod-incident-001'
 import { PROJECT_LEAD_DELAYS_002 } from '../data/scenarios/project-lead-delays-002'
+import { PERF_REVIEW_PROMOTION_003 } from '../data/scenarios/perf-review-promotion-003'
 import { buildScenarioColorConfig } from '../utils/colors'
 
 // ---- Scenario Registry ----------------------------------------------------
@@ -33,6 +34,7 @@ import { buildScenarioColorConfig } from '../utils/colors'
 const SCENARIO_REGISTRY: Record<string, typeof PROD_INCIDENT_001> = {
   'prod-incident-001': PROD_INCIDENT_001,
   'project-lead-delays-002': PROJECT_LEAD_DELAYS_002,
+  'perf-review-promotion-003': PERF_REVIEW_PROMOTION_003,
 }
 
 // ---- Completion Types -----------------------------------------------------
