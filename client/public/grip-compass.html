@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIP Compass — Human-AI Power Dynamics</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  /* ── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── SVG Canvas ───────────────────────────────────────── */
+  #compass-container {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ── Tooltip ──────────────────────────────────────────── */
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 14px 18px;
+    max-width: 340px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  #tooltip .tt-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  #tooltip .tt-pattern {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+
+  #tooltip .tt-quote {
+    font-size: 12px;
+    font-style: italic;
+    color: #cbd5e1;
+    line-height: 1.5;
+    border-left: 2px solid #475569;
+    padding-left: 10px;
+  }
+
+  /* ── Detail Panel ─────────────────────────────────────── */
+  #detail-panel {
+    width: 380px;
+    min-width: 380px;
+    background: #1e293b;
+    border-left: 1px solid #334155;
+    padding: 32px 28px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #detail-panel.open {
+    transform: translateX(0);
+  }
+
+  #detail-panel .panel-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+
+  #detail-panel .panel-close:hover {
+    background: #334155;
+    color: #e2e8f0;
+  }
+
+  .panel-type {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+
+  .panel-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .panel-pattern {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+
+  .panel-meta {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+
+  .panel-quote {
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    border-left: 3px solid #475569;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    background: rgba(51, 65, 85, 0.3);
+    border-radius: 0 6px 6px 0;
+  }
+
+  .panel-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #94a3b8;
+  }
+
+  .panel-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #475569;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .panel-placeholder svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  .panel-placeholder p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Legend ────────────────────────────────────────────── */
+  #legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 16px;
+    z-index: 50;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .legend-item:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .legend-item.dimmed {
+    opacity: 0.3;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .legend-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: capitalize;
+  }
+
+  /* ── Title ─────────────────────────────────────────────── */
+  #title-block {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    z-index: 50;
+  }
+
+  #title-block h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  #title-block p {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    #detail-panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      z-index: 200;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+    }
+  }
+
+  @media (max-width: 768px) {
+    #detail-panel {
+      width: 100%;
+      min-width: 100%;
+    }
+
+    #legend {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="container">
+  <div id="compass-container">
+    <svg id="compass"></svg>
+    <div id="tooltip"></div>
+    <div id="title-block">
+      <h1>GRIP Compass</h1>
+      <p>Human-AI Power Dynamics &mdash; 13 Historical Case Studies</p>
+    </div>
+    <div id="legend"></div>
+  </div>
+  <div id="detail-panel">
+    <div class="panel-placeholder" id="panel-placeholder">
+      <p>Click a case study dot to explore its pattern, lesson, and AI parallel.</p>
+    </div>
+    <div id="panel-content" style="display:none;">
+      <button class="panel-close" id="panel-close">&times;</button>
+      <span class="panel-type" id="p-type"></span>
+      <div class="panel-name" id="p-name"></div>
+      <div class="panel-pattern" id="p-pattern"></div>
+      <div class="panel-meta" id="p-meta"></div>
+      <div class="panel-quote" id="p-quote"></div>
+      <div class="panel-desc" id="p-desc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// GRIP Compass Visualization — D3.js v7
+// A diagnostic tool for human-AI power dynamics
+// ══════════════════════════════════════════════════════════
+
+// ── Case Study Data ─────────────────────────────────────
+const cases = [
+  {
+    id: 1, label: "Wei Zhongxian / Tianqi", shortLabel: "Tianqi",
+    ring: 1, quadrant: "G", pattern: "Total Displacement", type: "parasitic",
+    oneLiner: "The emperor who preferred his workshop to his throne lost both.",
+    color: "#dc2626",
+    description: "Principal disengages entirely; subordinate fills the governance vacuum. AI parallel: automation complacency, delegating all operational work to AI."
+  },
+  {
+    id: 2, label: "Sejanus / Tiberius", shortLabel: "Sejanus",
+    ring: 1, quadrant: "I", pattern: "Information Filter", type: "parasitic",
+    oneLiner: "The most dangerous information filter is the one you don't know is filtering.",
+    color: "#dc2626",
+    description: "Sole information channel constructs principal's reality. AI parallel: single AI source curating all analysis, no independent verification."
+  },
+  {
+    id: 3, label: "Qin Hui / Gaozong", shortLabel: "Qin Hui",
+    ring: 1, quadrant: "R-I", pattern: "Insecurity Weaponised", type: "parasitic",
+    oneLiner: "Perhaps is enough when fear is doing the reasoning.",
+    color: "#dc2626",
+    description: "Advisor reframes information to exploit pre-existing fears. AI parallel: confirmation bias amplification, AI validating what you already believe."
+  },
+  {
+    id: 4, label: "Rasputin / Romanovs", shortLabel: "Rasputin",
+    ring: 1, quadrant: "R", pattern: "Emotional Dependency", type: "parasitic",
+    oneLiner: "Access to expertise is worthless without the emotional capacity to accept it.",
+    color: "#dc2626",
+    description: "Emotional need overrides institutional information. AI parallel: emotional attachment to AI companions overriding professional advice."
+  },
+  {
+    id: 5, label: "Al-Mansur / Hisham II", shortLabel: "Al-Mansur",
+    ring: 2, quadrant: "R-G", pattern: "Competent Replacement", type: "parasitic",
+    oneLiner: "The most dangerous satisficer delivers everything while ensuring you never do without them.",
+    color: "#ea580c",
+    description: "Brilliant subordinate produces excellent outcomes while replacing institutional capacity. AI parallel: AI handling junior work so well the talent pipeline is severed."
+  },
+  {
+    id: 6, label: "Fouché / Napoleon", shortLabel: "Fouché",
+    ring: 2, quadrant: "I-G", pattern: "Structural Dependency", type: "parasitic",
+    oneLiner: "The AI you cannot leave is the AI that owns you.",
+    color: "#ea580c",
+    description: "Proprietary knowledge creates dependency independent of psychology. AI parallel: vendor lock-in through accumulated institutional knowledge in proprietary platforms."
+  },
+  {
+    id: 7, label: "Mao / Zhou", shortLabel: "Mao-Zhou",
+    ring: 3, quadrant: "P", pattern: "Sycophancy Equilibrium", type: "transition",
+    oneLiner: "The AI that always agrees with you is not serving you — it is surviving you.",
+    color: "#ca8a04",
+    description: "Productive partnership degrades through recognition threat into sycophancy equilibrium. AI parallel: RLHF optimising for agreement over accuracy (GPT-4o incident)."
+  },
+  {
+    id: 8, label: "Elizabeth / Cecil", shortLabel: "Elizabeth-Cecil",
+    ring: 5, quadrant: "ALL", pattern: "Gold Standard", type: "generative",
+    oneLiner: "The best AI partnership is the one that disagrees with you best.",
+    color: "#16a34a",
+    description: "40-year partnership with sustained productive friction across all four GRIP dimensions. AI parallel: centaur model where process trumps raw capability."
+  },
+  {
+    id: 9, label: "Taizong / Wei Zheng", shortLabel: "Taizong",
+    ring: 5, quadrant: "P", pattern: "Institutionalised Remonstrance", type: "generative",
+    oneLiner: "The AI that tells you what you don't want to hear is the one you cannot afford to lose.",
+    color: "#16a34a",
+    description: "Disagreement institutionalised as state function. Meta-remonstrance: criticising the criticism-receiving process itself. AI parallel: Constitutional AI, multi-agent debate."
+  },
+  {
+    id: 10, label: "Lincoln / Seward", shortLabel: "Lincoln-Seward",
+    ring: 4, quadrant: "G-P", pattern: "Rivals to Partners", type: "generative",
+    oneLiner: "The first time you use AI without questioning its output, you've established the norm.",
+    color: "#22c55e",
+    description: "Single non-humiliating boundary-setting moment defines entire partnership. AI parallel: onboarding norms determine long-term human-AI relationship."
+  },
+  {
+    id: 11, label: "Lennon / McCartney", shortLabel: "Lennon-McCartney",
+    ring: 4, quadrant: "P", pattern: "Lateral Creative Tension", type: "generative",
+    oneLiner: "Creative AI makes you individually better and collectively the same.",
+    color: "#22c55e",
+    description: "Peer creative partnership requiring mediating structures. AI parallel: creative human-AI collaboration needs Epstein (governance), Martin (arbitration), enforced proximity."
+  },
+  {
+    id: 12, label: "Jobs / Wozniak", shortLabel: "Jobs-Wozniak",
+    ring: 3, quadrant: "G", pattern: "Fusion → Extraction", type: "generative",
+    oneLiner: "The AI collaboration that works in a pilot won't survive enterprise scaling without structural evolution.",
+    color: "#22c55e",
+    description: "Complementarity deteriorates when governance doesn't evolve with scale. AI parallel: pilot-to-enterprise scaling without governance adaptation."
+  },
+  {
+    id: 13, label: "Kangxi / Aobai", shortLabel: "Kangxi",
+    ring: "trajectory", quadrant: "R", pattern: "Recovery", type: "recovery",
+    oneLiner: "Like any regency, it will only end when you build the strength to end it yourself.",
+    color: "#8b5cf6",
+    description: "Recovery trajectory from Ring 1 to Ring 5. Concealed capability-building, decisive restructuring. AI parallel: breaking free from AI dependency through the Kangxi Protocol."
+  }
+];
+
+// ── Ring definitions for labels ─────────────────────────
+const ringDefs = [
+  { ring: 1, label: "Parasitic", desc: "Total displacement, captured institutions, structural collapse" },
+  { ring: 2, label: "Dangerous", desc: "Information filtering, emotional capture, structural lock-in" },
+  { ring: 3, label: "At Risk", desc: "Productive elements deteriorating, drift in progress" },
+  { ring: 4, label: "Functional", desc: "Clear boundaries, some friction, room for improvement" },
+  { ring: 5, label: "Generative", desc: "Sustained productive friction, institutional resilience, self-correcting" }
+];
+
+// ── Quadrant angle mapping ──────────────────────────────
+// Quadrant centers (in degrees, 0 = east, counter-clockwise)
+// G: top-left (90-180) → center 135
+// R: top-right (0-90) → center 45
+// I: bottom-left (180-270) → center 225
+// P: bottom-right (270-360) → center 315
+const quadrantAngles = {
+  "G":   135,
+  "R":   45,
+  "I":   225,
+  "P":   315,
+  "R-I": 270,  // boundary between R and I (bottom, slightly right)
+  "I-G": 180,  // boundary between I and G (left)
+  "R-G": 90,   // boundary between R and G (top)
+  "G-P": 180 + 135, // boundary between G and P → 315 is P center, so G-P → between G and P
+  "ALL": 0     // center
+};
+
+// Adjust G-P: G is at 135, P is at 315. Going from G clockwise to P is through 0/360.
+// Boundary between G(135) and P(315) counter-clockwise: 135+315 / 2 doesn't work.
+// G is top-left, P is bottom-right. The boundary on the diagonal would be top-right or bottom-left.
+// Looking at the layout: G top-left, R top-right, I bottom-left, P bottom-right.
+// G-P boundary: the line from top-right to bottom-left? No, that's R-I.
+// The quadrant lines are vertical and horizontal through center.
+// G (top-left): 90 to 180. P (bottom-right): 270 to 360.
+// These are diagonally opposite. The boundary isn't shared.
+// Let me re-read: Lincoln-Seward is G-P → place on the boundary between G and P.
+// Since they don't share a boundary, place at the average angle going through 0:
+// Going clockwise from G(135) to P(315) passes through 225 (I). Counter-clockwise passes through 45 (R).
+// For "Rivals to Partners" (governance + productive friction), place near P with offset toward G.
+// I'll put G-P at ~345 degrees (near P, tilted slightly toward G direction through top).
+quadrantAngles["G-P"] = 345;
+
+// ── Color map for ring tints ────────────────────────────
+const ringColors = ["#991b1b", "#92400e", "#a16207", "#4d7c0f", "#166534"];
+
+// ── Parasitic drift labels ──────────────────────────────
+const driftStages = ["Engagement", "Reliance", "Delegation", "Displacement", "Collapse"];
+
+// ── Type colors for legend ──────────────────────────────
+const typeColors = {
+  parasitic:  "#dc2626",
+  dangerous:  "#ea580c",  // not used as standalone type, but for legend grouping
+  transition: "#ca8a04",
+  generative: "#22c55e",
+  recovery:   "#8b5cf6"
+};
+
+// ══════════════════════════════════════════════════════════
+// Visualization Setup
+// ══════════════════════════════════════════════════════════
+
+const svg = d3.select("#compass");
+const container = document.getElementById("compass-container");
+
+let width, height, cx, cy, maxRadius;
+let activeFilter = null;        // type filter from legend
+let activeQuadrant = null;      // quadrant filter from label click
+
+function computeDimensions() {
+  width = container.clientWidth;
+  height = container.clientHeight;
+  cx = width / 2;
+  cy = height / 2;
+  maxRadius = Math.min(width, height) * 0.38;
+}
+
+computeDimensions();
+
+// Main group, centered
+const g = svg.append("g");
+
+// ── Helper: ring index to radius ────────────────────────
+// Ring 1 (outermost) → largest radius. Ring 5 (innermost) → smallest.
+function ringRadius(ring) {
+  // 5 rings evenly spaced. Ring 1 = maxRadius, Ring 5 = maxRadius/5
+  const step = maxRadius / 5;
+  return maxRadius - (ring - 1) * step;
+}
+
+// ── Helper: angle to radians (D3 convention: 0=east, CCW positive) ──
+function toRad(deg) {
+  return (deg * Math.PI) / 180;
+}
+
+// ── Helper: polar to cartesian ──────────────────────────
+function polarToXY(radius, angleDeg) {
+  const rad = toRad(angleDeg);
+  return { x: radius * Math.cos(rad), y: -radius * Math.sin(rad) };
+}
+
+// ══════════════════════════════════════════════════════════
+// Draw Compass
+// ══════════════════════════════════════════════════════════
+
+function draw() {
+  computeDimensions();
+  g.attr("transform", `translate(${cx}, ${cy})`);
+  svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+  // Clear previous elements
+  g.selectAll("*").remove();
+
+  // ── Defs: gradients, filters ────────────────────────
+  const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
+  defs.selectAll("*").remove();
+
+  // Glow filter for dots
+  const glowFilter = defs.append("filter").attr("id", "glow");
+  glowFilter.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "blur");
+  const feMerge = glowFilter.append("feMerge");
+  feMerge.append("feMergeNode").attr("in", "blur");
+  feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+  // Stronger glow for hover
+  const glowHover = defs.append("filter").attr("id", "glow-hover");
+  glowHover.append("feGaussianBlur").attr("stdDeviation", "8").attr("result", "blur");
+  const feMerge2 = glowHover.append("feMerge");
+  feMerge2.append("feMergeNode").attr("in", "blur");
+  feMerge2.append("feMergeNode").attr("in", "SourceGraphic");
+
+  // ── Draw concentric rings ──────────────────────────
+  const ringsGroup = g.append("g").attr("class", "rings");
+
+  for (let i = 1; i <= 5; i++) {
+    const r = ringRadius(i);
+    const prevR = i === 1 ? maxRadius + maxRadius * 0.04 : ringRadius(i - 1);
+
+    // Ring fill as an annulus
+    const arc = d3.arc()
+      .innerRadius(r - (i === 5 ? r : 0))
+      .outerRadius(i === 1 ? maxRadius * 1.04 : ringRadius(i - 1))
+      .startAngle(0)
+      .endAngle(2 * Math.PI);
+
+    // Build proper annulus for each ring
+    const innerR = i === 5 ? 0 : ringRadius(i);
+    const outerR = i === 1 ? maxRadius * 1.02 : ringRadius(i - 1);
+
+    const ringArc = d3.arc()
+      .innerRadius(innerR)
+      .outerRadius(outerR)
+      .startAngle(0)
+      .endAngle(2 * Math.PI);
+
+    ringsGroup.append("path")
+      .attr("d", ringArc)
+      .attr("fill", ringColors[i - 1])
+      .attr("fill-opacity", 0.07 + (5 - i) * 0.012)
+      .attr("stroke", "none")
+      .attr("class", `ring-fill ring-fill-${i}`)
+      .style("cursor", "pointer")
+      .on("mouseenter", function(event) {
+        d3.select(this).transition().duration(200).attr("fill-opacity", 0.15 + (5 - i) * 0.015);
+        showRingTooltip(i);
+        positionTooltip(event);
+      })
+      .on("mouseleave", function() {
+        d3.select(this).transition().duration(200).attr("fill-opacity", 0.07 + (5 - i) * 0.012);
+        hideTooltip();
+      })
+      .on("mousemove", function(event) {
+        positionTooltip(event);
+      });
+
+    // Ring border circle
+    ringsGroup.append("circle")
+      .attr("r", r)
+      .attr("fill", "none")
+      .attr("stroke", "#475569")
+      .attr("stroke-opacity", 0.3)
+      .attr("stroke-width", 1);
+  }
+
+  // Outer border
+  ringsGroup.append("circle")
+    .attr("r", maxRadius * 1.02)
+    .attr("fill", "none")
+    .attr("stroke", "#475569")
+    .attr("stroke-opacity", 0.4)
+    .attr("stroke-width", 1.5);
+
+  // ── Ring labels along top-right ────────────────────
+  const ringLabelsGroup = g.append("g").attr("class", "ring-labels");
+
+  for (let i = 1; i <= 5; i++) {
+    const r = ringRadius(i);
+    const prevR = i === 1 ? maxRadius * 1.02 : ringRadius(i - 1);
+    const midR = (r + prevR) / 2;
+    // Place label at ~22 degrees (top-right area, between quadrant lines)
+    const angle = 22;
+    const pos = polarToXY(midR, angle);
+
+    ringLabelsGroup.append("text")
+      .attr("x", pos.x)
+      .attr("y", pos.y)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .attr("fill", "#64748b")
+      .attr("font-size", maxRadius > 250 ? "9px" : "7px")
+      .attr("font-weight", 500)
+      .attr("opacity", 0.7)
+      .text(`${ringDefs[i - 1].label}`);
+  }
+
+  // ── Quadrant lines ─────────────────────────────────
+  const linesGroup = g.append("g").attr("class", "quadrant-lines");
+  const lineExtent = maxRadius * 1.02;
+
+  // Vertical line (separates left/right)
+  linesGroup.append("line")
+    .attr("x1", 0).attr("y1", -lineExtent)
+    .attr("x2", 0).attr("y2", lineExtent)
+    .attr("stroke", "#334155").attr("stroke-width", 1.5).attr("stroke-opacity", 0.6);
+
+  // Horizontal line (separates top/bottom)
+  linesGroup.append("line")
+    .attr("x1", -lineExtent).attr("y1", 0)
+    .attr("x2", lineExtent).attr("y2", 0)
+    .attr("stroke", "#334155").attr("stroke-width", 1.5).attr("stroke-opacity", 0.6);
+
+  // ── Quadrant labels ────────────────────────────────
+  const qlGroup = g.append("g").attr("class", "quadrant-labels");
+  const labelOffset = maxRadius * 1.14;
+  const subLabelOffset = maxRadius * 1.22;
+
+  const quadrants = [
+    { key: "G", letter: "G", name: "Governance", x: -labelOffset * 0.55, y: -labelOffset * 0.55 },
+    { key: "R", letter: "R", name: "Resilience", x: labelOffset * 0.55, y: -labelOffset * 0.55 },
+    { key: "I", letter: "I", name: "Information\nIntegrity", x: -labelOffset * 0.55, y: labelOffset * 0.55 },
+    { key: "P", letter: "P", name: "Productive\nFriction", x: labelOffset * 0.55, y: labelOffset * 0.55 }
+  ];
+
+  quadrants.forEach(q => {
+    const qg = qlGroup.append("g")
+      .attr("class", `q-label q-label-${q.key}`)
+      .style("cursor", "pointer")
+      .on("click", () => toggleQuadrantFilter(q.key));
+
+    qg.append("text")
+      .attr("x", q.x)
+      .attr("y", q.y)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .attr("fill", "#e2e8f0")
+      .attr("font-size", maxRadius > 250 ? "28px" : "20px")
+      .attr("font-weight", 700)
+      .attr("opacity", 0.9)
+      .text(q.letter);
+
+    // Sub-label (variable name)
+    const lines = q.name.split("\n");
+    lines.forEach((line, li) => {
+      qg.append("text")
+        .attr("x", q.x)
+        .attr("y", q.y + (maxRadius > 250 ? 22 : 16) + li * (maxRadius > 250 ? 14 : 11))
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "#64748b")
+        .attr("font-size", maxRadius > 250 ? "11px" : "9px")
+        .attr("font-weight", 400)
+        .text(line);
+    });
+  });
+
+  // ── Parasitic Drift Arrow (outer ring) ─────────────
+  const driftGroup = g.append("g").attr("class", "drift-arrow");
+  const driftRadius = maxRadius * 1.06;
+
+  // Arc path going clockwise from ~100° to ~400° (wrapping)
+  // We'll draw from 120° (top-left area) clockwise to 60° (top-right)
+  // In SVG terms (clockwise from east): start at -60° going to 240°
+  const driftArc = d3.arc()
+    .innerRadius(driftRadius - 2)
+    .outerRadius(driftRadius + 2)
+    .startAngle(-Math.PI * 0.45)  // ~-81°
+    .endAngle(Math.PI * 1.55);    // ~279°
+
+  // Arrowhead marker
+  defs.append("marker")
+    .attr("id", "drift-arrow-head")
+    .attr("viewBox", "0 0 10 10")
+    .attr("refX", 5).attr("refY", 5)
+    .attr("markerWidth", 6).attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M 0 0 L 10 5 L 0 10 z")
+    .attr("fill", "#475569")
+    .attr("fill-opacity", 0.4);
+
+  // Draw drift arc as a custom path for better arrowhead placement
+  const driftStartAngle = 200;  // degrees (CCW from east)
+  const driftEndAngle = -110;   // sweep clockwise almost full circle
+  const numDriftPoints = 80;
+  const driftPoints = [];
+
+  for (let i = 0; i <= numDriftPoints; i++) {
+    const t = i / numDriftPoints;
+    const angle = driftStartAngle + t * (driftEndAngle - driftStartAngle);
+    const p = polarToXY(driftRadius, angle);
+    driftPoints.push([p.x, p.y]);
+  }
+
+  const driftLine = d3.line().curve(d3.curveBasis);
+
+  driftGroup.append("path")
+    .attr("d", driftLine(driftPoints))
+    .attr("fill", "none")
+    .attr("stroke", "#475569")
+    .attr("stroke-width", 1.5)
+    .attr("stroke-opacity", 0.3)
+    .attr("stroke-dasharray", "6,4")
+    .attr("marker-end", "url(#drift-arrow-head)");
+
+  // Drift stage labels along the arc
+  const driftLabelRadius = maxRadius * 1.11;
+  const driftLabelAngles = [185, 130, 60, -10, -80];
+
+  driftStages.forEach((stage, i) => {
+    const pos = polarToXY(driftLabelRadius, driftLabelAngles[i]);
+    driftGroup.append("text")
+      .attr("x", pos.x)
+      .attr("y", pos.y)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .attr("fill", "#475569")
+      .attr("font-size", maxRadius > 250 ? "9px" : "7px")
+      .attr("font-weight", 500)
+      .attr("font-style", "italic")
+      .attr("opacity", 0.5)
+      .text(stage);
+  });
+
+  // ── Kangxi Recovery Trajectory (Case 13) ───────────
+  drawKangxiTrajectory();
+
+  // ── Case Study Dots ────────────────────────────────
+  drawCaseDots();
+}
+
+// ══════════════════════════════════════════════════════════
+// Kangxi Recovery Trajectory
+// ══════════════════════════════════════════════════════════
+
+function drawKangxiTrajectory() {
+  const kangxi = cases.find(c => c.id === 13);
+  const trajGroup = g.append("g").attr("class", "kangxi-trajectory");
+
+  // Path from Ring 1 in R quadrant sweeping inward to Ring 5
+  // Start: Ring 1, ~45° (R quadrant)
+  // End: Ring 5, ~55° (near center, R quadrant)
+  const startR = ringRadius(1) - maxRadius * 0.06;
+  const endR = ringRadius(5) * 0.6;
+
+  // Create control points for a smooth inward spiral
+  const trajPoints = [];
+  const numPoints = 50;
+
+  for (let i = 0; i <= numPoints; i++) {
+    const t = i / numPoints;
+    // Radius spirals inward
+    const r = startR + t * (endR - startR);
+    // Angle sweeps from 40° to 65° with a slight curve
+    const angle = 40 + t * 30 + Math.sin(t * Math.PI) * 15;
+    const p = polarToXY(r, angle);
+    trajPoints.push([p.x, p.y]);
+  }
+
+  const trajLine = d3.line().curve(d3.curveBasis);
+
+  // Arrow marker for trajectory
+  const defs = svg.select("defs");
+  defs.append("marker")
+    .attr("id", "traj-arrow")
+    .attr("viewBox", "0 0 10 10")
+    .attr("refX", 8).attr("refY", 5)
+    .attr("markerWidth", 8).attr("markerHeight", 8)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M 0 1 L 8 5 L 0 9 z")
+    .attr("fill", "#8b5cf6");
+
+  // Main trajectory path
+  const trajPath = trajGroup.append("path")
+    .attr("d", trajLine(trajPoints))
+    .attr("fill", "none")
+    .attr("stroke", "#8b5cf6")
+    .attr("stroke-width", 2.5)
+    .attr("stroke-opacity", 0.6)
+    .attr("stroke-dasharray", "8,5")
+    .attr("marker-end", "url(#traj-arrow)")
+    .attr("class", "traj-path");
+
+  // Animated traveling dot along the path
+  const pathNode = trajPath.node();
+  const pathLength = pathNode.getTotalLength();
+
+  const travelDot = trajGroup.append("circle")
+    .attr("r", 4)
+    .attr("fill", "#8b5cf6")
+    .attr("filter", "url(#glow)")
+    .attr("opacity", 0.9);
+
+  // Animate the traveling dot
+  function animateTravelDot() {
+    travelDot
+      .attr("opacity", 0)
+      .transition()
+      .delay(300)
+      .duration(0)
+      .attr("opacity", 0.9)
+      .transition()
+      .duration(4000)
+      .ease(d3.easeLinear)
+      .attrTween("transform", function() {
+        return function(t) {
+          const point = pathNode.getPointAtLength(t * pathLength);
+          return `translate(${point.x}, ${point.y})`;
+        };
+      })
+      .transition()
+      .duration(400)
+      .attr("opacity", 0)
+      .on("end", animateTravelDot);
+  }
+
+  animateTravelDot();
+
+  // Trajectory label
+  const labelPos = polarToXY((startR + endR) / 2 + maxRadius * 0.08, 30);
+  trajGroup.append("text")
+    .attr("x", labelPos.x)
+    .attr("y", labelPos.y)
+    .attr("text-anchor", "start")
+    .attr("fill", "#8b5cf6")
+    .attr("font-size", maxRadius > 250 ? "10px" : "8px")
+    .attr("font-weight", 600)
+    .attr("opacity", 0.7)
+    .text("Recovery Trajectory");
+
+  // Kangxi label at start of trajectory
+  const startPos = polarToXY(startR, 38);
+  trajGroup.append("text")
+    .attr("x", startPos.x + 8)
+    .attr("y", startPos.y - 8)
+    .attr("text-anchor", "start")
+    .attr("fill", "#8b5cf6")
+    .attr("font-size", maxRadius > 250 ? "11px" : "9px")
+    .attr("font-weight", 600)
+    .attr("opacity", 0.8)
+    .text("Kangxi");
+
+  // Clickable invisible wider path for interaction
+  trajGroup.append("path")
+    .attr("d", trajLine(trajPoints))
+    .attr("fill", "none")
+    .attr("stroke", "transparent")
+    .attr("stroke-width", 20)
+    .style("cursor", "pointer")
+    .on("mouseenter", function(event) {
+      trajPath.transition().duration(200).attr("stroke-opacity", 0.9).attr("stroke-width", 3.5);
+      showCaseTooltip(event, kangxi);
+    })
+    .on("mousemove", function(event) {
+      positionTooltip(event);
+    })
+    .on("mouseleave", function() {
+      trajPath.transition().duration(200).attr("stroke-opacity", 0.6).attr("stroke-width", 2.5);
+      hideTooltip();
+    })
+    .on("click", function() {
+      showDetailPanel(kangxi);
+    });
+}
+
+// ══════════════════════════════════════════════════════════
+// Case Study Dots
+// ══════════════════════════════════════════════════════════
+
+function drawCaseDots() {
+  const dotsGroup = g.append("g").attr("class", "case-dots");
+
+  // Filter out Kangxi (trajectory) — it's handled separately
+  const dotCases = cases.filter(c => c.ring !== "trajectory");
+
+  // Small angle offsets to prevent overlap within same ring/quadrant
+  const angleOffsets = {};
+
+  dotCases.forEach(c => {
+    let angle = quadrantAngles[c.quadrant] || 0;
+    let r;
+
+    if (c.quadrant === "ALL") {
+      // Elizabeth/Cecil at center
+      r = ringRadius(5) * 0.4;
+      angle = 0;
+    } else {
+      // Place at the midpoint of the ring annulus
+      const innerR = ringRadius(c.ring);
+      const outerR = c.ring === 1 ? maxRadius * 1.02 : ringRadius(c.ring - 1);
+      r = (innerR + outerR) / 2;
+
+      // Add small jitter to prevent overlaps
+      const key = `${c.ring}-${c.quadrant}`;
+      if (!angleOffsets[key]) angleOffsets[key] = 0;
+      angle += angleOffsets[key] * 12;
+      angleOffsets[key]++;
+    }
+
+    const pos = polarToXY(r, angle);
+    const dotR = maxRadius > 250 ? 13 : 9;
+
+    const dotGroup = dotsGroup.append("g")
+      .attr("class", `case-dot case-dot-${c.id}`)
+      .attr("data-type", c.type)
+      .attr("data-quadrant", c.quadrant)
+      .style("cursor", "pointer");
+
+    // Outer glow circle (visible on hover)
+    dotGroup.append("circle")
+      .attr("cx", pos.x).attr("cy", pos.y)
+      .attr("r", dotR + 6)
+      .attr("fill", c.color)
+      .attr("opacity", 0)
+      .attr("class", "dot-glow");
+
+    // Main dot
+    dotGroup.append("circle")
+      .attr("cx", pos.x).attr("cy", pos.y)
+      .attr("r", dotR)
+      .attr("fill", c.color)
+      .attr("fill-opacity", 0.85)
+      .attr("stroke", c.color)
+      .attr("stroke-width", 2)
+      .attr("stroke-opacity", 0.4)
+      .attr("filter", "url(#glow)")
+      .attr("class", "dot-main");
+
+    // Inner highlight
+    dotGroup.append("circle")
+      .attr("cx", pos.x - dotR * 0.2).attr("cy", pos.y - dotR * 0.2)
+      .attr("r", dotR * 0.35)
+      .attr("fill", "white")
+      .attr("opacity", 0.15);
+
+    // Label
+    const labelXOffset = c.quadrant.includes("G") || c.quadrant === "I" || c.quadrant === "I-G" || c.quadrant === "R-I"
+      ? -dotR - 6 : dotR + 6;
+    const textAnchor = labelXOffset < 0 ? "end" : "start";
+
+    dotGroup.append("text")
+      .attr("x", pos.x + labelXOffset)
+      .attr("y", pos.y + 1)
+      .attr("text-anchor", textAnchor)
+      .attr("dominant-baseline", "middle")
+      .attr("fill", "#cbd5e1")
+      .attr("font-size", maxRadius > 250 ? "11px" : "8px")
+      .attr("font-weight", 500)
+      .attr("opacity", 0.8)
+      .attr("class", "dot-label")
+      .text(c.shortLabel);
+
+    // Hover interactions
+    dotGroup
+      .on("mouseenter", function(event) {
+        d3.select(this).select(".dot-glow")
+          .transition().duration(200).attr("opacity", 0.25);
+        d3.select(this).select(".dot-main")
+          .transition().duration(200)
+          .attr("r", dotR + 3)
+          .attr("fill-opacity", 1)
+          .attr("filter", "url(#glow-hover)");
+        d3.select(this).select(".dot-label")
+          .transition().duration(200).attr("opacity", 1).attr("font-weight", 700);
+
+        showCaseTooltip(event, c);
+      })
+      .on("mousemove", function(event) {
+        positionTooltip(event);
+      })
+      .on("mouseleave", function() {
+        d3.select(this).select(".dot-glow")
+          .transition().duration(200).attr("opacity", 0);
+        d3.select(this).select(".dot-main")
+          .transition().duration(200)
+          .attr("r", dotR)
+          .attr("fill-opacity", 0.85)
+          .attr("filter", "url(#glow)");
+        d3.select(this).select(".dot-label")
+          .transition().duration(200).attr("opacity", 0.8).attr("font-weight", 500);
+
+        hideTooltip();
+      })
+      .on("click", function() {
+        showDetailPanel(c);
+      });
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// Tooltip
+// ══════════════════════════════════════════════════════════
+
+const tooltip = document.getElementById("tooltip");
+
+function showCaseTooltip(event, c) {
+  tooltip.innerHTML = `
+    <div class="tt-name" style="color:${c.color}">${c.label}</div>
+    <div class="tt-pattern">${c.pattern} &middot; Ring ${c.ring === "trajectory" ? "1→5" : c.ring}</div>
+    <div class="tt-quote">"${c.oneLiner}"</div>
+  `;
+  tooltip.style.opacity = 1;
+  positionTooltip(event);
+}
+
+function showRingTooltip(ringNum) {
+  const def = ringDefs[ringNum - 1];
+  tooltip.innerHTML = `
+    <div class="tt-name">Ring ${ringNum}: ${def.label}</div>
+    <div class="tt-quote" style="font-style:normal; border-left-color:${ringColors[ringNum - 1]}">${def.desc}</div>
+  `;
+  tooltip.style.opacity = 1;
+}
+
+function positionTooltip(event) {
+  const rect = container.getBoundingClientRect();
+  let x = event.clientX - rect.left + 16;
+  let y = event.clientY - rect.top - 10;
+
+  // Keep tooltip within bounds
+  const tw = 340;
+  if (x + tw > rect.width) x = event.clientX - rect.left - tw - 16;
+  if (y + 120 > rect.height) y = rect.height - 130;
+  if (y < 10) y = 10;
+
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+}
+
+function hideTooltip() {
+  tooltip.style.opacity = 0;
+}
+
+// ══════════════════════════════════════════════════════════
+// Detail Panel
+// ══════════════════════════════════════════════════════════
+
+const detailPanel = document.getElementById("detail-panel");
+const panelContent = document.getElementById("panel-content");
+const panelPlaceholder = document.getElementById("panel-placeholder");
+const panelClose = document.getElementById("panel-close");
+
+function showDetailPanel(c) {
+  const typeLabel = document.getElementById("p-type");
+  const typeColorMap = {
+    parasitic: { bg: "rgba(220,38,38,0.15)", border: "#dc2626", text: "#fca5a5" },
+    transition: { bg: "rgba(202,138,4,0.15)", border: "#ca8a04", text: "#fde68a" },
+    generative: { bg: "rgba(34,197,94,0.15)", border: "#22c55e", text: "#86efac" },
+    recovery: { bg: "rgba(139,92,246,0.15)", border: "#8b5cf6", text: "#c4b5fd" }
+  };
+
+  const tc = typeColorMap[c.type] || typeColorMap.generative;
+  typeLabel.style.background = tc.bg;
+  typeLabel.style.border = `1px solid ${tc.border}`;
+  typeLabel.style.color = tc.text;
+  typeLabel.textContent = c.type;
+
+  document.getElementById("p-name").textContent = c.label;
+  document.getElementById("p-name").style.color = c.color;
+  document.getElementById("p-pattern").textContent = c.pattern;
+
+  const ringText = c.ring === "trajectory" ? "Trajectory (Ring 1 → Ring 5)" : `Ring ${c.ring}`;
+  const quadText = c.quadrant === "ALL" ? "All Quadrants" : c.quadrant.split("-").join(" / ");
+  document.getElementById("p-meta").textContent = `${ringText}  ·  ${quadText}`;
+
+  document.getElementById("p-quote").textContent = `"${c.oneLiner}"`;
+  document.getElementById("p-desc").textContent = c.description;
+
+  panelPlaceholder.style.display = "none";
+  panelContent.style.display = "block";
+  detailPanel.classList.add("open");
+}
+
+function closeDetailPanel() {
+  detailPanel.classList.remove("open");
+  setTimeout(() => {
+    panelContent.style.display = "none";
+    panelPlaceholder.style.display = "flex";
+  }, 300);
+}
+
+panelClose.addEventListener("click", closeDetailPanel);
+
+// ══════════════════════════════════════════════════════════
+// Quadrant Filter
+// ══════════════════════════════════════════════════════════
+
+function toggleQuadrantFilter(qKey) {
+  if (activeQuadrant === qKey) {
+    activeQuadrant = null;
+  } else {
+    activeQuadrant = qKey;
+  }
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════════════════
+// Legend
+// ══════════════════════════════════════════════════════════
+
+function buildLegend() {
+  const legend = document.getElementById("legend");
+  legend.innerHTML = "";
+
+  const types = [
+    { type: "parasitic", label: "Parasitic", color: "#dc2626" },
+    { type: "transition", label: "Transition", color: "#ca8a04" },
+    { type: "generative", label: "Generative", color: "#22c55e" },
+    { type: "recovery", label: "Recovery", color: "#8b5cf6" }
+  ];
+
+  types.forEach(t => {
+    const item = document.createElement("div");
+    item.className = "legend-item";
+    item.dataset.type = t.type;
+    item.innerHTML = `
+      <div class="legend-dot" style="background:${t.color}"></div>
+      <div class="legend-label">${t.label}</div>
+    `;
+    item.addEventListener("click", () => {
+      if (activeFilter === t.type) {
+        activeFilter = null;
+      } else {
+        activeFilter = t.type;
+      }
+      applyFilters();
+    });
+    legend.appendChild(item);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// Filter Logic
+// ══════════════════════════════════════════════════════════
+
+function applyFilters() {
+  // Update legend visual
+  document.querySelectorAll(".legend-item").forEach(el => {
+    if (activeFilter && el.dataset.type !== activeFilter) {
+      el.classList.add("dimmed");
+    } else {
+      el.classList.remove("dimmed");
+    }
+  });
+
+  // Update quadrant label visual
+  g.selectAll(".q-label").each(function() {
+    const key = d3.select(this).attr("class").split("q-label-")[1];
+    if (activeQuadrant && key !== activeQuadrant) {
+      d3.select(this).transition().duration(300).attr("opacity", 0.2);
+    } else {
+      d3.select(this).transition().duration(300).attr("opacity", 1);
+    }
+  });
+
+  // Update dots
+  g.selectAll(".case-dot").each(function() {
+    const el = d3.select(this);
+    const type = el.attr("data-type");
+    const quadrant = el.attr("data-quadrant");
+
+    let visible = true;
+
+    if (activeFilter && type !== activeFilter) visible = false;
+    if (activeQuadrant && !quadrant.includes(activeQuadrant) && quadrant !== "ALL") visible = false;
+
+    el.transition().duration(300).attr("opacity", visible ? 1 : 0.1);
+  });
+
+  // Handle Kangxi trajectory visibility
+  const kangxiVisible = (!activeFilter || activeFilter === "recovery") &&
+                         (!activeQuadrant || activeQuadrant === "R");
+  g.select(".kangxi-trajectory")
+    .transition().duration(300)
+    .attr("opacity", kangxiVisible ? 1 : 0.1);
+}
+
+// ══════════════════════════════════════════════════════════
+// Responsive Resize
+// ══════════════════════════════════════════════════════════
+
+function handleResize() {
+  computeDimensions();
+  draw();
+  applyFilters();
+}
+
+let resizeTimer;
+window.addEventListener("resize", function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(handleResize, 250);
+});
+
+// ══════════════════════════════════════════════════════════
+// Initialize
+// ══════════════════════════════════════════════════════════
+
+buildLegend();
+draw();
+
+// Open the detail panel by default on larger screens to show it exists
+if (window.innerWidth > 1024) {
+  detailPanel.classList.add("open");
+}
+</script>
+</body>
+</html>
