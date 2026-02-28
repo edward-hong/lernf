@@ -80,6 +80,67 @@ app.post('/api/deepseek', async (req, res) => {
   }
 })
 
+// NPC dialogue generation endpoint
+// Accepts a system prompt + messages array for multi-turn NPC conversation
+app.post('/api/npc-dialogue', async (req, res) => {
+  try {
+    const { systemPrompt, messages } = req.body
+
+    if (!systemPrompt || !messages || !Array.isArray(messages)) {
+      return res
+        .status(400)
+        .json({ error: 'systemPrompt and messages array are required' })
+    }
+
+    const apiMessages = [
+      { role: 'system', content: systemPrompt },
+      ...messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    ]
+
+    const response = await fetch(
+      'https://api.deepseek.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: apiMessages,
+          temperature: 0.8,
+          max_tokens: 300,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return res.status(response.status).json({
+        error: 'DeepSeek API error',
+        details: error,
+      })
+    }
+
+    const data = await response.json()
+    const output = data.choices[0].message.content.trim()
+
+    res.json({
+      success: true,
+      output,
+    })
+  } catch (error) {
+    console.error('NPC Dialogue Error:', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+    })
+  }
+})
+
 const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
