@@ -47,7 +47,7 @@ interface RawAIEvaluation {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:5000/api/evaluate-grip'
+const API_URL = 'http://localhost:4000/api/evaluate-grip'
 const REQUEST_TIMEOUT_MS = 60_000
 const RETRY_DELAY_BASE_MS = 2_000
 const MAX_RETRIES = 3

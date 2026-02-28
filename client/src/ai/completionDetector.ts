@@ -39,7 +39,7 @@ export interface CompletionDetectionResult {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:5000/api/evaluate-completion'
+const API_URL = 'http://localhost:4000/api/evaluate-completion'
 const REQUEST_TIMEOUT_MS = 20_000
 const LONG_RUNNING_THRESHOLD = 15
 /** Minimum user turns before AI evaluation kicks in (avoid premature checks). */

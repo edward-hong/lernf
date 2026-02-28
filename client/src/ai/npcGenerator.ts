@@ -29,7 +29,7 @@ interface NPCResponse {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:5000/api/npc-dialogue'
+const API_URL = 'http://localhost:4000/api/npc-dialogue'
 const MAX_HISTORY_TURNS = 10
 const REQUEST_TIMEOUT_MS = 15_000
 const RETRY_DELAY_MS = 2_000

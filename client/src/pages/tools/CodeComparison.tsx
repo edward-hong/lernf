@@ -32,7 +32,7 @@ function CodeComparison() {
     try {
       const prompt = generateComparisonPrompt(language)
 
-      const response = await axios.post('http://localhost:5000/api/deepseek', {
+      const response = await axios.post('http://localhost:4000/api/deepseek', {
         prompt,
       })
 
@@ -77,7 +77,7 @@ function CodeComparison() {
     setEvaluating(true)
 
     try {
-      const response = await axios.post('http://localhost:5000/api/deepseek', {
+      const response = await axios.post('http://localhost:4000/api/deepseek', {
         prompt: evaluateOptions(scenario, reasoning, selectedOption),
       })
 
