@@ -403,6 +403,67 @@ app.post('/api/evaluate-grip', async (req, res) => {
   }
 })
 
+// Consequence generation — post-scenario narrative outcomes
+// Uses temperature=0.7 for creative but grounded consequence narratives
+app.post('/api/generate-consequence', async (req, res) => {
+  try {
+    const { prompt } = req.body
+
+    if (!prompt) {
+      return res
+        .status(400)
+        .json({ error: 'prompt is required' })
+    }
+
+    const response = await fetch(
+      'https://api.deepseek.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return res.status(response.status).json({
+        error: 'DeepSeek API error',
+        details: error,
+      })
+    }
+
+    const data = await response.json()
+    let output = data.choices[0].message.content.trim()
+
+    // Clean markdown code blocks
+    output = output
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
+
+    const result = JSON.parse(output)
+
+    res.json({
+      success: true,
+      result,
+    })
+  } catch (error) {
+    console.error('Consequence Generation Error:', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+    })
+  }
+})
+
 // Evaluate PR review
 app.post('/api/evaluate-pr', async (req, res) => {
   try {
