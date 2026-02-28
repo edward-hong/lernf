@@ -133,6 +133,7 @@ const PRReview: React.FC = () => {
                   line={line}
                   isMarked={markedLines.has(line.lineNumber)}
                   onToggle={() => toggleLine(line.lineNumber)}
+                  language={scenario.language}
                 />
               ))}
             </div>
