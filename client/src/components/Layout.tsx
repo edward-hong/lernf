@@ -50,6 +50,14 @@ export function Layout() {
           label: 'GRIP Framework',
           placeholder: true,
         },
+        {
+          path: '/mindset/individual-audit',
+          label: 'Individual Audit',
+        },
+        {
+          path: '/mindset/organisational-audit',
+          label: 'Organisational Audit',
+        },
       ],
     },
   ]

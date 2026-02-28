@@ -7,6 +7,8 @@ import { Layout } from './components/Layout'
 import { HistoricalContext } from './pages/mindset/HistoricalContext'
 import { AiMapping } from './pages/mindset/AiMapping'
 import { GripFramework } from './pages/mindset/GripFramework'
+import { IndividualAudit } from './pages/mindset/IndividualAudit'
+import { OrganisationalAudit } from './pages/mindset/OrganisationalAudit'
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +48,14 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/grip-framework',
         element: <GripFramework />,
+      },
+      {
+        path: 'mindset/individual-audit',
+        element: <IndividualAudit />,
+      },
+      {
+        path: 'mindset/organisational-audit',
+        element: <OrganisationalAudit />,
       },
     ],
   },
