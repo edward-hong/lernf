@@ -70,6 +70,7 @@ const DiffLine: React.FC<Props> = ({ line, isMarked, onToggle, language }) => {
           fontSize: 'inherit',
           fontFamily: 'inherit',
           lineHeight: 'inherit',
+          border: 'none',
         }}
         codeTagProps={{
           style: {
