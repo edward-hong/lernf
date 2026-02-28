@@ -40,11 +40,11 @@ const caseStudies: CaseStudy[] = [
 // ─── Color Constants ───────────────────────────────────────────────
 
 const COLORS = {
-  bg: '#0f172a',
-  textPrimary: '#e2e8f0',
-  textSecondary: '#94a3b8',
-  quadrantLine: '#334155',
-  ringBorder: '#475569',
+  bg: '#ffffff',
+  textPrimary: '#1e293b',
+  textSecondary: '#64748b',
+  quadrantLine: '#cbd5e1',
+  ringBorder: '#94a3b8',
   parasitic: '#dc2626',
   dangerous: '#ea580c',
   transition: '#ca8a04',
@@ -52,7 +52,7 @@ const COLORS = {
   recovery: '#8b5cf6',
 }
 
-const RING_TINTS = ['#991b1b', '#92400e', '#a16207', '#4d7c0f', '#166534']
+const RING_TINTS = ['#fecaca', '#fed7aa', '#fef08a', '#bbf7d0', '#86efac']
 
 const RING_LABELS = [
   'Ring 1: Parasitic',
@@ -226,10 +226,10 @@ export function GripCompass() {
           endAngle: 2 * Math.PI,
         }))
         .attr('fill', RING_TINTS[i])
-        .attr('opacity', 0.08 + i * 0.01)
+        .attr('opacity', 0.25 + i * 0.05)
         .attr('class', `ring-fill ring-${i + 1}`)
         .on('mouseenter', function () {
-          d3.select(this).transition().duration(200).attr('opacity', 0.18 + i * 0.01)
+          d3.select(this).transition().duration(200).attr('opacity', 0.4 + i * 0.05)
           // Show ring label tooltip
           const rMid = (rOuter + rInner) / 2
           g.append('text')
@@ -246,7 +246,7 @@ export function GripCompass() {
             .text(RING_LABELS[i])
         })
         .on('mouseleave', function () {
-          d3.select(this).transition().duration(200).attr('opacity', 0.08 + i * 0.01)
+          d3.select(this).transition().duration(200).attr('opacity', 0.25 + i * 0.05)
           g.selectAll('.ring-tooltip').remove()
         })
 
@@ -501,6 +501,7 @@ export function GripCompass() {
         // Tooltip
         const tooltipG = g.append('g').attr('class', 'tooltip-group')
           .attr('transform', `translate(${pos.x},${pos.y})`)
+          .style('pointer-events', 'none')
 
         const tooltipY = -30
         const padding = 10
@@ -509,7 +510,7 @@ export function GripCompass() {
         // Background rect — size will be set after text
         const tooltipBg = tooltipG.append('rect')
           .attr('rx', 6).attr('ry', 6)
-          .attr('fill', '#1e293b')
+          .attr('fill', '#ffffff')
           .attr('stroke', c.color)
           .attr('stroke-width', 1)
           .attr('opacity', 0.95)
@@ -574,7 +575,10 @@ export function GripCompass() {
         d3.select(this).select('circle:nth-child(2)')
           .transition().duration(200)
           .attr('r', 10)
-        g.selectAll('.tooltip-group').remove()
+        g.selectAll('.tooltip-group')
+          .transition().duration(200)
+          .attr('opacity', 0)
+          .remove()
       })
       .on('click', () => {
         if (!dimmed) setSelectedCase(prev => prev?.id === c.id ? null : c)
@@ -652,7 +656,7 @@ export function GripCompass() {
             right: 0,
             width: '360px',
             height: '100%',
-            background: '#1e293b',
+            background: '#f8fafc',
             borderLeft: `2px solid ${selectedCase.color}`,
             padding: '24px',
             overflowY: 'auto',
