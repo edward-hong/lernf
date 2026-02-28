@@ -2,14 +2,12 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 interface MarkdownPageProps {
-  title: string
   content: string
 }
 
-export function MarkdownPage({ title, content }: MarkdownPageProps) {
+export function MarkdownPage({ content }: MarkdownPageProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{title}</h1>
       <div
         className="prose prose-gray max-w-none
         [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-8 [&_h1]:mb-4
