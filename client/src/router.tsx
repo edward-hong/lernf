@@ -22,14 +22,27 @@ export const router = createBrowserRouter([
         path: 'practice/pr-review',
         element: <PRReview />,
       },
-      // Future routes
+      // Future practice routes
       {
         path: 'practice/ai-coding',
-        element: <div>AI Coding - Coming Soon</div>,
+        element: <div>AI Assisted Coding - Coming Soon</div>,
       },
       {
         path: 'practice/workplace-scenarios',
         element: <div>Workplace Scenarios - Coming Soon</div>,
+      },
+      // Mindset routes
+      {
+        path: 'mindset/historical-mapping',
+        element: <div>Historical Mapping - Coming Soon</div>,
+      },
+      {
+        path: 'mindset/ai-mapping',
+        element: <div>AI Mapping - Coming Soon</div>,
+      },
+      {
+        path: 'mindset/grip-framework',
+        element: <div>GRIP Framework - Coming Soon</div>,
       },
     ],
   },
