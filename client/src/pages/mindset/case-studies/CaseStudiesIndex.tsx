@@ -157,6 +157,19 @@ const caseStudies = [
       "The partnership that built Apple in a garage couldn't survive Apple as a corporation — and the AI collaboration that works in a pilot won't survive enterprise scaling without deliberate structural evolution.",
     tag: 'Structural Extraction',
   },
+  {
+    id: '13',
+    path: '/mindset/case-studies/aobai-kangxi',
+    title: 'Kangxi Emperor & Aobai',
+    period: 'Qing Dynasty, 1661–1669',
+    pattern: 'Recovery from Dependency',
+    gripPosition: 'Trajectory — Position 1 to Position 8–9',
+    summary:
+      'The only recovery case: a principal endures deep dependency deliberately, builds concealed capability through years of strategic patience, and executes a decisive overthrow — then goes on to build one of history\'s greatest reigns.',
+    lesson:
+      'The AI you depend on today was supposed to serve you — and like any regency, it will only end when you build the strength to end it yourself.',
+    tag: 'Recovery Arc',
+  },
 ]
 
 export function CaseStudiesIndex() {
