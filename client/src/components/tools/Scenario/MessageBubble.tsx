@@ -1,6 +1,6 @@
 import { memo } from 'react'
-import type { ScenarioMessage, ScenarioColorConfig, ColorClasses } from '../types/scenario'
-import { getPersonaColors } from '../utils/colors'
+import type { ScenarioMessage, ScenarioColorConfig, ColorClasses } from '../../../types/scenario'
+import { getPersonaColors } from '../../../utils/colors'
 
 interface MessageBubbleProps {
   message: ScenarioMessage

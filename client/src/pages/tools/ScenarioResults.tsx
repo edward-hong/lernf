@@ -7,15 +7,15 @@
 
 import { useNavigate } from 'react-router-dom'
 import { useCallback } from 'react'
-import { useScenarioStore } from '../state/scenarioState'
-import { ScenarioResults } from './ScenarioResults'
-import { resetCompletionDetector } from '../ai/completionDetector'
+import { useScenarioStore } from '../../state/scenarioState'
+import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
+import { resetCompletionDetector } from '../../ai/completionDetector'
 
 interface ScenarioResultsRouteProps {
   scenarioId: string
 }
 
-export function ScenarioResultsRoute({ scenarioId }: ScenarioResultsRouteProps) {
+function ScenarioResultsRoute({ scenarioId }: ScenarioResultsRouteProps) {
   const navigate = useNavigate()
   const scenario = useScenarioStore((s) => s.scenario)
   const clearScenario = useScenarioStore((s) => s.clearScenario)
@@ -70,3 +70,5 @@ export function ScenarioResultsRoute({ scenarioId }: ScenarioResultsRouteProps) 
     </div>
   )
 }
+
+export default ScenarioResultsRoute

@@ -8,14 +8,14 @@
 
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import type { GripDimension, ScenarioCategory, ScenarioDefinition } from '../types/scenario'
-import { GRIP_LABELS } from '../types/scenario'
-import { ScenarioCard } from './ScenarioCard'
-import { getScenarioProgress } from '../utils/progress'
-import type { ScenarioProgressInfo, ScenarioCompletionStatus } from '../utils/progress'
-import { useScenarioStore } from '../state/scenarioState'
-import { PROD_INCIDENT_001 } from '../data/scenarios/prod-incident-001'
-import { PROJECT_LEAD_DELAYS_002 } from '../data/scenarios/project-lead-delays-002'
+import type { GripDimension, ScenarioCategory, ScenarioDefinition } from '../../types/scenario'
+import { GRIP_LABELS } from '../../types/scenario'
+import { ScenarioCard } from '../../components/tools/Scenario/ScenarioCard'
+import { getScenarioProgress } from '../../utils/progress'
+import type { ScenarioProgressInfo, ScenarioCompletionStatus } from '../../utils/progress'
+import { useScenarioStore } from '../../state/scenarioState'
+import { PROD_INCIDENT_001 } from '../../data/scenarios/prod-incident-001'
+import { PROJECT_LEAD_DELAYS_002 } from '../../data/scenarios/project-lead-delays-002'
 
 // ---- Scenario Registry Metadata -------------------------------------------
 
@@ -75,7 +75,7 @@ const ALL_STATUS: { value: ScenarioCompletionStatus; label: string }[] = [
 
 // ---- Component ------------------------------------------------------------
 
-export function ScenarioLibrary() {
+function ScenarioLibrary() {
   const [categoryFilter, setCategoryFilter] = useState<ScenarioCategory | 'all'>('all')
   const [gripFilter, setGripFilter] = useState<GripDimension | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<ScenarioCompletionStatus | 'all'>('all')
@@ -238,3 +238,5 @@ export function ScenarioLibrary() {
     </div>
   )
 }
+
+export default ScenarioLibrary

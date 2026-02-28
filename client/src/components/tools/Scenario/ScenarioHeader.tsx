@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { ScenarioState } from '../types/scenario'
-import { GRIP_LABELS } from '../types/scenario'
+import type { ScenarioState } from '../../../types/scenario'
+import { GRIP_LABELS } from '../../../types/scenario'
 
 interface ScenarioHeaderProps {
   scenario: ScenarioState

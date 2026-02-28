@@ -7,9 +7,9 @@
 // ---------------------------------------------------------------------------
 
 import { Link } from 'react-router-dom'
-import type { GripDimension, ScenarioCategory } from '../types/scenario'
-import { GRIP_LABELS } from '../types/scenario'
-import type { ScenarioProgressInfo } from '../utils/progress'
+import type { GripDimension, ScenarioCategory } from '../../../types/scenario'
+import { GRIP_LABELS } from '../../../types/scenario'
+import type { ScenarioProgressInfo } from '../../../utils/progress'
 
 // ---- Props ----------------------------------------------------------------
 
