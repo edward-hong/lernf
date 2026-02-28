@@ -45,7 +45,7 @@ interface RawConsequenceResponse {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:5000/api/generate-consequence'
+const API_URL = 'http://localhost:4000/api/generate-consequence'
 const REQUEST_TIMEOUT_MS = 45_000
 const RETRY_DELAY_BASE_MS = 2_000
 const MAX_RETRIES = 2

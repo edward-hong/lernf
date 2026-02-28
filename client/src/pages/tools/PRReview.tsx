@@ -19,7 +19,7 @@ const PRReview: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/generate-pr',
+        'http://localhost:4000/api/generate-pr',
         {
           language: 'react',
         }
@@ -54,7 +54,7 @@ const PRReview: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/evaluate-pr',
+        'http://localhost:4000/api/evaluate-pr',
         {
           userFindings: Array.from(markedLines),
           correctIssues: scenario.issues,
