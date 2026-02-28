@@ -61,6 +61,12 @@ export function HomePage() {
       icon: '🧭',
     },
     {
+      title: 'GRIP Limitations',
+      description: 'Known limits, cross-domain analysis, and future research directions for the GRIP framework',
+      path: '/mindset/grip-limitations',
+      icon: '🔬',
+    },
+    {
       title: 'Case Studies',
       description: '13 historical case studies analysed through the GRIP framework',
       path: '/mindset/case-studies',

@@ -69,6 +69,10 @@ export function Layout() {
           label: 'GRIP Compass',
         },
         {
+          path: '/mindset/grip-limitations',
+          label: 'GRIP Limitations',
+        },
+        {
           path: '/mindset/case-studies',
           label: 'Case Studies',
         },

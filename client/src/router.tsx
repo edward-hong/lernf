@@ -32,6 +32,7 @@ const WozniakJobs = lazy(() => import('./pages/mindset/case-studies/WozniakJobs'
 const AobaiKangxi = lazy(() => import('./pages/mindset/case-studies/AobaiKangxi').then(m => ({ default: m.AobaiKangxi })))
 const AiMisconceptions = lazy(() => import('./pages/mindset/AiMisconceptions').then(m => ({ default: m.AiMisconceptions })))
 const GripCompass = lazy(() => import('./pages/mindset/GripCompass').then(m => ({ default: m.GripCompass })))
+const GripLimitations = lazy(() => import('./pages/mindset/GripLimitations').then(m => ({ default: m.GripLimitations })))
 
 /** Suspense fallback for lazy-loaded routes. */
 function LazyFallback() {
@@ -153,6 +154,10 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/grip-compass',
         element: <Lazy><GripCompass /></Lazy>,
+      },
+      {
+        path: 'mindset/grip-limitations',
+        element: <Lazy><GripLimitations /></Lazy>,
       },
       // Case Studies routes
       {
