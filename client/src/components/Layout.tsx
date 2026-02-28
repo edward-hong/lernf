@@ -25,6 +25,7 @@ export function Layout() {
       items: [
         { path: '/practice/code-comparison', label: 'Code Comparison' },
         { path: '/practice/pr-review', label: 'PR Review' },
+        { path: '/practice/ai-intent', label: 'AI Intent Analysis' },
         {
           path: '/practice/ai-coding',
           label: 'AI Assisted Coding',

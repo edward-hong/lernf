@@ -90,6 +90,13 @@ export function HomePage() {
       icon: '📝',
     },
     {
+      title: 'AI Intent Analysis',
+      description: 'Visualize hidden behavioural patterns in AI responses',
+      path: '/practice/ai-intent',
+      status: 'ready',
+      icon: '🎨',
+    },
+    {
       title: 'AI-Assisted Coding',
       description: 'Practice agentic coding workflows',
       path: '/practice/ai-coding',
