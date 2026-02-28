@@ -1,6 +1,8 @@
+import type { Language } from '../../prompts/promptComparison'
+
 interface LanguageSelectorProps {
   value: string
-  languages: any
+  languages: Language[]
   onChange: (value: string) => void
 }
 

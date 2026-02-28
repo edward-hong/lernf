@@ -7,7 +7,7 @@ interface Props {
   onReset: () => void
 }
 
-const Evaluation: React.FC<Props> = ({ evaluation, scenario, onReset }) => {
+const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
   const getScoreTextColor = () => {
     if (evaluation.score >= 80) return 'text-emerald-500'
     if (evaluation.score >= 60) return 'text-blue-500'
