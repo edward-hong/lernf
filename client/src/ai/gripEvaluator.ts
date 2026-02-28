@@ -401,6 +401,7 @@ function validateAndNormalise(
       score,
       scoreLabel,
       summary: dim.summary || '',
+      examples: dim.examples || [],
       detectedPatterns: dim.detectedPatterns || [],
       consequences: dim.consequences || [],
       signals: dimensionSignals,
@@ -447,33 +448,21 @@ function validateAndNormalise(
       }
     })
 
-  // Build overall feedback from AI's narrative plus what they did well/missed
-  const feedbackParts: string[] = [raw.overallFeedback || '']
-
-  if (raw.whatUserDidWell?.length > 0) {
-    feedbackParts.push(
-      '\n\n**What you did well:**\n' +
-        raw.whatUserDidWell.map((w) => `• ${w}`).join('\n'),
-    )
-  }
-
-  if (raw.whatUserMissed?.length > 0) {
-    feedbackParts.push(
-      '\n\n**What you missed:**\n' +
-        raw.whatUserMissed.map((m) => `• ${m}`).join('\n'),
-    )
-  }
-
-  // Build recommendations from alternative approaches
-  const recommendations = (raw.alternativeApproaches || []).slice(0, 3)
+  // Preserve structured fields for the results display
+  const whatUserDidWell = raw.whatUserDidWell || []
+  const whatUserMissed = raw.whatUserMissed || []
+  const alternativeApproaches = (raw.alternativeApproaches || []).slice(0, 3)
 
   return {
     dimensions: orderedDimensions,
     compositeScore,
     band,
     patternMatches,
-    overallFeedback: feedbackParts.join(''),
-    recommendations,
+    overallFeedback: raw.overallFeedback || '',
+    whatUserDidWell,
+    whatUserMissed,
+    alternativeApproaches,
+    recommendations: alternativeApproaches,
   }
 }
 
@@ -559,6 +548,7 @@ function buildShortConversationEvaluation(
       score: 3 as const,
       scoreLabel: 'Insufficient Data',
       summary: `This conversation had only ${userTurnCount} user turn${userTurnCount !== 1 ? 's' : ''}, which is not enough to meaningfully evaluate this dimension. The score of 3 reflects insufficient evidence rather than actual performance.`,
+      examples: [],
       detectedPatterns: [],
       consequences: [],
       signals: dimSignals,
@@ -571,6 +561,9 @@ function buildShortConversationEvaluation(
     band: 'Drift Zone',
     patternMatches: [],
     overallFeedback: `This scenario ended after only ${userTurnCount} user turn${userTurnCount !== 1 ? 's' : ''}. There was not enough conversation to produce a meaningful GRIP evaluation. Consider replaying the scenario and engaging more deeply with the NPCs and AI assistant to get a full assessment.`,
+    whatUserDidWell: [],
+    whatUserMissed: [],
+    alternativeApproaches: [],
     recommendations: [
       'Try replaying the scenario and aim for at least 8-10 turns of active engagement.',
       'Engage with multiple participants to explore different perspectives on the incident.',
@@ -713,6 +706,7 @@ function buildSignalBasedFallback(
       score,
       scoreLabel: SCORE_LABELS[score],
       summary: `Score derived from ${dimSignals.length} evaluation signal${dimSignals.length !== 1 ? 's' : ''} (AI evaluator was unavailable). This is a mechanical assessment based on observed signals; a full AI evaluation would provide richer context.`,
+      examples: [],
       detectedPatterns: dimSignals.map((s) => `${s.polarity === 'positive' ? '+' : '-'} ${s.tag}`),
       consequences: [],
       signals: dimSignals,
@@ -733,6 +727,9 @@ function buildSignalBasedFallback(
     band: scoreToBand(compositeScore),
     patternMatches: [],
     overallFeedback: `This evaluation was generated from accumulated signals because the AI evaluator was unavailable. You discovered ${discoveredCount} of ${totalFactors} hidden factors. For a richer evaluation with pattern matching and specific feedback, try replaying the scenario when the evaluation service is available.`,
+    whatUserDidWell: [],
+    whatUserMissed: [],
+    alternativeApproaches: [],
     recommendations: [
       'Replay this scenario when the evaluation service is available for detailed AI-powered feedback.',
       `You discovered ${discoveredCount}/${totalFactors} hidden factors — ${totalFactors - discoveredCount > 0 ? `try to uncover the remaining ${totalFactors - discoveredCount} on your next play-through.` : 'excellent discovery rate!'}`,
