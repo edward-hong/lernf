@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import axios from 'axios'
-import CodeBlock from './CodeBlock'
-import Evaluation from './Evaluation'
-import LanguageSelector from './LanguageSelector'
+import CodeBlock from '../components/CodeComparison/CodeBlock'
+import Evaluation from '../components/CodeComparison/Evaluation'
+import LanguageSelector from '../components/CodeComparison/LanguageSelector'
 import {
   generateComparisonPrompt,
   LANGUAGES,
-} from '../../prompts/promptComparison'
-import { evaluateOptions } from '../../prompts/evaluateOptions'
-import type { CodeScenario, SelectedOption } from '../../types/comparison'
+} from '../prompts/promptComparison'
+import { evaluateOptions } from '../prompts/evaluateOptions'
+import type { CodeScenario, SelectedOption } from '../types/comparison'
 
 function CodeComparison() {
   const [loading, setLoading] = useState(false)
   const [scenario, setScenario] = useState<CodeScenario | null>(null)
-  const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(null)
+  const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(
+    null
+  )
   const [reasoning, setReasoning] = useState('')
   const [evaluation, setEvaluation] = useState<string | null>(null)
   const [evaluating, setEvaluating] = useState(false)

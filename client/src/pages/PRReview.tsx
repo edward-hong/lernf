@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import axios from 'axios'
-import type { PRScenario, EvaluationResult } from '../../types/pr'
-import DiffLine from './DiffLine'
-import Evaluation from './Evaluation'
+import type { PRScenario, EvaluationResult } from '../types/pr'
+import DiffLine from '../components/PRReview/DiffLine'
+import Evaluation from '../components/PRReview/Evaluation'
 
 const PRReview: React.FC = () => {
   const [loading, setLoading] = useState(false)
@@ -106,8 +106,12 @@ const PRReview: React.FC = () => {
       {scenario && !evaluation && (
         <div className="bg-white rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.1)] overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="m-0 mb-2 text-gray-800 text-2xl">{scenario.title}</h2>
-            <p className="text-gray-500 m-0 mb-4 leading-[1.6]">{scenario.description}</p>
+            <h2 className="m-0 mb-2 text-gray-800 text-2xl">
+              {scenario.title}
+            </h2>
+            <p className="text-gray-500 m-0 mb-4 leading-[1.6]">
+              {scenario.description}
+            </p>
             <div className="flex gap-4 items-center">
               <span className="bg-blue-500 text-white px-3 py-1 rounded text-[13px] font-medium">
                 {scenario.language}

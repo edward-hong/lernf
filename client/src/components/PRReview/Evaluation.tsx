@@ -54,8 +54,12 @@ const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
                   {issue.severity}
                 </span>
               </div>
-              <h4 className="m-0 mb-2 text-gray-800 text-base">{issue.title}</h4>
-              <p className="m-0 mb-3 text-gray-600 leading-[1.6]">{issue.explanation}</p>
+              <h4 className="m-0 mb-2 text-gray-800 text-base">
+                {issue.title}
+              </h4>
+              <p className="m-0 mb-3 text-gray-600 leading-[1.6]">
+                {issue.explanation}
+              </p>
               <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
                 <strong className="text-gray-800">Fix:</strong> {issue.fix}
               </div>
@@ -82,8 +86,12 @@ const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
                   {issue.severity}
                 </span>
               </div>
-              <h4 className="m-0 mb-2 text-gray-800 text-base">{issue.title}</h4>
-              <p className="m-0 mb-3 text-gray-600 leading-[1.6]">{issue.explanation}</p>
+              <h4 className="m-0 mb-2 text-gray-800 text-base">
+                {issue.title}
+              </h4>
+              <p className="m-0 mb-3 text-gray-600 leading-[1.6]">
+                {issue.explanation}
+              </p>
               <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
                 <strong className="text-gray-800">Fix:</strong> {issue.fix}
               </div>
