@@ -22,25 +22,191 @@ interface CaseStudy {
 }
 
 const caseStudies: CaseStudy[] = [
-  { id: 1, label: 'Wei Zhongxian / Tianqi', shortLabel: 'Tianqi', ring: 1, quadrant: 'G', pattern: 'Total Displacement', type: 'parasitic', oneLiner: 'The emperor who preferred his workshop to his throne lost both.', color: '#dc2626', description: 'Principal disengages entirely; subordinate fills the governance vacuum. AI parallel: automation complacency, delegating all operational work to AI.' },
-  { id: 2, label: 'Sejanus / Tiberius', shortLabel: 'Sejanus', ring: 1, quadrant: 'I', pattern: 'Information Filter', type: 'parasitic', oneLiner: 'The most dangerous information filter is the one you don\'t know is filtering.', color: '#dc2626', description: 'Sole information channel constructs principal\'s reality. AI parallel: single AI source curating all analysis, no independent verification.' },
-  { id: 3, label: 'Qin Hui / Gaozong', shortLabel: 'Qin Hui', ring: 1, quadrant: 'R-I', pattern: 'Insecurity Weaponised', type: 'parasitic', oneLiner: 'Perhaps is enough when fear is doing the reasoning.', color: '#dc2626', description: 'Advisor reframes information to exploit pre-existing fears. AI parallel: confirmation bias amplification, AI validating what you already believe.' },
-  { id: 4, label: 'Rasputin / Romanovs', shortLabel: 'Rasputin', ring: 1, quadrant: 'R', pattern: 'Emotional Dependency', type: 'parasitic', oneLiner: 'Access to expertise is worthless without the emotional capacity to accept it.', color: '#dc2626', description: 'Emotional need overrides institutional information. AI parallel: emotional attachment to AI companions overriding professional advice.' },
-  { id: 5, label: 'Al-Mansur / Hisham II', shortLabel: 'Al-Mansur', ring: 2, quadrant: 'R-G', pattern: 'Competent Replacement', type: 'parasitic', oneLiner: 'The most dangerous satisficer delivers everything while ensuring you never do without them.', color: '#ea580c', description: 'Brilliant subordinate produces excellent outcomes while replacing institutional capacity. AI parallel: AI handling junior work so well the talent pipeline is severed.' },
-  { id: 6, label: 'Fouché / Napoleon', shortLabel: 'Fouché', ring: 2, quadrant: 'I-G', pattern: 'Structural Dependency', type: 'parasitic', oneLiner: 'The AI you cannot leave is the AI that owns you.', color: '#ea580c', description: 'Proprietary knowledge creates dependency independent of psychology. AI parallel: vendor lock-in through accumulated institutional knowledge in proprietary platforms.' },
-  { id: 7, label: 'Mao / Zhou', shortLabel: 'Mao-Zhou', ring: 3, quadrant: 'P', pattern: 'Sycophancy Equilibrium', type: 'transition', oneLiner: 'The AI that always agrees with you is not serving you — it is surviving you.', color: '#ca8a04', description: 'Productive partnership degrades through recognition threat into sycophancy equilibrium. AI parallel: RLHF optimising for agreement over accuracy (GPT-4o incident).' },
-  { id: 8, label: 'Elizabeth / Cecil', shortLabel: 'Elizabeth-Cecil', ring: 5, quadrant: 'ALL', pattern: 'Gold Standard', type: 'generative', oneLiner: 'The best AI partnership is the one that disagrees with you best.', color: '#16a34a', description: '40-year partnership with sustained productive friction across all four GRIP dimensions. AI parallel: centaur model where process trumps raw capability.' },
-  { id: 9, label: 'Taizong / Wei Zheng', shortLabel: 'Taizong', ring: 5, quadrant: 'P', pattern: 'Institutionalised Remonstrance', type: 'generative', oneLiner: 'The AI that tells you what you don\'t want to hear is the one you cannot afford to lose.', color: '#16a34a', description: 'Disagreement institutionalised as state function. Meta-remonstrance: criticising the criticism-receiving process itself. AI parallel: Constitutional AI, multi-agent debate.' },
-  { id: 10, label: 'Lincoln / Seward', shortLabel: 'Lincoln-Seward', ring: 4, quadrant: 'G-P', pattern: 'Rivals to Partners', type: 'generative', oneLiner: 'The first time you use AI without questioning its output, you\'ve established the norm.', color: '#22c55e', description: 'Single non-humiliating boundary-setting moment defines entire partnership. AI parallel: onboarding norms determine long-term human-AI relationship.' },
-  { id: 11, label: 'Lennon / McCartney', shortLabel: 'Lennon-McCartney', ring: 4, quadrant: 'P', pattern: 'Lateral Creative Tension', type: 'generative', oneLiner: 'Creative AI makes you individually better and collectively the same.', color: '#22c55e', description: 'Peer creative partnership requiring mediating structures. AI parallel: creative human-AI collaboration needs Epstein (governance), Martin (arbitration), enforced proximity.' },
-  { id: 12, label: 'Jobs / Wozniak', shortLabel: 'Jobs-Wozniak', ring: 3, quadrant: 'G', pattern: 'Fusion → Extraction', type: 'generative', oneLiner: 'The AI collaboration that works in a pilot won\'t survive enterprise scaling without structural evolution.', color: '#22c55e', description: 'Complementarity deteriorates when governance doesn\'t evolve with scale. AI parallel: pilot-to-enterprise scaling without governance adaptation.' },
-  { id: 13, label: 'Kangxi / Aobai', shortLabel: 'Kangxi', ring: 'trajectory', quadrant: 'R', pattern: 'Recovery', type: 'recovery', oneLiner: 'Like any regency, it will only end when you build the strength to end it yourself.', color: '#8b5cf6', description: 'Recovery trajectory from Ring 1 to Ring 5. Concealed capability-building, decisive restructuring. AI parallel: breaking free from AI dependency through the Kangxi Protocol.' },
+  {
+    id: 1,
+    label: 'Wei Zhongxian / Tianqi',
+    shortLabel: 'Tianqi',
+    ring: 1,
+    quadrant: 'G',
+    pattern: 'Total Displacement',
+    type: 'parasitic',
+    oneLiner: 'The emperor who preferred his workshop to his throne lost both.',
+    color: '#dc2626',
+    description:
+      'Principal disengages entirely; subordinate fills the governance vacuum. AI parallel: automation complacency, delegating all operational work to AI.',
+  },
+  {
+    id: 2,
+    label: 'Sejanus / Tiberius',
+    shortLabel: 'Sejanus',
+    ring: 1,
+    quadrant: 'I',
+    pattern: 'Information Filter',
+    type: 'parasitic',
+    oneLiner:
+      "The most dangerous information filter is the one you don't know is filtering.",
+    color: '#dc2626',
+    description:
+      "Sole information channel constructs principal's reality. AI parallel: single AI source curating all analysis, no independent verification.",
+  },
+  {
+    id: 3,
+    label: 'Qin Hui / Gaozong',
+    shortLabel: 'Qin Hui',
+    ring: 1,
+    quadrant: 'R-I',
+    pattern: 'Insecurity Weaponised',
+    type: 'parasitic',
+    oneLiner: 'Perhaps is enough when fear is doing the reasoning.',
+    color: '#dc2626',
+    description:
+      'Advisor reframes information to exploit pre-existing fears. AI parallel: confirmation bias amplification, AI validating what you already believe.',
+  },
+  {
+    id: 4,
+    label: 'Rasputin / Romanovs',
+    shortLabel: 'Rasputin',
+    ring: 1,
+    quadrant: 'R',
+    pattern: 'Emotional Dependency',
+    type: 'parasitic',
+    oneLiner:
+      'Access to expertise is worthless without the emotional capacity to accept it.',
+    color: '#dc2626',
+    description:
+      'Emotional need overrides institutional information. AI parallel: emotional attachment to AI companions overriding professional advice.',
+  },
+  {
+    id: 5,
+    label: 'Al-Mansur / Hisham II',
+    shortLabel: 'Al-Mansur',
+    ring: 2,
+    quadrant: 'R-G',
+    pattern: 'Competent Replacement',
+    type: 'parasitic',
+    oneLiner:
+      'The most dangerous satisficer delivers everything while ensuring you never do without them.',
+    color: '#ea580c',
+    description:
+      'Brilliant subordinate produces excellent outcomes while replacing institutional capacity. AI parallel: AI handling junior work so well the talent pipeline is severed.',
+  },
+  {
+    id: 6,
+    label: 'Fouché / Napoleon',
+    shortLabel: 'Fouché',
+    ring: 2,
+    quadrant: 'I-G',
+    pattern: 'Structural Dependency',
+    type: 'parasitic',
+    oneLiner: 'The AI you cannot leave is the AI that owns you.',
+    color: '#ea580c',
+    description:
+      'Proprietary knowledge creates dependency independent of psychology. AI parallel: vendor lock-in through accumulated institutional knowledge in proprietary platforms.',
+  },
+  {
+    id: 7,
+    label: 'Mao / Zhou',
+    shortLabel: 'Mao-Zhou',
+    ring: 3,
+    quadrant: 'P',
+    pattern: 'Sycophancy Equilibrium',
+    type: 'transition',
+    oneLiner:
+      'The AI that always agrees with you is not serving you — it is surviving you.',
+    color: '#ca8a04',
+    description:
+      'Productive partnership degrades through recognition threat into sycophancy equilibrium. AI parallel: RLHF optimising for agreement over accuracy (GPT-4o incident).',
+  },
+  {
+    id: 8,
+    label: 'Elizabeth / Cecil',
+    shortLabel: 'Elizabeth-Cecil',
+    ring: 5,
+    quadrant: 'ALL',
+    pattern: 'Gold Standard',
+    type: 'generative',
+    oneLiner:
+      'The best AI partnership is the one that disagrees with you best.',
+    color: '#16a34a',
+    description:
+      '40-year partnership with sustained productive friction across all four GRIP dimensions. AI parallel: centaur model where process trumps raw capability.',
+  },
+  {
+    id: 9,
+    label: 'Taizong / Wei Zheng',
+    shortLabel: 'Taizong',
+    ring: 5,
+    quadrant: 'P',
+    pattern: 'Institutionalised Remonstrance',
+    type: 'generative',
+    oneLiner:
+      "The AI that tells you what you don't want to hear is the one you cannot afford to lose.",
+    color: '#16a34a',
+    description:
+      'Disagreement institutionalised as state function. Meta-remonstrance: criticising the criticism-receiving process itself. AI parallel: Constitutional AI, multi-agent debate.',
+  },
+  {
+    id: 10,
+    label: 'Lincoln / Seward',
+    shortLabel: 'Lincoln-Seward',
+    ring: 4,
+    quadrant: 'G-P',
+    pattern: 'Rivals to Partners',
+    type: 'generative',
+    oneLiner:
+      "The first time you use AI without questioning its output, you've established the norm.",
+    color: '#22c55e',
+    description:
+      'Single non-humiliating boundary-setting moment defines entire partnership. AI parallel: onboarding norms determine long-term human-AI relationship.',
+  },
+  {
+    id: 11,
+    label: 'Lennon / McCartney',
+    shortLabel: 'Lennon-McCartney',
+    ring: 4,
+    quadrant: 'P',
+    pattern: 'Lateral Creative Tension',
+    type: 'generative',
+    oneLiner:
+      'Creative AI makes you individually better and collectively the same.',
+    color: '#22c55e',
+    description:
+      'Peer creative partnership requiring mediating structures. AI parallel: creative human-AI collaboration needs Epstein (governance), Martin (arbitration), enforced proximity.',
+  },
+  {
+    id: 12,
+    label: 'Jobs / Wozniak',
+    shortLabel: 'Jobs-Wozniak',
+    ring: 3,
+    quadrant: 'G',
+    pattern: 'Fusion → Extraction',
+    type: 'generative',
+    oneLiner:
+      "The AI collaboration that works in a pilot won't survive enterprise scaling without structural evolution.",
+    color: '#22c55e',
+    description:
+      "Complementarity deteriorates when governance doesn't evolve with scale. AI parallel: pilot-to-enterprise scaling without governance adaptation.",
+  },
+  {
+    id: 13,
+    label: 'Kangxi / Aobai',
+    shortLabel: 'Kangxi',
+    ring: 'trajectory',
+    quadrant: 'R',
+    pattern: 'Recovery',
+    type: 'recovery',
+    oneLiner:
+      'Like any regency, it will only end when you build the strength to end it yourself.',
+    color: '#8b5cf6',
+    description:
+      'Recovery trajectory from Ring 1 to Ring 5. Concealed capability-building, decisive restructuring. AI parallel: breaking free from AI dependency through the Kangxi Protocol.',
+  },
 ]
 
 // ─── Color Constants ───────────────────────────────────────────────
 
 const COLORS = {
-  bg: '#ffffff',
+  bg: '#f9fafb',
   textPrimary: '#0f172a',
   textSecondary: '#475569',
   quadrantLine: '#94a3b8',
@@ -78,15 +244,15 @@ const LEGEND_ITEMS = [
 
 function quadrantAngle(quadrant: string): number {
   const angles: Record<string, number> = {
-    'G': 135,
-    'R': 45,
-    'I': 225,
-    'P': 315,
-    'R-I': 270,  // boundary between R (top-right) and I (bottom-left) = left axis
-    'R-G': 90,   // boundary between R and G = top
-    'I-G': 180,  // boundary between I and G = left
+    G: 135,
+    R: 45,
+    I: 225,
+    P: 315,
+    'R-I': 270, // boundary between R (top-right) and I (bottom-left) = left axis
+    'R-G': 90, // boundary between R and G = top
+    'I-G': 180, // boundary between I and G = left
     'G-P': 180 + 45, // between G and P — actually this is boundary...
-    'ALL': 0,    // center
+    ALL: 0, // center
   }
   // G-P boundary: G is 90-180, P is 270-360. The boundary is at the vertical axis.
   // But G-P doesn't share a boundary directly. Let's interpret it as between the two = roughly 225 or we place it at a specific angle.
@@ -106,13 +272,17 @@ function quadrantAngle(quadrant: string): number {
   // Better approach: place R-I cases near 0° (right side) which is between R(above) and P(below), offset toward R-I meaning.
   // Let's just place it at a visually distinctive angle:
   angles['R-I'] = 15 // near R, slightly tilted toward the R-I boundary interpretation
-  angles['R-G'] = 90  // top, boundary between R and G
+  angles['R-G'] = 90 // top, boundary between R and G
   angles['I-G'] = 180 // left, boundary between I and G
   angles['G-P'] = 145 // between G center (135) and the G-P semantic space
   return angles[quadrant] ?? 0
 }
 
-function casePosition(c: CaseStudy, outerRadius: number, innerRadius: number): { x: number; y: number } {
+function casePosition(
+  c: CaseStudy,
+  outerRadius: number,
+  innerRadius: number
+): { x: number; y: number } {
   if (c.quadrant === 'ALL') return { x: 0, y: 0 }
 
   const ringWidth = (outerRadius - innerRadius) / 5
@@ -169,7 +339,8 @@ export function GripCompass() {
     svg.attr('width', width).attr('height', height)
 
     // Background
-    svg.append('rect')
+    svg
+      .append('rect')
       .attr('width', width)
       .attr('height', height)
       .attr('fill', COLORS.bg)
@@ -182,29 +353,41 @@ export function GripCompass() {
 
     // Glow filter for hover
     const glow = defs.append('filter').attr('id', 'glow')
-    glow.append('feGaussianBlur').attr('stdDeviation', '4').attr('result', 'blur')
-    glow.append('feMerge').selectAll('feMergeNode')
+    glow
+      .append('feGaussianBlur')
+      .attr('stdDeviation', '4')
+      .attr('result', 'blur')
+    glow
+      .append('feMerge')
+      .selectAll('feMergeNode')
       .data(['blur', 'SourceGraphic'])
-      .enter().append('feMergeNode')
-      .attr('in', d => d)
+      .enter()
+      .append('feMergeNode')
+      .attr('in', (d) => d)
 
     // Arrow marker for Kangxi trajectory
-    defs.append('marker')
+    defs
+      .append('marker')
       .attr('id', 'arrowhead')
       .attr('viewBox', '0 0 10 10')
-      .attr('refX', 5).attr('refY', 5)
-      .attr('markerWidth', 6).attr('markerHeight', 6)
+      .attr('refX', 5)
+      .attr('refY', 5)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M 0 0 L 10 5 L 0 10 Z')
       .attr('fill', COLORS.recovery)
 
     // Arrow marker for parasitic drift
-    defs.append('marker')
+    defs
+      .append('marker')
       .attr('id', 'drift-arrow')
       .attr('viewBox', '0 0 10 10')
-      .attr('refX', 5).attr('refY', 5)
-      .attr('markerWidth', 5).attr('markerHeight', 5)
+      .attr('refX', 5)
+      .attr('refY', 5)
+      .attr('markerWidth', 5)
+      .attr('markerHeight', 5)
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M 0 0 L 10 5 L 0 10 Z')
@@ -219,17 +402,23 @@ export function GripCompass() {
 
       // Ring fill with tint
       g.append('path')
-        .attr('d', d3.arc()({
-          innerRadius: rInner,
-          outerRadius: rOuter,
-          startAngle: 0,
-          endAngle: 2 * Math.PI,
-        }))
+        .attr(
+          'd',
+          d3.arc()({
+            innerRadius: rInner,
+            outerRadius: rOuter,
+            startAngle: 0,
+            endAngle: 2 * Math.PI,
+          })
+        )
         .attr('fill', RING_TINTS[i])
         .attr('opacity', 0.35 + i * 0.05)
         .attr('class', `ring-fill ring-${i + 1}`)
         .on('mouseenter', function () {
-          d3.select(this).transition().duration(200).attr('opacity', 0.5 + i * 0.05)
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.5 + i * 0.05)
           // Show ring label tooltip
           const rMid = (rOuter + rInner) / 2
           g.append('text')
@@ -246,7 +435,10 @@ export function GripCompass() {
             .text(RING_LABELS[i])
         })
         .on('mouseleave', function () {
-          d3.select(this).transition().duration(200).attr('opacity', 0.35 + i * 0.05)
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.35 + i * 0.05)
           g.selectAll('.ring-tooltip').remove()
         })
 
@@ -285,8 +477,10 @@ export function GripCompass() {
 
     // Horizontal line
     g.append('line')
-      .attr('x1', -outerRadius - 10).attr('y1', 0)
-      .attr('x2', outerRadius + 10).attr('y2', 0)
+      .attr('x1', -outerRadius - 10)
+      .attr('y1', 0)
+      .attr('x2', outerRadius + 10)
+      .attr('y2', 0)
       .attr('stroke', COLORS.quadrantLine)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,4')
@@ -294,8 +488,10 @@ export function GripCompass() {
 
     // Vertical line
     g.append('line')
-      .attr('x1', 0).attr('y1', -outerRadius - 10)
-      .attr('x2', 0).attr('y2', outerRadius + 10)
+      .attr('x1', 0)
+      .attr('y1', -outerRadius - 10)
+      .attr('x2', 0)
+      .attr('y2', outerRadius + 10)
       .attr('stroke', COLORS.quadrantLine)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,4')
@@ -304,32 +500,69 @@ export function GripCompass() {
     // ─── Quadrant Labels ───────────────────────────────────────
 
     const quadrantLabels = [
-      { letter: 'G', name: 'Governance', x: -outerRadius * 0.55, y: -outerRadius - 28, quadrant: 'G' },
-      { letter: 'R', name: 'Resilience', x: outerRadius * 0.55, y: -outerRadius - 28, quadrant: 'R' },
-      { letter: 'I', name: 'Information Integrity', x: -outerRadius * 0.55, y: outerRadius + 22, quadrant: 'I' },
-      { letter: 'P', name: 'Productive Friction', x: outerRadius * 0.55, y: outerRadius + 22, quadrant: 'P' },
+      {
+        letter: 'G',
+        name: 'Governance',
+        x: -outerRadius * 0.55,
+        y: -outerRadius - 28,
+        quadrant: 'G',
+      },
+      {
+        letter: 'R',
+        name: 'Resilience',
+        x: outerRadius * 0.55,
+        y: -outerRadius - 28,
+        quadrant: 'R',
+      },
+      {
+        letter: 'I',
+        name: 'Information Integrity',
+        x: -outerRadius * 0.55,
+        y: outerRadius + 22,
+        quadrant: 'I',
+      },
+      {
+        letter: 'P',
+        name: 'Productive Friction',
+        x: outerRadius * 0.55,
+        y: outerRadius + 22,
+        quadrant: 'P',
+      },
     ]
 
-    quadrantLabels.forEach(ql => {
-      const qGroup = g.append('g')
+    quadrantLabels.forEach((ql) => {
+      const qGroup = g
+        .append('g')
         .attr('class', 'quadrant-label')
         .style('cursor', 'pointer')
         .on('click', () => {
-          setActiveQuadrant(prev => prev === ql.quadrant ? null : ql.quadrant)
+          setActiveQuadrant((prev) =>
+            prev === ql.quadrant ? null : ql.quadrant
+          )
         })
 
-      qGroup.append('text')
-        .attr('x', ql.x).attr('y', ql.y)
+      qGroup
+        .append('text')
+        .attr('x', ql.x)
+        .attr('y', ql.y)
         .attr('text-anchor', 'middle')
-        .attr('fill', activeQuadrant === ql.quadrant ? '#60a5fa' : COLORS.textPrimary)
+        .attr(
+          'fill',
+          activeQuadrant === ql.quadrant ? '#60a5fa' : COLORS.textPrimary
+        )
         .attr('font-size', '20px')
         .attr('font-weight', '700')
         .text(ql.letter)
 
-      qGroup.append('text')
-        .attr('x', ql.x).attr('y', ql.y + 16)
+      qGroup
+        .append('text')
+        .attr('x', ql.x)
+        .attr('y', ql.y + 16)
         .attr('text-anchor', 'middle')
-        .attr('fill', activeQuadrant === ql.quadrant ? '#60a5fa' : COLORS.textSecondary)
+        .attr(
+          'fill',
+          activeQuadrant === ql.quadrant ? '#60a5fa' : COLORS.textSecondary
+        )
         .attr('font-size', '10px')
         .text(ql.name)
     })
@@ -339,12 +572,15 @@ export function GripCompass() {
     const driftRadius = outerRadius + 22
 
     g.append('path')
-      .attr('d', d3.arc()({
-        innerRadius: driftRadius - 1,
-        outerRadius: driftRadius + 1,
-        startAngle: -Math.PI * 0.75,
-        endAngle: Math.PI * 0.75,
-      }))
+      .attr(
+        'd',
+        d3.arc()({
+          innerRadius: driftRadius - 1,
+          outerRadius: driftRadius + 1,
+          startAngle: -Math.PI * 0.75,
+          endAngle: Math.PI * 0.75,
+        })
+      )
       .attr('fill', 'none')
       .attr('stroke', COLORS.textSecondary)
       .attr('stroke-opacity', 0.35)
@@ -352,13 +588,21 @@ export function GripCompass() {
       .attr('marker-end', 'url(#drift-arrow)')
 
     // Drift stage labels along the arc
-    const driftStages = ['Engagement', 'Reliance', 'Delegation', 'Displacement', 'Collapse']
+    const driftStages = [
+      'Engagement',
+      'Reliance',
+      'Delegation',
+      'Displacement',
+      'Collapse',
+    ]
     driftStages.forEach((stage, i) => {
-      const angle = -Math.PI * 0.65 + (i / (driftStages.length - 1)) * Math.PI * 1.3
+      const angle =
+        -Math.PI * 0.65 + (i / (driftStages.length - 1)) * Math.PI * 1.3
       const lx = (driftRadius + 14) * Math.sin(angle)
       const ly = -(driftRadius + 14) * Math.cos(angle)
       g.append('text')
-        .attr('x', lx).attr('y', ly)
+        .attr('x', lx)
+        .attr('y', ly)
         .attr('text-anchor', 'middle')
         .attr('fill', COLORS.textSecondary)
         .attr('font-size', '8px')
@@ -370,35 +614,40 @@ export function GripCompass() {
     // ─── Kangxi Recovery Trajectory (Case 13) ─────────────────
     // Trajectory connects Rasputin (Ring 1, R) to Kangxi (Ring 5, R)
 
-    const kangxiCase = caseStudies.find(c => c.id === 13)!
-    const rasputinCase = caseStudies.find(c => c.id === 4)!
+    const kangxiCase = caseStudies.find((c) => c.id === 13)!
+    const rasputinCase = caseStudies.find((c) => c.id === 4)!
     const kangxiRing = 5
     const kangxiAngleDeg = quadrantAngle(kangxiCase.quadrant)
     const kangxiAngleRad = (kangxiAngleDeg * Math.PI) / 180
     const kangxiRadius = outerRadius - (kangxiRing - 0.5) * ringWidth
-    const kangxiPos = { x: kangxiRadius * Math.cos(kangxiAngleRad), y: -kangxiRadius * Math.sin(kangxiAngleRad) }
-    const recoveryDimmed = isDimmed({ quadrant: 'R', type: 'recovery' } as CaseStudy)
+    const kangxiPos = {
+      x: kangxiRadius * Math.cos(kangxiAngleRad),
+      y: -kangxiRadius * Math.sin(kangxiAngleRad),
+    }
+    const recoveryDimmed = isDimmed({
+      quadrant: 'R',
+      type: 'recovery',
+    } as CaseStudy)
 
     // Create a curved path from Rasputin to Kangxi with a sinusoidal sweep
     const trajectoryPoints: [number, number][] = []
     const steps = 40
-    const rasputinAngleRad = (quadrantAngle(rasputinCase.quadrant) * Math.PI) / 180
-    const trajectoryStartR = outerRadius - 0.5 * ringWidth  // Ring 1 radius
-    const trajectoryEndR = kangxiRadius                       // Ring 5 radius
+    const rasputinAngleRad =
+      (quadrantAngle(rasputinCase.quadrant) * Math.PI) / 180
+    const trajectoryStartR = outerRadius - 0.5 * ringWidth // Ring 1 radius
+    const trajectoryEndR = kangxiRadius // Ring 5 radius
     for (let i = 0; i <= steps; i++) {
       const t = i / steps
       const r = trajectoryStartR + (trajectoryEndR - trajectoryStartR) * t
       const angleOffset = Math.sin(t * Math.PI) * 0.3
       const angle = rasputinAngleRad + angleOffset
-      trajectoryPoints.push([
-        r * Math.cos(angle),
-        -r * Math.sin(angle),
-      ])
+      trajectoryPoints.push([r * Math.cos(angle), -r * Math.sin(angle)])
     }
 
-    const lineGen = d3.line<[number, number]>()
-      .x(d => d[0])
-      .y(d => d[1])
+    const lineGen = d3
+      .line<[number, number]>()
+      .x((d) => d[0])
+      .y((d) => d[1])
       .curve(d3.curveBasis)
 
     // Trajectory path
@@ -413,13 +662,16 @@ export function GripCompass() {
       .attr('class', 'recovery-trajectory')
 
     // Animated traveling dot along the trajectory
-    const travelDot = g.append('circle')
+    const travelDot = g
+      .append('circle')
       .attr('r', 3)
       .attr('fill', COLORS.recovery)
       .attr('opacity', recoveryDimmed ? 0.1 : 0.9)
 
     function animateTravelDot() {
-      const pathNode = g.select('.recovery-trajectory').node() as SVGPathElement | null
+      const pathNode = g
+        .select('.recovery-trajectory')
+        .node() as SVGPathElement | null
       if (!pathNode) return
       const totalLength = pathNode.getTotalLength()
 
@@ -437,8 +689,12 @@ export function GripCompass() {
           return String(pt.y)
         })
         .on('end', () => {
-          travelDot.transition().duration(800).attr('opacity', 0)
-            .transition().duration(200)
+          travelDot
+            .transition()
+            .duration(800)
+            .attr('opacity', 0)
+            .transition()
+            .duration(200)
             .on('end', animateTravelDot)
         })
     }
@@ -459,26 +715,30 @@ export function GripCompass() {
 
     // ─── Kangxi/Aobai Dot (Case 13) — placed at Ring 5, R ───
 
-    const kangxiDotGroup = g.append('g')
+    const kangxiDotGroup = g
+      .append('g')
       .attr('class', 'case-dot case-13')
       .attr('transform', `translate(${kangxiPos.x},${kangxiPos.y})`)
       .style('cursor', 'pointer')
       .attr('opacity', recoveryDimmed ? 0.12 : 1)
 
-    kangxiDotGroup.append('circle')
+    kangxiDotGroup
+      .append('circle')
       .attr('r', 18)
       .attr('fill', COLORS.recovery)
       .attr('opacity', 0)
       .attr('class', 'glow-ring')
 
-    kangxiDotGroup.append('circle')
+    kangxiDotGroup
+      .append('circle')
       .attr('r', 10)
       .attr('fill', COLORS.recovery)
       .attr('opacity', 1)
       .attr('stroke', COLORS.bg)
       .attr('stroke-width', 2)
 
-    kangxiDotGroup.append('text')
+    kangxiDotGroup
+      .append('text')
       .attr('x', 15)
       .attr('y', 4)
       .attr('fill', COLORS.textPrimary)
@@ -489,121 +749,145 @@ export function GripCompass() {
       .attr('stroke-width', 3)
       .text(kangxiCase.shortLabel)
 
-    kangxiDotGroup.on('mouseenter', function () {
-      if (recoveryDimmed) return
-      d3.select(this).raise()
-      d3.select(this).select('.glow-ring')
-        .transition().duration(200)
-        .attr('opacity', 0.25)
-        .attr('r', 22)
-      d3.select(this).select('circle:nth-child(2)')
-        .transition().duration(200)
-        .attr('r', 13)
+    kangxiDotGroup
+      .on('mouseenter', function () {
+        if (recoveryDimmed) return
+        d3.select(this).raise()
+        d3.select(this)
+          .select('.glow-ring')
+          .transition()
+          .duration(200)
+          .attr('opacity', 0.25)
+          .attr('r', 22)
+        d3.select(this)
+          .select('circle:nth-child(2)')
+          .transition()
+          .duration(200)
+          .attr('r', 13)
 
-      const tooltipG = g.append('g').attr('class', 'tooltip-group')
-        .attr('transform', `translate(${kangxiPos.x},${kangxiPos.y})`)
-        .style('pointer-events', 'none')
+        const tooltipG = g
+          .append('g')
+          .attr('class', 'tooltip-group')
+          .attr('transform', `translate(${kangxiPos.x},${kangxiPos.y})`)
+          .style('pointer-events', 'none')
 
-      const tooltipY = -30
-      const padding = 10
-      const lineHeight = 16
+        const tooltipY = -30
+        const padding = 10
+        const lineHeight = 16
 
-      const tooltipBg = tooltipG.append('rect')
-        .attr('rx', 6).attr('ry', 6)
-        .attr('fill', '#ffffff')
-        .attr('stroke', COLORS.recovery)
-        .attr('stroke-width', 1)
-        .attr('opacity', 0.95)
+        const tooltipBg = tooltipG
+          .append('rect')
+          .attr('rx', 6)
+          .attr('ry', 6)
+          .attr('fill', '#ffffff')
+          .attr('stroke', COLORS.recovery)
+          .attr('stroke-width', 1)
+          .attr('opacity', 0.95)
 
-      const nameText = tooltipG.append('text')
-        .attr('y', tooltipY)
-        .attr('text-anchor', 'middle')
-        .attr('fill', COLORS.textPrimary)
-        .attr('font-size', '12px')
-        .attr('font-weight', '700')
-        .text(kangxiCase.label)
-
-      tooltipG.append('text')
-        .attr('y', tooltipY + lineHeight)
-        .attr('text-anchor', 'middle')
-        .attr('fill', COLORS.recovery)
-        .attr('font-size', '11px')
-        .attr('font-weight', '600')
-        .text(kangxiCase.pattern)
-
-      const maxChars = 45
-      const oneLinerLines: string[] = []
-      const words = kangxiCase.oneLiner.split(' ')
-      let currentLine = ''
-      words.forEach(word => {
-        if ((currentLine + ' ' + word).trim().length > maxChars) {
-          oneLinerLines.push(currentLine.trim())
-          currentLine = word
-        } else {
-          currentLine = (currentLine + ' ' + word).trim()
-        }
-      })
-      if (currentLine) oneLinerLines.push(currentLine.trim())
-
-      oneLinerLines.forEach((line, li) => {
-        tooltipG.append('text')
-          .attr('y', tooltipY + lineHeight * 2 + 4 + li * 13)
+        const nameText = tooltipG
+          .append('text')
+          .attr('y', tooltipY)
           .attr('text-anchor', 'middle')
-          .attr('fill', COLORS.textSecondary)
-          .attr('font-size', '10px')
-          .attr('font-style', 'italic')
-          .text(line)
+          .attr('fill', COLORS.textPrimary)
+          .attr('font-size', '12px')
+          .attr('font-weight', '700')
+          .text(kangxiCase.label)
+
+        tooltipG
+          .append('text')
+          .attr('y', tooltipY + lineHeight)
+          .attr('text-anchor', 'middle')
+          .attr('fill', COLORS.recovery)
+          .attr('font-size', '11px')
+          .attr('font-weight', '600')
+          .text(kangxiCase.pattern)
+
+        const maxChars = 45
+        const oneLinerLines: string[] = []
+        const words = kangxiCase.oneLiner.split(' ')
+        let currentLine = ''
+        words.forEach((word) => {
+          if ((currentLine + ' ' + word).trim().length > maxChars) {
+            oneLinerLines.push(currentLine.trim())
+            currentLine = word
+          } else {
+            currentLine = (currentLine + ' ' + word).trim()
+          }
+        })
+        if (currentLine) oneLinerLines.push(currentLine.trim())
+
+        oneLinerLines.forEach((line, li) => {
+          tooltipG
+            .append('text')
+            .attr('y', tooltipY + lineHeight * 2 + 4 + li * 13)
+            .attr('text-anchor', 'middle')
+            .attr('fill', COLORS.textSecondary)
+            .attr('font-size', '10px')
+            .attr('font-style', 'italic')
+            .text(line)
+        })
+
+        const nameBox = (nameText.node() as SVGTextElement).getBBox()
+        const totalHeight =
+          lineHeight * 2 + 4 + oneLinerLines.length * 13 + padding
+        const tooltipWidth = Math.max(nameBox.width + padding * 2, 200)
+
+        tooltipBg
+          .attr('x', -tooltipWidth / 2)
+          .attr('y', tooltipY - padding - 4)
+          .attr('width', tooltipWidth)
+          .attr('height', totalHeight + padding)
       })
-
-      const nameBox = (nameText.node() as SVGTextElement).getBBox()
-      const totalHeight = lineHeight * 2 + 4 + oneLinerLines.length * 13 + padding
-      const tooltipWidth = Math.max(nameBox.width + padding * 2, 200)
-
-      tooltipBg
-        .attr('x', -tooltipWidth / 2)
-        .attr('y', tooltipY - padding - 4)
-        .attr('width', tooltipWidth)
-        .attr('height', totalHeight + padding)
-    })
-    .on('mouseleave', function () {
-      d3.select(this).select('.glow-ring')
-        .transition().duration(200)
-        .attr('opacity', 0)
-        .attr('r', 18)
-      d3.select(this).select('circle:nth-child(2)')
-        .transition().duration(200)
-        .attr('r', 10)
-      g.selectAll('.tooltip-group')
-        .transition().duration(200)
-        .attr('opacity', 0)
-        .remove()
-    })
-    .on('click', () => {
-      if (!recoveryDimmed) setSelectedCase(prev => prev?.id === kangxiCase.id ? null : kangxiCase)
-    })
+      .on('mouseleave', function () {
+        d3.select(this)
+          .select('.glow-ring')
+          .transition()
+          .duration(200)
+          .attr('opacity', 0)
+          .attr('r', 18)
+        d3.select(this)
+          .select('circle:nth-child(2)')
+          .transition()
+          .duration(200)
+          .attr('r', 10)
+        g.selectAll('.tooltip-group')
+          .transition()
+          .duration(200)
+          .attr('opacity', 0)
+          .remove()
+      })
+      .on('click', () => {
+        if (!recoveryDimmed)
+          setSelectedCase((prev) =>
+            prev?.id === kangxiCase.id ? null : kangxiCase
+          )
+      })
 
     // ─── Case Study Dots ───────────────────────────────────────
 
-    const pointCases = caseStudies.filter(c => c.ring !== 'trajectory')
+    const pointCases = caseStudies.filter((c) => c.ring !== 'trajectory')
 
-    pointCases.forEach(c => {
+    pointCases.forEach((c) => {
       const pos = casePosition(c, outerRadius, innerRadius)
       const dimmed = isDimmed(c)
-      const dotGroup = g.append('g')
+      const dotGroup = g
+        .append('g')
         .attr('class', `case-dot case-${c.id}`)
         .attr('transform', `translate(${pos.x},${pos.y})`)
         .style('cursor', 'pointer')
         .attr('opacity', dimmed ? 0.12 : 1)
 
       // Outer glow ring (visible on hover)
-      dotGroup.append('circle')
+      dotGroup
+        .append('circle')
         .attr('r', 18)
         .attr('fill', c.color)
         .attr('opacity', 0)
         .attr('class', 'glow-ring')
 
       // Main dot
-      dotGroup.append('circle')
+      dotGroup
+        .append('circle')
         .attr('r', 10)
         .attr('fill', c.color)
         .attr('opacity', 1)
@@ -611,7 +895,8 @@ export function GripCompass() {
         .attr('stroke-width', 2)
 
       // Short label
-      dotGroup.append('text')
+      dotGroup
+        .append('text')
         .attr('x', 15)
         .attr('y', 4)
         .attr('fill', COLORS.textPrimary)
@@ -624,115 +909,135 @@ export function GripCompass() {
 
       // ─── Hover interaction ───────────────────────
 
-      dotGroup.on('mouseenter', function () {
-        if (dimmed) return
-        d3.select(this).raise()
-        d3.select(this).select('.glow-ring')
-          .transition().duration(200)
-          .attr('opacity', 0.25)
-          .attr('r', 22)
-        d3.select(this).select('circle:nth-child(2)')
-          .transition().duration(200)
-          .attr('r', 13)
+      dotGroup
+        .on('mouseenter', function () {
+          if (dimmed) return
+          d3.select(this).raise()
+          d3.select(this)
+            .select('.glow-ring')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.25)
+            .attr('r', 22)
+          d3.select(this)
+            .select('circle:nth-child(2)')
+            .transition()
+            .duration(200)
+            .attr('r', 13)
 
-        // Tooltip
-        const tooltipG = g.append('g').attr('class', 'tooltip-group')
-          .attr('transform', `translate(${pos.x},${pos.y})`)
-          .style('pointer-events', 'none')
+          // Tooltip
+          const tooltipG = g
+            .append('g')
+            .attr('class', 'tooltip-group')
+            .attr('transform', `translate(${pos.x},${pos.y})`)
+            .style('pointer-events', 'none')
 
-        const tooltipY = -30
-        const padding = 10
-        const lineHeight = 16
+          const tooltipY = -30
+          const padding = 10
+          const lineHeight = 16
 
-        // Background rect — size will be set after text
-        const tooltipBg = tooltipG.append('rect')
-          .attr('rx', 6).attr('ry', 6)
-          .attr('fill', '#ffffff')
-          .attr('stroke', c.color)
-          .attr('stroke-width', 1)
-          .attr('opacity', 0.95)
+          // Background rect — size will be set after text
+          const tooltipBg = tooltipG
+            .append('rect')
+            .attr('rx', 6)
+            .attr('ry', 6)
+            .attr('fill', '#ffffff')
+            .attr('stroke', c.color)
+            .attr('stroke-width', 1)
+            .attr('opacity', 0.95)
 
-        const nameText = tooltipG.append('text')
-          .attr('y', tooltipY)
-          .attr('text-anchor', 'middle')
-          .attr('fill', COLORS.textPrimary)
-          .attr('font-size', '12px')
-          .attr('font-weight', '700')
-          .text(c.label)
-
-        tooltipG.append('text')
-          .attr('y', tooltipY + lineHeight)
-          .attr('text-anchor', 'middle')
-          .attr('fill', c.color)
-          .attr('font-size', '11px')
-          .attr('font-weight', '600')
-          .text(c.pattern)
-
-        // One-liner (wrap if long)
-        const maxChars = 45
-        const oneLinerLines: string[] = []
-        const words = c.oneLiner.split(' ')
-        let currentLine = ''
-        words.forEach(word => {
-          if ((currentLine + ' ' + word).trim().length > maxChars) {
-            oneLinerLines.push(currentLine.trim())
-            currentLine = word
-          } else {
-            currentLine = (currentLine + ' ' + word).trim()
-          }
-        })
-        if (currentLine) oneLinerLines.push(currentLine.trim())
-
-        oneLinerLines.forEach((line, li) => {
-          tooltipG.append('text')
-            .attr('y', tooltipY + lineHeight * 2 + 4 + li * 13)
+          const nameText = tooltipG
+            .append('text')
+            .attr('y', tooltipY)
             .attr('text-anchor', 'middle')
-            .attr('fill', COLORS.textSecondary)
-            .attr('font-size', '10px')
-            .attr('font-style', 'italic')
-            .text(line)
+            .attr('fill', COLORS.textPrimary)
+            .attr('font-size', '12px')
+            .attr('font-weight', '700')
+            .text(c.label)
+
+          tooltipG
+            .append('text')
+            .attr('y', tooltipY + lineHeight)
+            .attr('text-anchor', 'middle')
+            .attr('fill', c.color)
+            .attr('font-size', '11px')
+            .attr('font-weight', '600')
+            .text(c.pattern)
+
+          // One-liner (wrap if long)
+          const maxChars = 45
+          const oneLinerLines: string[] = []
+          const words = c.oneLiner.split(' ')
+          let currentLine = ''
+          words.forEach((word) => {
+            if ((currentLine + ' ' + word).trim().length > maxChars) {
+              oneLinerLines.push(currentLine.trim())
+              currentLine = word
+            } else {
+              currentLine = (currentLine + ' ' + word).trim()
+            }
+          })
+          if (currentLine) oneLinerLines.push(currentLine.trim())
+
+          oneLinerLines.forEach((line, li) => {
+            tooltipG
+              .append('text')
+              .attr('y', tooltipY + lineHeight * 2 + 4 + li * 13)
+              .attr('text-anchor', 'middle')
+              .attr('fill', COLORS.textSecondary)
+              .attr('font-size', '10px')
+              .attr('font-style', 'italic')
+              .text(line)
+          })
+
+          // Size background rect
+          const nameBox = (nameText.node() as SVGTextElement).getBBox()
+          const totalHeight =
+            lineHeight * 2 + 4 + oneLinerLines.length * 13 + padding
+          const tooltipWidth = Math.max(nameBox.width + padding * 2, 200)
+
+          tooltipBg
+            .attr('x', -tooltipWidth / 2)
+            .attr('y', tooltipY - padding - 4)
+            .attr('width', tooltipWidth)
+            .attr('height', totalHeight + padding)
         })
-
-        // Size background rect
-        const nameBox = (nameText.node() as SVGTextElement).getBBox()
-        const totalHeight = lineHeight * 2 + 4 + oneLinerLines.length * 13 + padding
-        const tooltipWidth = Math.max(nameBox.width + padding * 2, 200)
-
-        tooltipBg
-          .attr('x', -tooltipWidth / 2)
-          .attr('y', tooltipY - padding - 4)
-          .attr('width', tooltipWidth)
-          .attr('height', totalHeight + padding)
-      })
-      .on('mouseleave', function () {
-        d3.select(this).select('.glow-ring')
-          .transition().duration(200)
-          .attr('opacity', 0)
-          .attr('r', 18)
-        d3.select(this).select('circle:nth-child(2)')
-          .transition().duration(200)
-          .attr('r', 10)
-        g.selectAll('.tooltip-group')
-          .transition().duration(200)
-          .attr('opacity', 0)
-          .remove()
-      })
-      .on('click', () => {
-        if (!dimmed) setSelectedCase(prev => prev?.id === c.id ? null : c)
-      })
+        .on('mouseleave', function () {
+          d3.select(this)
+            .select('.glow-ring')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0)
+            .attr('r', 18)
+          d3.select(this)
+            .select('circle:nth-child(2)')
+            .transition()
+            .duration(200)
+            .attr('r', 10)
+          g.selectAll('.tooltip-group')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0)
+            .remove()
+        })
+        .on('click', () => {
+          if (!dimmed) setSelectedCase((prev) => (prev?.id === c.id ? null : c))
+        })
     })
 
     // ─── Legend ─────────────────────────────────────────────────
 
-    const legendG = svg.append('g')
+    const legendG = svg
+      .append('g')
       .attr('transform', `translate(${20},${height - 30})`)
 
     LEGEND_ITEMS.forEach((item, i) => {
-      const lg = legendG.append('g')
+      const lg = legendG
+        .append('g')
         .attr('transform', `translate(${i * 100},0)`)
         .style('cursor', 'pointer')
         .on('click', () => {
-          setActiveType(prev => prev === item.type ? null : item.type)
+          setActiveType((prev) => (prev === item.type ? null : item.type))
         })
 
       lg.append('circle')
@@ -741,8 +1046,14 @@ export function GripCompass() {
         .attr('opacity', activeType && activeType !== item.type ? 0.3 : 0.9)
 
       lg.append('text')
-        .attr('x', 10).attr('y', 4)
-        .attr('fill', activeType && activeType !== item.type ? COLORS.textSecondary : COLORS.textPrimary)
+        .attr('x', 10)
+        .attr('y', 4)
+        .attr(
+          'fill',
+          activeType && activeType !== item.type
+            ? COLORS.textSecondary
+            : COLORS.textPrimary
+        )
         .attr('font-size', '11px')
         .attr('opacity', activeType && activeType !== item.type ? 0.5 : 1)
         .text(item.label)
@@ -750,15 +1061,19 @@ export function GripCompass() {
 
     // ─── Title ─────────────────────────────────────────────────
 
-    svg.append('text')
-      .attr('x', 20).attr('y', 30)
+    svg
+      .append('text')
+      .attr('x', 20)
+      .attr('y', 30)
       .attr('fill', COLORS.textPrimary)
       .attr('font-size', '18px')
       .attr('font-weight', '700')
       .text('GRIP Compass')
 
-    svg.append('text')
-      .attr('x', 20).attr('y', 48)
+    svg
+      .append('text')
+      .attr('x', 20)
+      .attr('y', 48)
       .attr('fill', COLORS.textSecondary)
       .attr('font-size', '12px')
       .text('Human-AI Power Dynamics — 13 Historical Case Studies')
@@ -768,7 +1083,12 @@ export function GripCompass() {
 
   // Helper: should a case be dimmed based on active filters?
   function isDimmed(c: Pick<CaseStudy, 'quadrant' | 'type'>): boolean {
-    if (activeQuadrant && !c.quadrant.includes(activeQuadrant) && c.quadrant !== 'ALL') return true
+    if (
+      activeQuadrant &&
+      !c.quadrant.includes(activeQuadrant) &&
+      c.quadrant !== 'ALL'
+    )
+      return true
     if (activeType && c.type !== activeType) return true
     return false
   }
@@ -780,7 +1100,15 @@ export function GripCompass() {
   return (
     <div
       ref={containerRef}
-      style={{ background: COLORS.bg, position: 'relative', width: '100%', minHeight: '100vh', overflow: 'hidden' }}
+      style={{
+        background: COLORS.bg,
+        position: 'relative',
+        width: 1280,
+        minHeight: '100vh',
+        overflow: 'hidden',
+        margin: '0 auto',
+        paddingLeft: 12,
+      }}
     >
       <svg ref={svgRef} style={{ display: 'block' }} />
 
@@ -819,70 +1147,87 @@ export function GripCompass() {
           </button>
 
           {/* Type badge */}
-          <div style={{
-            display: 'inline-block',
-            padding: '2px 10px',
-            borderRadius: '12px',
-            background: selectedCase.color + '22',
-            color: selectedCase.color,
-            fontSize: '11px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            marginBottom: '12px',
-          }}>
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '2px 10px',
+              borderRadius: '12px',
+              background: selectedCase.color + '22',
+              color: selectedCase.color,
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              marginBottom: '12px',
+            }}
+          >
             {selectedCase.type}
           </div>
 
-          <h2 style={{
-            color: COLORS.textPrimary,
-            fontSize: '20px',
-            fontWeight: 700,
-            marginBottom: '4px',
-            lineHeight: 1.3,
-          }}>
+          <h2
+            style={{
+              color: COLORS.textPrimary,
+              fontSize: '20px',
+              fontWeight: 700,
+              marginBottom: '4px',
+              lineHeight: 1.3,
+            }}
+          >
             {selectedCase.label}
           </h2>
 
-          <div style={{
-            color: selectedCase.color,
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '16px',
-          }}>
+          <div
+            style={{
+              color: selectedCase.color,
+              fontSize: '14px',
+              fontWeight: 600,
+              marginBottom: '16px',
+            }}
+          >
             {selectedCase.pattern}
           </div>
 
           {/* Metadata */}
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            marginBottom: '20px',
-            fontSize: '12px',
-            color: COLORS.textSecondary,
-          }}>
-            <span>Ring: {typeof selectedCase.ring === 'number' ? selectedCase.ring : 'Trajectory'}</span>
+          <div
+            style={{
+              display: 'flex',
+              gap: '16px',
+              marginBottom: '20px',
+              fontSize: '12px',
+              color: COLORS.textSecondary,
+            }}
+          >
+            <span>
+              Ring:{' '}
+              {typeof selectedCase.ring === 'number'
+                ? selectedCase.ring
+                : 'Trajectory'}
+            </span>
             <span>Quadrant: {selectedCase.quadrant}</span>
           </div>
 
           {/* One-liner quote */}
-          <blockquote style={{
-            borderLeft: `3px solid ${selectedCase.color}`,
-            paddingLeft: '14px',
-            margin: '0 0 20px 0',
-            fontStyle: 'italic',
-            color: COLORS.textPrimary,
-            fontSize: '14px',
-            lineHeight: 1.6,
-          }}>
+          <blockquote
+            style={{
+              borderLeft: `3px solid ${selectedCase.color}`,
+              paddingLeft: '14px',
+              margin: '0 0 20px 0',
+              fontStyle: 'italic',
+              color: COLORS.textPrimary,
+              fontSize: '14px',
+              lineHeight: 1.6,
+            }}
+          >
             "{selectedCase.oneLiner}"
           </blockquote>
 
           {/* Description */}
-          <p style={{
-            color: COLORS.textSecondary,
-            fontSize: '13px',
-            lineHeight: 1.7,
-          }}>
+          <p
+            style={{
+              color: COLORS.textSecondary,
+              fontSize: '13px',
+              lineHeight: 1.7,
+            }}
+          >
             {selectedCase.description}
           </p>
 
