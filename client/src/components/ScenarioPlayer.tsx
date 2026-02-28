@@ -3,6 +3,12 @@ import { useScenarioStore } from '../state/scenarioState'
 import { ScenarioHeader } from './ScenarioHeader'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
+import { CompletionDialog } from './CompletionDialog'
+import {
+  evaluateCompletion,
+  createUserInitiatedResult,
+  resetCompletionDetector,
+} from '../ai/completionDetector'
 
 interface ScenarioPlayerProps {
   scenarioId: string
@@ -11,10 +17,12 @@ interface ScenarioPlayerProps {
 export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
   const {
     scenario,
+    pendingCompletion,
     initializeScenario,
     addTurn,
     setPhase,
     checkCompletion,
+    setPendingCompletion,
     clearScenario,
   } = useScenarioStore()
 
@@ -23,6 +31,7 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
   // Initialize scenario if not already active
   useEffect(() => {
     if (!scenario || scenario.definition.id !== scenarioId) {
+      resetCompletionDetector()
       initializeScenario(scenarioId)
     }
   }, [scenarioId, scenario, initializeScenario])
@@ -30,7 +39,7 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
   // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [scenario?.messages.length])
+  }, [scenario?.messages.length, pendingCompletion])
 
   // Start the scenario when it's in briefing phase (user has seen the context)
   const handleStartScenario = useCallback(() => {
@@ -47,7 +56,7 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
   }, [scenario, setPhase, addTurn])
 
   const handleSendMessage = useCallback(
-    (content: string) => {
+    async (content: string) => {
       if (!scenario || scenario.phase !== 'active') return
 
       addTurn({
@@ -58,19 +67,59 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
         actions: [],
       })
 
-      // Check if the scenario should wrap up
+      // Check the simple heuristic first (all factors discovered, turn limit)
       const trigger = checkCompletion()
       if (trigger) {
         setPhase('wrapping-up')
       }
+
+      // Run AI completion evaluation in the background (non-blocking)
+      // Uses the latest messages from the store after addTurn
+      const currentState = useScenarioStore.getState()
+      if (
+        currentState.scenario &&
+        currentState.scenario.phase === 'active' &&
+        !currentState.pendingCompletion
+      ) {
+        const result = await evaluateCompletion(
+          currentState.scenario.definition,
+          currentState.scenario.messages,
+        )
+        if (result) {
+          // Re-check that the scenario is still active (user may have ended it)
+          const latestState = useScenarioStore.getState()
+          if (
+            latestState.scenario &&
+            latestState.scenario.phase !== 'completed' &&
+            !latestState.pendingCompletion
+          ) {
+            setPendingCompletion(result)
+          }
+        }
+      }
     },
-    [scenario, addTurn, checkCompletion, setPhase],
+    [scenario, addTurn, checkCompletion, setPhase, setPendingCompletion],
   )
 
+  // User clicked "End Scenario" button — show confirmation dialog
   const handleEndScenario = useCallback(() => {
     if (!scenario) return
+    if (scenario.phase === 'completed') return
+
+    const result = createUserInitiatedResult(scenario.messages)
+    setPendingCompletion(result)
+  }, [scenario, setPendingCompletion])
+
+  // User confirmed completion — end the scenario
+  const handleConfirmCompletion = useCallback(() => {
+    setPendingCompletion(null)
     setPhase('completed')
-  }, [scenario, setPhase])
+  }, [setPendingCompletion, setPhase])
+
+  // User chose to keep going — dismiss the dialog
+  const handleKeepGoing = useCallback(() => {
+    setPendingCompletion(null)
+  }, [setPendingCompletion])
 
   // Loading state
   if (!scenario) {
@@ -140,7 +189,7 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
   }
 
   // Active / wrapping-up / completed: show conversation UI
-  const isInputDisabled = scenario.phase === 'completed'
+  const isInputDisabled = scenario.phase === 'completed' || pendingCompletion !== null
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -164,8 +213,17 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
             />
           ))}
 
-          {/* Wrapping-up indicator */}
-          {scenario.phase === 'wrapping-up' && (
+          {/* Completion confirmation dialog */}
+          {pendingCompletion && (
+            <CompletionDialog
+              result={pendingCompletion}
+              onSeeResults={handleConfirmCompletion}
+              onKeepGoing={handleKeepGoing}
+            />
+          )}
+
+          {/* Wrapping-up indicator (only show when no dialog is active) */}
+          {scenario.phase === 'wrapping-up' && !pendingCompletion && (
             <div className="text-center py-3">
               <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -202,9 +260,11 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
         onSend={handleSendMessage}
         disabled={isInputDisabled}
         placeholder={
-          isInputDisabled
+          scenario.phase === 'completed'
             ? 'Scenario has ended'
-            : 'Type your response...'
+            : pendingCompletion
+              ? 'Respond to the prompt above to continue...'
+              : 'Type your response...'
         }
       />
     </div>
