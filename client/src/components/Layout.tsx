@@ -61,6 +61,10 @@ export function Layout() {
           label: 'AI Misconceptions',
         },
         {
+          path: '/mindset/grip-compass',
+          label: 'GRIP Compass',
+        },
+        {
           path: '/mindset/case-studies',
           label: 'Case Studies',
         },
