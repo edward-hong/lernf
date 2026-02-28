@@ -262,6 +262,8 @@ export interface DimensionResult {
   scoreLabel: string
   /** Narrative summary of performance in this dimension. */
   summary: string
+  /** Specific examples from the conversation justifying the score. */
+  examples: string[]
   /** Behavioural patterns the engine detected (both positive and negative). */
   detectedPatterns: string[]
   /** Potential real-world consequences the engine projects from the observed behaviour. */
@@ -299,6 +301,12 @@ export interface GripEvaluation {
   patternMatches: PatternMatch[]
   /** Top-level narrative feedback for the user. */
   overallFeedback: string
+  /** Specific positive actions the user took. */
+  whatUserDidWell: string[]
+  /** Factors or opportunities the user missed. */
+  whatUserMissed: string[]
+  /** Alternative approaches that would have scored higher. */
+  alternativeApproaches: string[]
   /** Concrete, actionable recommendations. */
   recommendations: string[]
 }

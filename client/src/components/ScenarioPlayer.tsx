@@ -1,9 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useScenarioStore } from '../state/scenarioState'
 import { ScenarioHeader } from './ScenarioHeader'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
 import { CompletionDialog } from './CompletionDialog'
+import { ScenarioResults } from './ScenarioResults'
 import {
   evaluateCompletion,
   createUserInitiatedResult,
@@ -15,6 +17,7 @@ interface ScenarioPlayerProps {
 }
 
 export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
+  const navigate = useNavigate()
   const {
     scenario,
     pendingCompletion,
@@ -121,6 +124,22 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
     setPendingCompletion(null)
   }, [setPendingCompletion])
 
+  // Results page actions
+  const handleTryAgain = useCallback(() => {
+    clearScenario()
+    resetCompletionDetector()
+    initializeScenario(scenarioId)
+  }, [clearScenario, initializeScenario, scenarioId])
+
+  const handleNextScenario = useCallback(() => {
+    clearScenario()
+    navigate('/practice/workplace-scenarios')
+  }, [clearScenario, navigate])
+
+  const handleViewProgress = useCallback(() => {
+    navigate('/mindset/grip-compass')
+  }, [navigate])
+
   // Loading state
   if (!scenario) {
     return (
@@ -188,7 +207,23 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
     )
   }
 
-  // Active / wrapping-up / completed: show conversation UI
+  // Completed phase with evaluation: show full results dashboard
+  if (scenario.phase === 'completed' && scenario.evaluation) {
+    return (
+      <div className="h-[calc(100vh-4rem)] overflow-y-auto bg-gray-50">
+        <ScenarioResults
+          evaluation={scenario.evaluation}
+          scenario={scenario.definition}
+          discoveredFactorIds={scenario.discoveredFactorIds}
+          onTryAgain={handleTryAgain}
+          onNextScenario={handleNextScenario}
+          onViewProgress={handleViewProgress}
+        />
+      </div>
+    )
+  }
+
+  // Active / wrapping-up / completed (no evaluation yet): show conversation UI
   const isInputDisabled = scenario.phase === 'completed' || pendingCompletion !== null
 
   return (
@@ -234,20 +269,13 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
             </div>
           )}
 
-          {/* Completed indicator */}
-          {scenario.phase === 'completed' && (
+          {/* Completed without evaluation — fallback */}
+          {scenario.phase === 'completed' && !scenario.evaluation && (
             <div className="text-center py-6 space-y-3">
               <span className="inline-flex items-center gap-1.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-full px-4 py-1.5">
                 Scenario completed
               </span>
-              <div>
-                <button
-                  onClick={clearScenario}
-                  className="text-sm text-blue-600 hover:text-blue-700 underline"
-                >
-                  Return to scenarios
-                </button>
-              </div>
+              <p className="text-sm text-gray-500">Generating evaluation...</p>
             </div>
           )}
 
