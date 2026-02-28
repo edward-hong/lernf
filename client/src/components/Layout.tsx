@@ -32,7 +32,6 @@ export function Layout() {
         {
           path: '/practice/workplace-scenarios',
           label: 'Workplace Scenarios',
-          placeholder: true,
         },
       ],
     },

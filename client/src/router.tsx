@@ -25,6 +25,7 @@ import { WozniakJobs } from './pages/mindset/case-studies/WozniakJobs'
 import { AobaiKangxi } from './pages/mindset/case-studies/AobaiKangxi'
 import { AiMisconceptions } from './pages/mindset/AiMisconceptions'
 import { GripCompass } from './pages/mindset/GripCompass'
+import { ScenarioPlayer } from './components/ScenarioPlayer'
 
 export const router = createBrowserRouter([
   {
@@ -50,7 +51,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'practice/workplace-scenarios',
-        element: <div>Workplace Scenarios - Coming Soon</div>,
+        element: <ScenarioPlayer scenarioId="prod-incident-001" />,
       },
       // Mindset routes
       {
