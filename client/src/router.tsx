@@ -1,5 +1,5 @@
 // src/routes.tsx (or app/routes.tsx)
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, useParams } from 'react-router-dom'
 import CodeComparison from './pages/tools/CodeComparison'
 import PRReview from './pages/tools/PRReview'
 import { HomePage } from './pages/HomePage'
@@ -26,6 +26,14 @@ import { AobaiKangxi } from './pages/mindset/case-studies/AobaiKangxi'
 import { AiMisconceptions } from './pages/mindset/AiMisconceptions'
 import { GripCompass } from './pages/mindset/GripCompass'
 import { ScenarioPlayer } from './components/ScenarioPlayer'
+import { ScenarioLibrary } from './components/ScenarioLibrary'
+import { ProgressDashboard } from './components/ProgressDashboard'
+
+/** Route wrapper that extracts the scenarioId param. */
+function ScenarioPlayerRoute() {
+  const { scenarioId } = useParams<{ scenarioId: string }>()
+  return <ScenarioPlayer scenarioId={scenarioId ?? 'prod-incident-001'} />
+}
 
 export const router = createBrowserRouter([
   {
@@ -51,7 +59,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'practice/workplace-scenarios',
-        element: <ScenarioPlayer scenarioId="prod-incident-001" />,
+        element: <ScenarioLibrary />,
+      },
+      {
+        path: 'practice/workplace-scenarios/:scenarioId',
+        element: <ScenarioPlayerRoute />,
+      },
+      {
+        path: 'practice/progress',
+        element: <ProgressDashboard />,
       },
       // Mindset routes
       {

@@ -94,7 +94,7 @@ export function HomePage() {
       title: 'Workplace Scenarios',
       description: 'Practice real-world AI situations',
       path: '/practice/workplace-scenarios',
-      status: 'coming-soon',
+      status: 'ready',
       icon: '💼',
     },
   ]

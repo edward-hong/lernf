@@ -11,6 +11,7 @@ import {
   createUserInitiatedResult,
   resetCompletionDetector,
 } from '../ai/completionDetector'
+import { recordAttempt } from '../utils/progress'
 
 interface ScenarioPlayerProps {
   scenarioId: string
@@ -137,8 +138,32 @@ export function ScenarioPlayer({ scenarioId }: ScenarioPlayerProps) {
   }, [clearScenario, navigate])
 
   const handleViewProgress = useCallback(() => {
-    navigate('/mindset/grip-compass')
+    navigate('/practice/progress')
   }, [navigate])
+
+  // Record progress when scenario completes with evaluation
+  const hasRecordedRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (
+      scenario?.phase === 'completed' &&
+      scenario.evaluation &&
+      scenario.completedAt &&
+      hasRecordedRef.current !== scenario.startedAt
+    ) {
+      hasRecordedRef.current = scenario.startedAt
+      recordAttempt({
+        scenarioId: scenario.definition.id,
+        scenarioTitle: scenario.definition.title,
+        category: scenario.definition.category,
+        gripFocus: scenario.definition.gripFocus,
+        startedAt: scenario.startedAt,
+        completedAt: scenario.completedAt,
+        evaluation: scenario.evaluation,
+        discoveredFactors: scenario.discoveredFactorIds.length,
+        totalFactors: scenario.definition.hiddenFactors.length,
+      })
+    }
+  }, [scenario?.phase, scenario?.evaluation])
 
   // Loading state
   if (!scenario) {

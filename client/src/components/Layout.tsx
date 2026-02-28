@@ -31,7 +31,11 @@ export function Layout() {
         },
         {
           path: '/practice/workplace-scenarios',
-          label: 'Workplace Scenarios',
+          label: 'Scenario Library',
+        },
+        {
+          path: '/practice/progress',
+          label: 'Progress Dashboard',
         },
       ],
     },
@@ -82,7 +86,7 @@ export function Layout() {
   }, [])
 
   const isSectionActive = (items: DropdownItem[]) =>
-    items.some((item) => location.pathname === item.path)
+    items.some((item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/'))
 
   return (
     <div className="min-h-screen bg-gray-50">
