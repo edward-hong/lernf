@@ -220,8 +220,12 @@ Make it realistic. 30-50 lines total. Return only valid JSON.`;
 // ---- Evaluate PR Review -----------------------------------------------------
 
 interface PrIssue {
+  id: string;
   lineNumber: number;
-  [key: string]: unknown;
+  severity: string;
+  title: string;
+  explanation: string;
+  fix: string;
 }
 
 interface EvaluatePrRequest {
