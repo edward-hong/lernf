@@ -3,14 +3,14 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, useParams, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
 import { Layout } from './components/Layout'
-import { ScenarioLibrary } from './components/ScenarioLibrary'
-import { ScenarioPlayer } from './components/ScenarioPlayer'
-import { ScenarioResultsRoute } from './components/ScenarioResultsRoute'
 import { ProgressDashboard } from './components/ProgressDashboard'
 
 // Lazy-loaded routes for non-critical pages (code-split)
 const CodeComparison = lazy(() => import('./pages/tools/CodeComparison'))
 const PRReview = lazy(() => import('./pages/tools/PRReview'))
+const ScenarioLibrary = lazy(() => import('./pages/tools/ScenarioLibrary'))
+const ScenarioPlayer = lazy(() => import('./pages/tools/ScenarioPlayer'))
+const ScenarioResultsRoute = lazy(() => import('./pages/tools/ScenarioResults'))
 const HistoricalContext = lazy(() => import('./pages/mindset/HistoricalContext').then(m => ({ default: m.HistoricalContext })))
 const AiMapping = lazy(() => import('./pages/mindset/AiMapping').then(m => ({ default: m.AiMapping })))
 const GripFramework = lazy(() => import('./pages/mindset/GripFramework').then(m => ({ default: m.GripFramework })))
@@ -56,13 +56,13 @@ function Lazy({ children }: { children: React.ReactNode }) {
 /** Route wrapper that extracts the scenarioId param. */
 function ScenarioPlayerRoute() {
   const { scenarioId } = useParams<{ scenarioId: string }>()
-  return <ScenarioPlayer scenarioId={scenarioId ?? 'prod-incident-001'} />
+  return <Lazy><ScenarioPlayer scenarioId={scenarioId ?? 'prod-incident-001'} /></Lazy>
 }
 
 /** Route wrapper for scenario results. */
 function ScenarioResultsRouteWrapper() {
   const { scenarioId } = useParams<{ scenarioId: string }>()
-  return <ScenarioResultsRoute scenarioId={scenarioId ?? 'prod-incident-001'} />
+  return <Lazy><ScenarioResultsRoute scenarioId={scenarioId ?? 'prod-incident-001'} /></Lazy>
 }
 
 /** Redirect wrapper that preserves the scenarioId param. */
@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
       // Scenario routes (canonical paths)
       {
         path: 'practice/workplace-scenarios',
-        element: <ScenarioLibrary />,
+        element: <Lazy><ScenarioLibrary /></Lazy>,
       },
       {
         path: 'practice/workplace-scenarios/:scenarioId',

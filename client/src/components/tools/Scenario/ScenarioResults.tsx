@@ -14,8 +14,8 @@ import type {
   PatternMatch,
   ScenarioDefinition,
   HiddenFactor,
-} from '../types/scenario'
-import { GRIP_LABELS } from '../types/scenario'
+} from '../../../types/scenario'
+import { GRIP_LABELS } from '../../../types/scenario'
 
 // ---- Props ----------------------------------------------------------------
 

@@ -1,22 +1,22 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useScenarioStore } from '../state/scenarioState'
-import { ScenarioHeader } from './ScenarioHeader'
-import { MessageBubble } from './MessageBubble'
-import { MessageInput } from './MessageInput'
-import { CompletionDialog } from './CompletionDialog'
-import { ScenarioResults } from './ScenarioResults'
-import { ScenarioSkeleton, ThinkingIndicator, EvaluationSpinner, InlineError } from './LoadingStates'
-import { ErrorBoundary } from './ErrorBoundary'
+import { useScenarioStore } from '../../state/scenarioState'
+import { ScenarioHeader } from '../../components/tools/Scenario/ScenarioHeader'
+import { MessageBubble } from '../../components/tools/Scenario/MessageBubble'
+import { MessageInput } from '../../components/tools/Scenario/MessageInput'
+import { CompletionDialog } from '../../components/tools/Scenario/CompletionDialog'
+import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
+import { ScenarioSkeleton, ThinkingIndicator, EvaluationSpinner, InlineError } from '../../components/tools/Scenario/LoadingStates'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 import {
   evaluateCompletion,
   createUserInitiatedResult,
   resetCompletionDetector,
-} from '../ai/completionDetector'
-import { generateNPCResponse } from '../ai/npcGenerator'
-import { evaluateScenario } from '../ai/gripEvaluator'
-import { EVALUATION_GUIDANCE } from '../data/scenarios/prod-incident-001'
-import { recordAttempt } from '../utils/progress'
+} from '../../ai/completionDetector'
+import { generateNPCResponse } from '../../ai/npcGenerator'
+import { evaluateScenario } from '../../ai/gripEvaluator'
+import { EVALUATION_GUIDANCE } from '../../data/scenarios/prod-incident-001'
+import { recordAttempt } from '../../utils/progress'
 
 interface ScenarioPlayerProps {
   scenarioId: string
@@ -447,7 +447,7 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   )
 }
 
-export function ScenarioPlayer(props: ScenarioPlayerProps) {
+function ScenarioPlayer(props: ScenarioPlayerProps) {
   const clearScenario = useScenarioStore((s) => s.clearScenario)
 
   return (
@@ -461,3 +461,5 @@ export function ScenarioPlayer(props: ScenarioPlayerProps) {
     </ErrorBoundary>
   )
 }
+
+export default ScenarioPlayer

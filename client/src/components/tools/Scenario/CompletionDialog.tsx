@@ -7,7 +7,7 @@
 // ---------------------------------------------------------------------------
 
 import { useRef, useEffect } from 'react'
-import type { CompletionDetectionResult } from '../ai/completionDetector'
+import type { CompletionDetectionResult } from '../../../ai/completionDetector'
 
 interface CompletionDialogProps {
   /** The detection result that triggered this dialog. */
