@@ -11,6 +11,17 @@ import { IndividualAudit } from './pages/mindset/IndividualAudit'
 import { OrganisationalAudit } from './pages/mindset/OrganisationalAudit'
 import { CaseStudiesIndex } from './pages/mindset/case-studies/CaseStudiesIndex'
 import { WeiZhongxianTianqi } from './pages/mindset/case-studies/WeiZhongxianTianqi'
+import { SejanustTiberius } from './pages/mindset/case-studies/SejanustTiberius'
+import { QinHuiGaozong } from './pages/mindset/case-studies/QinHuiGaozong'
+import { RasputinRomanovs } from './pages/mindset/case-studies/RasputinRomanovs'
+import { AlMansurHisham } from './pages/mindset/case-studies/AlMansurHisham'
+import { FoucheNapoleon } from './pages/mindset/case-studies/FoucheNapoleon'
+import { ZhouMao } from './pages/mindset/case-studies/ZhouMao'
+import { CecilElizabeth } from './pages/mindset/case-studies/CecilElizabeth'
+import { WeiZhengTaizong } from './pages/mindset/case-studies/WeiZhengTaizong'
+import { SewardLincoln } from './pages/mindset/case-studies/SewardLincoln'
+import { LennonMcCartney } from './pages/mindset/case-studies/LennonMcCartney'
+import { WozniakJobs } from './pages/mindset/case-studies/WozniakJobs'
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +78,50 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/case-studies/wei-zhongxian-tianqi',
         element: <WeiZhongxianTianqi />,
+      },
+      {
+        path: 'mindset/case-studies/sejanus-tiberius',
+        element: <SejanustTiberius />,
+      },
+      {
+        path: 'mindset/case-studies/qin-hui-gaozong',
+        element: <QinHuiGaozong />,
+      },
+      {
+        path: 'mindset/case-studies/rasputin-romanovs',
+        element: <RasputinRomanovs />,
+      },
+      {
+        path: 'mindset/case-studies/al-mansur-hisham',
+        element: <AlMansurHisham />,
+      },
+      {
+        path: 'mindset/case-studies/fouche-napoleon',
+        element: <FoucheNapoleon />,
+      },
+      {
+        path: 'mindset/case-studies/zhou-mao',
+        element: <ZhouMao />,
+      },
+      {
+        path: 'mindset/case-studies/cecil-elizabeth',
+        element: <CecilElizabeth />,
+      },
+      {
+        path: 'mindset/case-studies/wei-zheng-taizong',
+        element: <WeiZhengTaizong />,
+      },
+      {
+        path: 'mindset/case-studies/seward-lincoln',
+        element: <SewardLincoln />,
+      },
+      {
+        path: 'mindset/case-studies/lennon-mccartney',
+        element: <LennonMcCartney />,
+      },
+      {
+        path: 'mindset/case-studies/wozniak-jobs',
+        element: <WozniakJobs />,
       },
     ],
   },
