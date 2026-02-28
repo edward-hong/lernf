@@ -15,8 +15,9 @@ export function MessageInput({
 }: MessageInputProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const sendTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Auto-expand textarea as user types
+  // Auto-expand textarea
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current
     if (!textarea) return
@@ -28,12 +29,25 @@ export function MessageInput({
     adjustHeight()
   }, [value, adjustHeight])
 
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (sendTimeoutRef.current) clearTimeout(sendTimeoutRef.current)
+    }
+  }, [])
+
   const handleSend = useCallback(() => {
     const trimmed = value.trim()
     if (!trimmed || disabled) return
+
+    // Debounce: prevent double-sends within 300ms
+    if (sendTimeoutRef.current) return
+    sendTimeoutRef.current = setTimeout(() => {
+      sendTimeoutRef.current = null
+    }, 300)
+
     onSend(trimmed)
     setValue('')
-    // Reset height after clearing
     requestAnimationFrame(() => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto'
@@ -54,8 +68,8 @@ export function MessageInput({
   const charCount = value.length
 
   return (
-    <div className="border-t border-gray-200 bg-white px-4 py-3">
-      <div className="flex items-end gap-2">
+    <div className="border-t border-gray-200 bg-white px-3 sm:px-4 py-2 sm:py-3">
+      <div className="max-w-3xl mx-auto flex items-end gap-2">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -65,15 +79,16 @@ export function MessageInput({
             disabled={disabled}
             placeholder={placeholder}
             rows={1}
-            className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+            aria-label="Message input"
+            className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 transition-colors"
           />
-          {/* Character count */}
           <span
-            className={`absolute bottom-1.5 right-2 text-xs ${
+            className={`absolute bottom-1.5 right-2 text-xs select-none ${
               charCount > maxLength * 0.9
                 ? 'text-red-400'
                 : 'text-gray-300'
             }`}
+            aria-hidden="true"
           >
             {charCount}/{maxLength}
           </span>
@@ -82,7 +97,7 @@ export function MessageInput({
         <button
           onClick={handleSend}
           disabled={disabled || !value.trim()}
-          className="shrink-0 p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="shrink-0 p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           aria-label="Send message"
         >
           <svg
@@ -91,6 +106,7 @@ export function MessageInput({
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -100,7 +116,7 @@ export function MessageInput({
           </svg>
         </button>
       </div>
-      <p className="mt-1 text-xs text-gray-400">
+      <p className="max-w-3xl mx-auto mt-1 text-xs text-gray-400 hidden sm:block">
         Press Enter to send, Shift+Enter for new line
       </p>
     </div>

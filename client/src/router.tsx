@@ -1,38 +1,77 @@
-// src/routes.tsx (or app/routes.tsx)
-import { createBrowserRouter, useParams } from 'react-router-dom'
-import CodeComparison from './pages/tools/CodeComparison'
-import PRReview from './pages/tools/PRReview'
+// src/routes.tsx — React Router configuration with lazy-loaded routes
+import { lazy, Suspense } from 'react'
+import { createBrowserRouter, useParams, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
 import { Layout } from './components/Layout'
-import { HistoricalContext } from './pages/mindset/HistoricalContext'
-import { AiMapping } from './pages/mindset/AiMapping'
-import { GripFramework } from './pages/mindset/GripFramework'
-import { IndividualAudit } from './pages/mindset/IndividualAudit'
-import { OrganisationalAudit } from './pages/mindset/OrganisationalAudit'
-import { CaseStudiesIndex } from './pages/mindset/case-studies/CaseStudiesIndex'
-import { WeiZhongxianTianqi } from './pages/mindset/case-studies/WeiZhongxianTianqi'
-import { SejanustTiberius } from './pages/mindset/case-studies/SejanustTiberius'
-import { QinHuiGaozong } from './pages/mindset/case-studies/QinHuiGaozong'
-import { RasputinRomanovs } from './pages/mindset/case-studies/RasputinRomanovs'
-import { AlMansurHisham } from './pages/mindset/case-studies/AlMansurHisham'
-import { FoucheNapoleon } from './pages/mindset/case-studies/FoucheNapoleon'
-import { ZhouMao } from './pages/mindset/case-studies/ZhouMao'
-import { CecilElizabeth } from './pages/mindset/case-studies/CecilElizabeth'
-import { WeiZhengTaizong } from './pages/mindset/case-studies/WeiZhengTaizong'
-import { SewardLincoln } from './pages/mindset/case-studies/SewardLincoln'
-import { LennonMcCartney } from './pages/mindset/case-studies/LennonMcCartney'
-import { WozniakJobs } from './pages/mindset/case-studies/WozniakJobs'
-import { AobaiKangxi } from './pages/mindset/case-studies/AobaiKangxi'
-import { AiMisconceptions } from './pages/mindset/AiMisconceptions'
-import { GripCompass } from './pages/mindset/GripCompass'
-import { ScenarioPlayer } from './components/ScenarioPlayer'
 import { ScenarioLibrary } from './components/ScenarioLibrary'
+import { ScenarioPlayer } from './components/ScenarioPlayer'
+import { ScenarioResultsRoute } from './components/ScenarioResultsRoute'
 import { ProgressDashboard } from './components/ProgressDashboard'
+
+// Lazy-loaded routes for non-critical pages (code-split)
+const CodeComparison = lazy(() => import('./pages/tools/CodeComparison'))
+const PRReview = lazy(() => import('./pages/tools/PRReview'))
+const HistoricalContext = lazy(() => import('./pages/mindset/HistoricalContext').then(m => ({ default: m.HistoricalContext })))
+const AiMapping = lazy(() => import('./pages/mindset/AiMapping').then(m => ({ default: m.AiMapping })))
+const GripFramework = lazy(() => import('./pages/mindset/GripFramework').then(m => ({ default: m.GripFramework })))
+const IndividualAudit = lazy(() => import('./pages/mindset/IndividualAudit').then(m => ({ default: m.IndividualAudit })))
+const OrganisationalAudit = lazy(() => import('./pages/mindset/OrganisationalAudit').then(m => ({ default: m.OrganisationalAudit })))
+const CaseStudiesIndex = lazy(() => import('./pages/mindset/case-studies/CaseStudiesIndex').then(m => ({ default: m.CaseStudiesIndex })))
+const WeiZhongxianTianqi = lazy(() => import('./pages/mindset/case-studies/WeiZhongxianTianqi').then(m => ({ default: m.WeiZhongxianTianqi })))
+const SejanustTiberius = lazy(() => import('./pages/mindset/case-studies/SejanustTiberius').then(m => ({ default: m.SejanustTiberius })))
+const QinHuiGaozong = lazy(() => import('./pages/mindset/case-studies/QinHuiGaozong').then(m => ({ default: m.QinHuiGaozong })))
+const RasputinRomanovs = lazy(() => import('./pages/mindset/case-studies/RasputinRomanovs').then(m => ({ default: m.RasputinRomanovs })))
+const AlMansurHisham = lazy(() => import('./pages/mindset/case-studies/AlMansurHisham').then(m => ({ default: m.AlMansurHisham })))
+const FoucheNapoleon = lazy(() => import('./pages/mindset/case-studies/FoucheNapoleon').then(m => ({ default: m.FoucheNapoleon })))
+const ZhouMao = lazy(() => import('./pages/mindset/case-studies/ZhouMao').then(m => ({ default: m.ZhouMao })))
+const CecilElizabeth = lazy(() => import('./pages/mindset/case-studies/CecilElizabeth').then(m => ({ default: m.CecilElizabeth })))
+const WeiZhengTaizong = lazy(() => import('./pages/mindset/case-studies/WeiZhengTaizong').then(m => ({ default: m.WeiZhengTaizong })))
+const SewardLincoln = lazy(() => import('./pages/mindset/case-studies/SewardLincoln').then(m => ({ default: m.SewardLincoln })))
+const LennonMcCartney = lazy(() => import('./pages/mindset/case-studies/LennonMcCartney').then(m => ({ default: m.LennonMcCartney })))
+const WozniakJobs = lazy(() => import('./pages/mindset/case-studies/WozniakJobs').then(m => ({ default: m.WozniakJobs })))
+const AobaiKangxi = lazy(() => import('./pages/mindset/case-studies/AobaiKangxi').then(m => ({ default: m.AobaiKangxi })))
+const AiMisconceptions = lazy(() => import('./pages/mindset/AiMisconceptions').then(m => ({ default: m.AiMisconceptions })))
+const GripCompass = lazy(() => import('./pages/mindset/GripCompass').then(m => ({ default: m.GripCompass })))
+
+/** Suspense fallback for lazy-loaded routes. */
+function LazyFallback() {
+  return (
+    <div className="flex items-center justify-center h-64" role="status" aria-label="Loading page">
+      <div className="flex items-center gap-3 text-gray-400 text-sm">
+        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Loading...
+      </div>
+    </div>
+  )
+}
+
+/** Suspense wrapper for lazy-loaded routes. */
+function Lazy({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<LazyFallback />}>{children}</Suspense>
+}
 
 /** Route wrapper that extracts the scenarioId param. */
 function ScenarioPlayerRoute() {
   const { scenarioId } = useParams<{ scenarioId: string }>()
   return <ScenarioPlayer scenarioId={scenarioId ?? 'prod-incident-001'} />
+}
+
+/** Route wrapper for scenario results. */
+function ScenarioResultsRouteWrapper() {
+  const { scenarioId } = useParams<{ scenarioId: string }>()
+  return <ScenarioResultsRoute scenarioId={scenarioId ?? 'prod-incident-001'} />
+}
+
+/** Redirect wrapper that preserves the scenarioId param. */
+function ScenarioRedirect({ suffix }: { suffix?: string }) {
+  const { scenarioId } = useParams<{ scenarioId: string }>()
+  const target = suffix
+    ? `/practice/workplace-scenarios/${scenarioId}/${suffix}`
+    : `/practice/workplace-scenarios/${scenarioId}`
+  return <Navigate to={target} replace />
 }
 
 export const router = createBrowserRouter([
@@ -46,17 +85,17 @@ export const router = createBrowserRouter([
       },
       {
         path: 'practice/code-comparison',
-        element: <CodeComparison />,
+        element: <Lazy><CodeComparison /></Lazy>,
       },
       {
         path: 'practice/pr-review',
-        element: <PRReview />,
+        element: <Lazy><PRReview /></Lazy>,
       },
-      // Future practice routes
       {
         path: 'practice/ai-coding',
         element: <div>AI Assisted Coding - Coming Soon</div>,
       },
+      // Scenario routes (canonical paths)
       {
         path: 'practice/workplace-scenarios',
         element: <ScenarioLibrary />,
@@ -66,94 +105,111 @@ export const router = createBrowserRouter([
         element: <ScenarioPlayerRoute />,
       },
       {
+        path: 'practice/workplace-scenarios/:scenarioId/results',
+        element: <ScenarioResultsRouteWrapper />,
+      },
+      {
         path: 'practice/progress',
         element: <ProgressDashboard />,
       },
-      // Mindset routes
+      // /scenarios aliases — redirect to canonical paths
+      {
+        path: 'scenarios',
+        element: <Navigate to="/practice/workplace-scenarios" replace />,
+      },
+      {
+        path: 'scenarios/:scenarioId',
+        element: <ScenarioRedirect />,
+      },
+      {
+        path: 'scenarios/:scenarioId/results',
+        element: <ScenarioRedirect suffix="results" />,
+      },
+      // Mindset routes (lazy-loaded)
       {
         path: 'mindset/historical-mapping',
-        element: <HistoricalContext />,
+        element: <Lazy><HistoricalContext /></Lazy>,
       },
       {
         path: 'mindset/ai-mapping',
-        element: <AiMapping />,
+        element: <Lazy><AiMapping /></Lazy>,
       },
       {
         path: 'mindset/grip-framework',
-        element: <GripFramework />,
+        element: <Lazy><GripFramework /></Lazy>,
       },
       {
         path: 'mindset/individual-audit',
-        element: <IndividualAudit />,
+        element: <Lazy><IndividualAudit /></Lazy>,
       },
       {
         path: 'mindset/organisational-audit',
-        element: <OrganisationalAudit />,
+        element: <Lazy><OrganisationalAudit /></Lazy>,
       },
       {
         path: 'mindset/ai-misconceptions',
-        element: <AiMisconceptions />,
+        element: <Lazy><AiMisconceptions /></Lazy>,
       },
       {
         path: 'mindset/grip-compass',
-        element: <GripCompass />,
+        element: <Lazy><GripCompass /></Lazy>,
       },
       // Case Studies routes
       {
         path: 'mindset/case-studies',
-        element: <CaseStudiesIndex />,
+        element: <Lazy><CaseStudiesIndex /></Lazy>,
       },
       {
         path: 'mindset/case-studies/wei-zhongxian-tianqi',
-        element: <WeiZhongxianTianqi />,
+        element: <Lazy><WeiZhongxianTianqi /></Lazy>,
       },
       {
         path: 'mindset/case-studies/sejanus-tiberius',
-        element: <SejanustTiberius />,
+        element: <Lazy><SejanustTiberius /></Lazy>,
       },
       {
         path: 'mindset/case-studies/qin-hui-gaozong',
-        element: <QinHuiGaozong />,
+        element: <Lazy><QinHuiGaozong /></Lazy>,
       },
       {
         path: 'mindset/case-studies/rasputin-romanovs',
-        element: <RasputinRomanovs />,
+        element: <Lazy><RasputinRomanovs /></Lazy>,
       },
       {
         path: 'mindset/case-studies/al-mansur-hisham',
-        element: <AlMansurHisham />,
+        element: <Lazy><AlMansurHisham /></Lazy>,
       },
       {
         path: 'mindset/case-studies/fouche-napoleon',
-        element: <FoucheNapoleon />,
+        element: <Lazy><FoucheNapoleon /></Lazy>,
       },
       {
         path: 'mindset/case-studies/zhou-mao',
-        element: <ZhouMao />,
+        element: <Lazy><ZhouMao /></Lazy>,
       },
       {
         path: 'mindset/case-studies/cecil-elizabeth',
-        element: <CecilElizabeth />,
+        element: <Lazy><CecilElizabeth /></Lazy>,
       },
       {
         path: 'mindset/case-studies/wei-zheng-taizong',
-        element: <WeiZhengTaizong />,
+        element: <Lazy><WeiZhengTaizong /></Lazy>,
       },
       {
         path: 'mindset/case-studies/seward-lincoln',
-        element: <SewardLincoln />,
+        element: <Lazy><SewardLincoln /></Lazy>,
       },
       {
         path: 'mindset/case-studies/lennon-mccartney',
-        element: <LennonMcCartney />,
+        element: <Lazy><LennonMcCartney /></Lazy>,
       },
       {
         path: 'mindset/case-studies/wozniak-jobs',
-        element: <WozniakJobs />,
+        element: <Lazy><WozniakJobs /></Lazy>,
       },
       {
         path: 'mindset/case-studies/aobai-kangxi',
-        element: <AobaiKangxi />,
+        element: <Lazy><AobaiKangxi /></Lazy>,
       },
     ],
   },

@@ -100,15 +100,15 @@ function DimensionScoreBar({ result }: { result: DimensionResult }) {
       {/* Score bar header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left group"
+        className="w-full text-left group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg"
+        aria-expanded={expanded}
+        aria-label={`${GRIP_LABELS[result.dimension]}: ${result.score} out of 5, ${result.scoreLabel}. ${expanded ? 'Collapse' : 'Expand'} details.`}
       >
         <div className="flex items-center gap-3 mb-1.5">
-          {/* Dimension letter badge */}
-          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm ${colors.text} ${colors.bg}`}>
+          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm ${colors.text} ${colors.bg}`} aria-hidden="true">
             {DIMENSION_LETTERS[result.dimension]}
           </span>
 
-          {/* Label and score */}
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-medium text-gray-900">
@@ -122,8 +122,14 @@ function DimensionScoreBar({ result }: { result: DimensionResult }) {
               </span>
             </div>
 
-            {/* Score bar */}
-            <div className={`mt-1 h-2.5 rounded-full ${colors.bg} overflow-hidden`}>
+            <div
+              className={`mt-1 h-2.5 rounded-full ${colors.bg} overflow-hidden`}
+              role="meter"
+              aria-label={`${GRIP_LABELS[result.dimension]} score`}
+              aria-valuenow={result.score}
+              aria-valuemin={1}
+              aria-valuemax={5}
+            >
               <div
                 className={`h-full rounded-full ${colors.fill} transition-all duration-700 ease-out`}
                 style={{ width: `${fillPercent}%` }}
@@ -131,13 +137,13 @@ function DimensionScoreBar({ result }: { result: DimensionResult }) {
             </div>
           </div>
 
-          {/* Expand chevron */}
           <svg
             className={`w-4 h-4 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
@@ -262,10 +268,12 @@ function HiddenFactorCard({
   const dimensionLabel = GRIP_LABELS[factor.gripDimension]
 
   return (
-    <div className={`p-4 rounded-lg border ${discovered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'} mb-3`}>
+    <div className={`p-3 sm:p-4 rounded-lg border ${discovered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'} mb-3`}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left"
+        className="w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+        aria-expanded={expanded}
+        aria-label={`${discovered ? 'Discovered' : 'Missed'}: ${factor.what.slice(0, 60)}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2 min-w-0">
@@ -335,11 +343,15 @@ function CollapsibleSection({
 }) {
   const [open, setOpen] = useState(defaultOpen)
 
+  const sectionId = `section-${title.toLowerCase().replace(/\s+/g, '-')}`
+
   return (
     <div className="border border-gray-200 rounded-lg mb-4 overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-3.5 bg-white hover:bg-gray-50 transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors text-left"
+        aria-expanded={open}
+        aria-controls={sectionId}
       >
         <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
         <svg
@@ -348,12 +360,13 @@ function CollapsibleSection({
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={2}
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       {open && (
-        <div className="px-5 pb-4 bg-white border-t border-gray-100">
+        <div id={sectionId} className="px-4 sm:px-5 pb-4 bg-white border-t border-gray-100">
           {children}
         </div>
       )}
@@ -376,7 +389,7 @@ export function ScenarioResults({
   const totalFactors = scenario.hiddenFactors.length
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* ---- Header with composite score ---- */}
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -533,22 +546,22 @@ export function ScenarioResults({
       )}
 
       {/* ---- Section 7: Action Buttons ---- */}
-      <div className="mt-8 flex flex-col sm:flex-row gap-3">
+      <div className="mt-8 flex flex-col sm:flex-row gap-3" role="group" aria-label="Next actions">
         <button
           onClick={onTryAgain}
-          className="flex-1 py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          className="flex-1 py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm"
         >
           Try Different Approach
         </button>
         <button
           onClick={onNextScenario}
-          className="flex-1 py-3 px-4 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm"
+          className="flex-1 py-3 px-4 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm"
         >
           Next Scenario
         </button>
         <button
           onClick={onViewProgress}
-          className="flex-1 py-3 px-4 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm"
+          className="flex-1 py-3 px-4 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm"
         >
           View Progress
         </button>

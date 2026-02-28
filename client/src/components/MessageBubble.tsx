@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { ScenarioMessage, ScenarioColorConfig, ColorClasses } from '../types/scenario'
 import { getPersonaColors } from '../utils/colors'
 
@@ -13,80 +14,121 @@ function getColorsForMessage(
   switch (message.speakerType) {
     case 'user':
       return config.user
-    case 'system':
-      return config.system
     case 'ai':
       return config.ai
-    case 'npc':
-      return getPersonaColors(message.speakerId, config) ?? config.system
+    case 'system':
+      return config.system
+    case 'npc': {
+      const npcColors = getPersonaColors(message.speakerId, config)
+      return npcColors ?? config.system
+    }
+    default:
+      return config.system
   }
 }
 
-function formatTime(timestamp: string): string {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+function formatTimestamp(ts: string): string {
+  try {
+    const date = new Date(ts)
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return ''
+  }
 }
 
-export function MessageBubble({ message, colors }: MessageBubbleProps) {
-  const colorClasses = getColorsForMessage(message, colors)
+function MessageBubbleInner({ message, colors }: MessageBubbleProps) {
+  const messageColors = getColorsForMessage(message, colors)
   const isUser = message.speakerType === 'user'
   const isSystem = message.speakerType === 'system'
 
-  // System messages: full-width, neutral
   if (isSystem) {
     return (
-      <div className="w-full px-4 py-2">
+      <div
+        className="px-3 sm:px-4 py-2"
+        role="status"
+        aria-label={`System: ${message.content.slice(0, 50)}`}
+      >
         <div
-          className={`${colorClasses.bg} border ${colorClasses.border} rounded-md px-4 py-2.5 text-sm ${colorClasses.label}`}
+          className={`w-full rounded-lg px-3 sm:px-4 py-3 text-sm ${messageColors.bg} ${messageColors.label}`}
         >
+          <span className="sr-only">System message: </span>
           <p className="whitespace-pre-wrap">{message.content}</p>
-          <span className={`block mt-1 text-xs ${colorClasses.accent}`}>
-            {formatTime(message.timestamp)}
-          </span>
         </div>
       </div>
     )
   }
 
-  // User messages: right-aligned, gray background
-  if (isUser) {
-    return (
-      <div className="flex justify-end px-4 py-1.5">
-        <div className="max-w-[75%]">
-          <div
-            className={`${colorClasses.bg} border ${colorClasses.border} rounded-2xl rounded-br-sm px-4 py-2.5`}
-          >
-            <p className="text-sm text-gray-900 whitespace-pre-wrap">
-              {message.content}
-            </p>
-          </div>
-          <span className="block mt-0.5 text-right text-xs text-gray-400">
-            {formatTime(message.timestamp)}
-          </span>
-        </div>
-      </div>
-    )
-  }
-
-  // NPC / AI messages: left-aligned, color-coded with left border
   return (
-    <div className="flex justify-start px-4 py-1.5">
-      <div className="max-w-[75%]">
+    <div
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} px-3 sm:px-4 py-1.5`}
+      role="listitem"
+    >
+      <div className={`max-w-[90%] sm:max-w-[80%] md:max-w-[75%]`}>
         <div
-          className={`${colorClasses.bg} border-l-4 ${colorClasses.border} rounded-lg rounded-tl-sm px-4 py-2.5`}
+          className={`rounded-lg ${
+            isUser ? 'rounded-tr-sm' : 'rounded-tl-sm border-l-4'
+          } px-3 sm:px-4 py-3 ${messageColors.bg} ${
+            isUser ? '' : messageColors.border
+          }`}
         >
-          {/* Colored name label */}
-          <span className={`block text-xs font-semibold ${colorClasses.label} mb-1`}>
-            {message.speakerName}
-          </span>
-          <p className="text-sm text-gray-900 whitespace-pre-wrap">
+          {/* Speaker name */}
+          {!isUser && (
+            <span
+              className={`block text-xs font-semibold mb-1 ${messageColors.label}`}
+            >
+              {message.speakerName}
+            </span>
+          )}
+
+          {/* Content */}
+          <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
             {message.content}
           </p>
+
+          {/* Actions */}
+          {message.actions.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {message.actions.map((action, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-center gap-1.5 text-xs ${messageColors.accent}`}
+                >
+                  <svg
+                    className="w-3.5 h-3.5 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  <span>{action.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <span className={`block mt-0.5 text-xs ${colorClasses.accent}`}>
-          {formatTime(message.timestamp)}
+
+        {/* Timestamp */}
+        <span
+          className={`block mt-0.5 text-xs text-gray-400 ${
+            isUser ? 'text-right' : 'text-left'
+          }`}
+          aria-label={`Sent at ${formatTimestamp(message.timestamp)}`}
+        >
+          {formatTimestamp(message.timestamp)}
         </span>
       </div>
     </div>
   )
 }
+
+export const MessageBubble = memo(MessageBubbleInner)

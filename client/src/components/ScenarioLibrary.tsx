@@ -18,11 +18,6 @@ import { PROD_INCIDENT_001 } from '../data/scenarios/prod-incident-001'
 
 // ---- Scenario Registry Metadata -------------------------------------------
 
-/**
- * Static metadata for all scenarios. We build a lightweight descriptor from
- * each scenario bundle so the library doesn't need to instantiate full
- * definitions just to show cards.
- */
 interface ScenarioMeta {
   id: string
   title: string
@@ -33,7 +28,6 @@ interface ScenarioMeta {
 }
 
 function buildScenarioMeta(): ScenarioMeta[] {
-  // Build a temporary definition to extract metadata
   const def: ScenarioDefinition = PROD_INCIDENT_001.buildScenario()
   return [
     {
@@ -84,10 +78,8 @@ export function ScenarioLibrary() {
 
   const activeScenario = useScenarioStore((s) => s.scenario)
 
-  // Build scenario metadata (stable across renders since registry is static)
   const scenarios = useMemo(() => buildScenarioMeta(), [])
 
-  // Build progress map
   const progressMap = useMemo(() => {
     const map: Record<string, ScenarioProgressInfo> = {}
     for (const s of scenarios) {
@@ -96,16 +88,10 @@ export function ScenarioLibrary() {
     return map
   }, [scenarios])
 
-  // Apply filters
   const filteredScenarios = useMemo(() => {
     return scenarios.filter((s) => {
-      // Category filter
       if (categoryFilter !== 'all' && s.category !== categoryFilter) return false
-
-      // GRIP filter
       if (gripFilter !== 'all' && !s.gripFocus.includes(gripFilter)) return false
-
-      // Status filter
       if (statusFilter !== 'all') {
         const progress = progressMap[s.id]
         const hasActiveSession =
@@ -114,31 +100,35 @@ export function ScenarioLibrary() {
         const displayStatus = hasActiveSession ? 'in-progress' : progress.status
         if (displayStatus !== statusFilter) return false
       }
-
       return true
     })
   }, [scenarios, categoryFilter, gripFilter, statusFilter, progressMap, activeScenario])
 
-  // Count active filters
   const activeFilterCount = [categoryFilter, gripFilter, statusFilter].filter(
     (f) => f !== 'all',
   ).length
 
+  const clearFilters = () => {
+    setCategoryFilter('all')
+    setGripFilter('all')
+    setStatusFilter('all')
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Scenario Library</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Scenario Library</h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">
             Practice navigating real-world AI collaboration challenges
           </p>
         </div>
         <Link
           to="/practice/progress"
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors self-start"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           View Progress
@@ -146,14 +136,17 @@ export function ScenarioLibrary() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6 p-4 bg-white border border-gray-200 rounded-lg">
-        <span className="text-sm font-medium text-gray-500">Filters:</span>
+      <fieldset className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 sm:gap-3 mb-6 p-3 sm:p-4 bg-white border border-gray-200 rounded-lg">
+        <legend className="sr-only">Filter scenarios</legend>
+        <span className="text-sm font-medium text-gray-500" aria-hidden="true">
+          Filters:
+        </span>
 
-        {/* Category */}
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value as ScenarioCategory | 'all')}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          aria-label="Filter by category"
+          className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
         >
           <option value="all">All Categories</option>
           {ALL_CATEGORIES.map((cat) => (
@@ -163,11 +156,11 @@ export function ScenarioLibrary() {
           ))}
         </select>
 
-        {/* GRIP Dimension */}
         <select
           value={gripFilter}
           onChange={(e) => setGripFilter(e.target.value as GripDimension | 'all')}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          aria-label="Filter by GRIP dimension"
+          className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
         >
           <option value="all">All GRIP Dimensions</option>
           {ALL_GRIP.map((dim) => (
@@ -177,11 +170,11 @@ export function ScenarioLibrary() {
           ))}
         </select>
 
-        {/* Status */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as ScenarioCompletionStatus | 'all')}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          aria-label="Filter by completion status"
+          className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
         >
           <option value="all">All Status</option>
           {ALL_STATUS.map((s) => (
@@ -191,30 +184,25 @@ export function ScenarioLibrary() {
           ))}
         </select>
 
-        {/* Clear filters */}
         {activeFilterCount > 0 && (
           <button
-            onClick={() => {
-              setCategoryFilter('all')
-              setGripFilter('all')
-              setStatusFilter('all')
-            }}
+            onClick={clearFilters}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
             Clear ({activeFilterCount})
           </button>
         )}
-      </div>
+      </fieldset>
 
       {/* Results count */}
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-gray-400 mb-4" role="status" aria-live="polite">
         {filteredScenarios.length} scenario{filteredScenarios.length !== 1 ? 's' : ''}
         {activeFilterCount > 0 ? ' matching filters' : ' available'}
       </p>
 
       {/* Scenario Grid */}
       {filteredScenarios.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" role="list" aria-label="Scenarios">
           {filteredScenarios.map((s) => (
             <ScenarioCard
               key={s.id}
@@ -236,11 +224,7 @@ export function ScenarioLibrary() {
         <div className="text-center py-16 bg-white border border-gray-200 rounded-lg">
           <p className="text-gray-500 mb-2">No scenarios match your filters.</p>
           <button
-            onClick={() => {
-              setCategoryFilter('all')
-              setGripFilter('all')
-              setStatusFilter('all')
-            }}
+            onClick={clearFilters}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium"
           >
             Clear all filters
