@@ -1,7 +1,7 @@
 // src/routes.tsx (or app/routes.tsx)
 import { createBrowserRouter } from 'react-router-dom'
-import CodeComparison from './pages/CodeComparison'
-import PRReview from './pages/PRReview'
+import CodeComparison from './pages/tools/CodeComparison'
+import PRReview from './pages/tools/PRReview'
 import { HomePage } from './pages/HomePage'
 import { Layout } from './components/Layout'
 
