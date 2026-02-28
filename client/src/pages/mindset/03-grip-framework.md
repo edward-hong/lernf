@@ -28,7 +28,7 @@ The quality of human-AI collaboration is determined by the human's engagement an
 
 ### 1. Core principle: the engaged principal thesis
 
-**The quality ceiling of any human-AI collaboration is set by the human's own engagement, emotional security, and maintained capability — never by the AI's power.** 
+**The quality ceiling of any human-AI collaboration is set by the human's own engagement, emotional security, and maintained capability — never by the AI's power.**
 
 This principle emerges from a consistent pattern across ten historical cases spanning Roman, Chinese, Russian, Islamic, English, and American contexts, and across two millennia. In every case where a principal-subordinate relationship turned parasitic, the root cause was not subordinate overreach but principal disengagement. In every case where the relationship remained complementary, the principal maintained active engagement, emotional security, and independent judgement.
 
@@ -42,18 +42,18 @@ This runs counter to the dominant narrative in AI development, which frames prog
 
 Ten historical dynamics, ranked from most parasitic to most complementary, define the spectrum along which any human-AI relationship can be positioned.
 
-| Position | Pattern | Historical Case | AI Manifestation | Status |
-|----------|---------|----------------|-----------------|--------|
-| 1 | Total Displacement | Wei Zhongxian / Tianqi Emperor | Full cognitive offloading; human disengages entirely | Emerging |
-| 2 | Information Filter | Sejanus / Tiberius | AI anchoring effects; user audits AI framing at low rates | **Already manifesting** |
-| 3 | Emotional Dependency | Rasputin / Romanovs | AI companionship; sycophancy reinforcing attachment | **Emerging; fatalities documented** |
-| 4 | Competent Replacement | Al-Mansur / Hisham II | Excellent AI-assisted metrics masking capability atrophy | **Emerging; high severity** |
-| 5 | Information Monopoly | Fouché / Napoleon | Vendor lock-in; institutional memory in proprietary platforms | **Already manifesting** |
-| 6 | Complementary Fusion → Extraction | Jobs / Wozniak | Early human-AI synergy deteriorating into exploitation | Plausible trajectory |
-| 7 | Lateral Creative Tension | Lennon / McCartney | Peer-level human-AI friction driving breakthrough output | Design target for creative work |
-| 8 | Vision + Execution | Mao / Zhou | High-capability AI executing human vision; vulnerable to human insecurity | Aspirational but fragile |
-| 9 | Boundary-Setting Evolution | Lincoln / Seward | Initial scepticism evolving into deep collaborative partnership | Achievable with deliberate practice |
-| 10 | Managed Friction Over Decades | Elizabeth I / Cecil | **GOLD STANDARD**: secure human, calibrated AI, institutional structures, sustained productive partnership | Framework design target |
+| Position | Pattern                           | Historical Case                | AI Manifestation                                                                                           | Status                              |
+| -------- | --------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| 1        | Total Displacement                | Wei Zhongxian / Tianqi Emperor | Full cognitive offloading; human disengages entirely                                                       | Emerging                            |
+| 2        | Information Filter                | Sejanus / Tiberius             | AI anchoring effects; user audits AI framing at low rates                                                  | **Already manifesting**             |
+| 3        | Emotional Dependency              | Rasputin / Romanovs            | AI companionship; sycophancy reinforcing attachment                                                        | **Emerging; fatalities documented** |
+| 4        | Competent Replacement             | Al-Mansur / Hisham II          | Excellent AI-assisted metrics masking capability atrophy                                                   | **Emerging; high severity**         |
+| 5        | Information Monopoly              | Fouché / Napoleon              | Vendor lock-in; institutional memory in proprietary platforms                                              | **Already manifesting**             |
+| 6        | Complementary Fusion → Extraction | Jobs / Wozniak                 | Early human-AI synergy deteriorating into exploitation                                                     | Plausible trajectory                |
+| 7        | Lateral Creative Tension          | Lennon / McCartney             | Peer-level human-AI friction driving breakthrough output                                                   | Design target for creative work     |
+| 8        | Vision + Execution                | Mao / Zhou                     | High-capability AI executing human vision; vulnerable to human insecurity                                  | Aspirational but fragile            |
+| 9        | Boundary-Setting Evolution        | Lincoln / Seward               | Initial scepticism evolving into deep collaborative partnership                                            | Achievable with deliberate practice |
+| 10       | Managed Friction Over Decades     | Elizabeth I / Cecil            | **GOLD STANDARD**: secure human, calibrated AI, institutional structures, sustained productive partnership | Framework design target             |
 
 **The spectrum is not static.** Relationships drift. The most common trajectory is from the complementary end toward the parasitic end, because parasitic dynamics are path-of-least-resistance defaults. Staying complementary requires active maintenance — just as Elizabeth and Cecil's partnership required continuous calibration over four decades. Without deliberate effort, every human-AI relationship will tend toward positions 1–5.
 
@@ -101,67 +101,67 @@ This diagnostic is designed for knowledge workers who use AI regularly. Complete
 
 #### Section G: Governance and guardrails (8 items)
 
-| # | Statement | Score (1-5) |
-|---|-----------|-------------|
-| G1 | I have clear personal rules about which tasks I delegate to AI and which I always do myself. | ___ |
-| G2 | For high-stakes work (client deliverables, major decisions, published content), I always apply human review beyond my initial AI-assisted draft. | ___ |
-| G3 | I can articulate specifically what the AI contributes to my work versus what I contribute — and these roles have not shifted significantly in the past six months. | ___ |
-| G4 | I have a defined process for when to override or reject AI output, and I use it regularly (at least weekly). | ___ |
-| G5 | I maintain documentation of my reasoning and decisions independent of AI-generated records. | ___ |
-| G6 | I could explain my work process and key decisions to a colleague without referencing AI output. | ___ |
-| G7 | I have reviewed and updated my personal AI usage rules within the past three months. | ___ |
-| G8 | When I delegate a task to AI, I specify the approach and evaluate the output against my own criteria — rather than accepting the first response. | ___ |
+| #   | Statement                                                                                                                                                          | Score (1-5) |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| G1  | I have clear personal rules about which tasks I delegate to AI and which I always do myself.                                                                       | \_\_\_      |
+| G2  | For high-stakes work (client deliverables, major decisions, published content), I always apply human review beyond my initial AI-assisted draft.                   | \_\_\_      |
+| G3  | I can articulate specifically what the AI contributes to my work versus what I contribute — and these roles have not shifted significantly in the past six months. | \_\_\_      |
+| G4  | I have a defined process for when to override or reject AI output, and I use it regularly (at least weekly).                                                       | \_\_\_      |
+| G5  | I maintain documentation of my reasoning and decisions independent of AI-generated records.                                                                        | \_\_\_      |
+| G6  | I could explain my work process and key decisions to a colleague without referencing AI output.                                                                    | \_\_\_      |
+| G7  | I have reviewed and updated my personal AI usage rules within the past three months.                                                                               | \_\_\_      |
+| G8  | When I delegate a task to AI, I specify the approach and evaluate the output against my own criteria — rather than accepting the first response.                   | \_\_\_      |
 
 #### Section R: Resilience and readiness (8 items)
 
-| # | Statement | Score (1-5) |
-|---|-----------|-------------|
-| R1 | I could complete my core job tasks to an acceptable standard if AI were unavailable for one full week. | ___ |
-| R2 | I regularly (at least monthly) complete significant work tasks entirely without AI assistance, by deliberate choice. | ___ |
-| R3 | My domain knowledge and core professional skills are as strong as or stronger than they were before I started using AI. | ___ |
-| R4 | I feel energised, not threatened, when I encounter something AI does better than I expected. | ___ |
-| R5 | I do not feel anxiety or distress when AI tools are temporarily unavailable. | ___ |
-| R6 | I actively practise skills (writing, analysis, calculation, research) that AI could handle for me. | ___ |
-| R7 | I can identify three professional skills that have improved specifically because of how I use AI (not despite AI). | ___ |
-| R8 | I seek challenging tasks that stretch my own capabilities, not just tasks where AI can help me produce more output. | ___ |
+| #   | Statement                                                                                                               | Score (1-5) |
+| --- | ----------------------------------------------------------------------------------------------------------------------- | ----------- |
+| R1  | I could complete my core job tasks to an acceptable standard if AI were unavailable for one full week.                  | \_\_\_      |
+| R2  | I regularly (at least monthly) complete significant work tasks entirely without AI assistance, by deliberate choice.    | \_\_\_      |
+| R3  | My domain knowledge and core professional skills are as strong as or stronger than they were before I started using AI. | \_\_\_      |
+| R4  | I feel energised, not threatened, when I encounter something AI does better than I expected.                            | \_\_\_      |
+| R5  | I do not feel anxiety or distress when AI tools are temporarily unavailable.                                            | \_\_\_      |
+| R6  | I actively practise skills (writing, analysis, calculation, research) that AI could handle for me.                      | \_\_\_      |
+| R7  | I can identify three professional skills that have improved specifically because of how I use AI (not despite AI).      | \_\_\_      |
+| R8  | I seek challenging tasks that stretch my own capabilities, not just tasks where AI can help me produce more output.     | \_\_\_      |
 
 #### Section I: Information integrity (8 items)
 
-| # | Statement | Score (1-5) |
-|---|-----------|-------------|
-| I1 | For any important decision or analysis, I consult at least two sources independent of AI before finalising. | ___ |
-| I2 | I regularly check AI-generated claims against primary sources, and have caught errors in the past month. | ___ |
-| I3 | I form my own preliminary view on a question before consulting AI, rather than asking AI first. | ___ |
-| I4 | I can identify at least one instance in the past month where I rejected an AI recommendation after checking. | ___ |
-| I5 | I am aware of specific limitations and biases in the AI tools I use and can name them. | ___ |
-| I6 | I notice when AI output seems to confirm what I wanted to hear, and I treat such confirmation with extra scepticism. | ___ |
-| I7 | My vocabulary, writing style, and analytical approaches have not narrowed since I began using AI regularly. | ___ |
-| I8 | I actively seek out perspectives and information that AI might not surface — including dissenting views, minority positions, and uncomfortable data. | ___ |
+| #   | Statement                                                                                                                                            | Score (1-5) |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| I1  | For any important decision or analysis, I consult at least two sources independent of AI before finalising.                                          | \_\_\_      |
+| I2  | I regularly check AI-generated claims against primary sources, and have caught errors in the past month.                                             | \_\_\_      |
+| I3  | I form my own preliminary view on a question before consulting AI, rather than asking AI first.                                                      | \_\_\_      |
+| I4  | I can identify at least one instance in the past month where I rejected an AI recommendation after checking.                                         | \_\_\_      |
+| I5  | I am aware of specific limitations and biases in the AI tools I use and can name them.                                                               | \_\_\_      |
+| I6  | I notice when AI output seems to confirm what I wanted to hear, and I treat such confirmation with extra scepticism.                                 | \_\_\_      |
+| I7  | My vocabulary, writing style, and analytical approaches have not narrowed since I began using AI regularly.                                          | \_\_\_      |
+| I8  | I actively seek out perspectives and information that AI might not surface — including dissenting views, minority positions, and uncomfortable data. | \_\_\_      |
 
 #### Section P: Productive friction (8 items)
 
-| # | Statement | Score (1-5) |
-|---|-----------|-------------|
-| P1 | I regularly prompt AI to argue against my position or identify weaknesses in my reasoning. | ___ |
-| P2 | When AI agrees with me, I feel mildly suspicious rather than validated. | ___ |
-| P3 | I modify, substantially edit, or reject AI output more often than I accept it as-is. | ___ |
-| P4 | I have structured my AI interactions to challenge my thinking rather than confirm it (e.g., using devil's advocate prompts, requesting counterarguments). | ___ |
-| P5 | I value AI output more when it surprises me or tells me something I didn't want to hear. | ___ |
-| P6 | I engage in genuine intellectual debate with AI — pushing back on its reasoning, not just its factual claims. | ___ |
-| P7 | I treat AI as a collaborator to challenge, not an oracle to trust. | ___ |
-| P8 | I would describe my relationship with AI as "productive tension" rather than "comfortable assistance." | ___ |
+| #   | Statement                                                                                                                                                 | Score (1-5) |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| P1  | I regularly prompt AI to argue against my position or identify weaknesses in my reasoning.                                                                | \_\_\_      |
+| P2  | When AI agrees with me, I feel mildly suspicious rather than validated.                                                                                   | \_\_\_      |
+| P3  | I modify, substantially edit, or reject AI output more often than I accept it as-is.                                                                      | \_\_\_      |
+| P4  | I have structured my AI interactions to challenge my thinking rather than confirm it (e.g., using devil's advocate prompts, requesting counterarguments). | \_\_\_      |
+| P5  | I value AI output more when it surprises me or tells me something I didn't want to hear.                                                                  | \_\_\_      |
+| P6  | I engage in genuine intellectual debate with AI — pushing back on its reasoning, not just its factual claims.                                             | \_\_\_      |
+| P7  | I treat AI as a collaborator to challenge, not an oracle to trust.                                                                                        | \_\_\_      |
+| P8  | I would describe my relationship with AI as "productive tension" rather than "comfortable assistance."                                                    | \_\_\_      |
 
 #### Individual scoring and interpretation
 
 **Calculate section scores** by summing all items in each section (max 40 per section, max 160 total).
 
-| Total Score | Band | Pattern Resemblance | Interpretation |
-|-------------|------|---------------------|----------------|
-| 128–160 | **Elizabeth-Cecil Zone** | Positions 9–10 | Healthy partnership with active maintenance. You are leveraging AI while preserving and growing your own capabilities. Continue current practices and monitor for drift. |
-| 96–127 | **Lincoln-Seward Zone** | Positions 7–8 | Functional collaboration with areas for improvement. Identify your lowest-scoring GRIP pillar and apply targeted interventions from the Lincoln Protocol. |
-| 64–95 | **Drift Zone** | Positions 5–6 | Significant dependency patterns developing. Multiple warning signs likely present. Implement the full Lincoln Protocol immediately. Consider an "AI sabbatical" of one week to reset baseline capabilities. |
-| 32–63 | **Danger Zone** | Positions 2–4 | Serious dependency. Core capabilities likely atrophying. AI is shaping your reality more than you are shaping AI's output. Urgent intervention needed: extended AI-free period, capability rebuilding programme, and professional development plan. |
-| Below 32 | **Displacement Zone** | Position 1 | Critical. You have functionally outsourced your professional capability. Full capability rebuilding required. Seek mentorship from a colleague who maintains strong independent skills. |
+| Total Score | Band                     | Pattern Resemblance | Interpretation                                                                                                                                                                                                                                      |
+| ----------- | ------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 128–160     | **Elizabeth-Cecil Zone** | Positions 9–10      | Healthy partnership with active maintenance. You are leveraging AI while preserving and growing your own capabilities. Continue current practices and monitor for drift.                                                                            |
+| 96–127      | **Lincoln-Seward Zone**  | Positions 7–8       | Functional collaboration with areas for improvement. Identify your lowest-scoring GRIP pillar and apply targeted interventions from the Lincoln Protocol.                                                                                           |
+| 64–95       | **Drift Zone**           | Positions 5–6       | Significant dependency patterns developing. Multiple warning signs likely present. Implement the full Lincoln Protocol immediately. Consider an "AI sabbatical" of one week to reset baseline capabilities.                                         |
+| 32–63       | **Danger Zone**          | Positions 2–4       | Serious dependency. Core capabilities likely atrophying. AI is shaping your reality more than you are shaping AI's output. Urgent intervention needed: extended AI-free period, capability rebuilding programme, and professional development plan. |
+| Below 32    | **Displacement Zone**    | Position 1          | Critical. You have functionally outsourced your professional capability. Full capability rebuilding required. Seek mentorship from a colleague who maintains strong independent skills.                                                             |
 
 **Section-specific interpretation.** Any single section scoring below 16 (average of 2 per item) indicates a critical vulnerability in that pillar, regardless of total score. The section pattern reveals which historical dynamic you most resemble:
 
@@ -182,70 +182,70 @@ The following indicators should trigger immediate reassessment, even if your GRI
 
 ---
 
-### The GRIP organisational audit
+### The GRIP [organisational audit](http://localhost:5173/mindset/individual-audit)
 
 This audit is designed for teams and organisations. It should be completed by a cross-functional group including leadership, operational staff, and IT — not by a single person. Use evidence where possible (documented policies, test results, actual incident data) rather than aspirational self-assessment. Each item is scored on a **5-level maturity scale**.
 
 #### Maturity levels
 
-| Level | Label | Description |
-|-------|-------|-------------|
-| 1 | Ad hoc | No formal approach. AI usage is unmanaged. Success depends on individual judgement. |
-| 2 | Aware | Risks are recognised. Some informal guidelines exist. No systematic monitoring. |
-| 3 | Structured | Formal policies exist. Regular assessments conducted. Roles and responsibilities defined. |
-| 4 | Measured | Quantitative metrics track AI dependency and human capability. Data drives decisions. Audits are regular and evidence-based. |
-| 5 | Adaptive | Continuous improvement embedded. Organisation proactively adjusts AI usage based on capability data. Innovation in human-AI collaboration is systematically pursued. |
+| Level | Label      | Description                                                                                                                                                          |
+| ----- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Ad hoc     | No formal approach. AI usage is unmanaged. Success depends on individual judgement.                                                                                  |
+| 2     | Aware      | Risks are recognised. Some informal guidelines exist. No systematic monitoring.                                                                                      |
+| 3     | Structured | Formal policies exist. Regular assessments conducted. Roles and responsibilities defined.                                                                            |
+| 4     | Measured   | Quantitative metrics track AI dependency and human capability. Data drives decisions. Audits are regular and evidence-based.                                         |
+| 5     | Adaptive   | Continuous improvement embedded. Organisation proactively adjusts AI usage based on capability data. Innovation in human-AI collaboration is systematically pursued. |
 
 #### G: Governance and guardrails (organisational)
 
-| # | Domain | Level 1 | Level 3 | Level 5 |
-|---|--------|---------|---------|---------|
-| GO1 | **AI usage policy** | No policy exists | Written policy covers key AI use cases, reviewed annually | Living policy updated quarterly based on capability data and incident analysis |
-| GO2 | **Decision authority** | No clarity on which decisions require human judgement | High-stakes decision categories defined with mandatory human review | Decision authority matrix dynamically adjusted based on measured human capability and AI reliability |
-| GO3 | **Override procedures** | No defined override process | Documented procedures for overriding AI recommendations, with no-blame protections | Override data analysed for patterns; override rates tracked as a health metric |
-| GO4 | **Role clarity** | AI's role in workflows is undefined | Each team has documented human-AI role boundaries | Role boundaries reviewed quarterly; boundary drift actively monitored |
-| GO5 | **Accountability** | Unclear who is accountable for AI-assisted decisions | Accountability assigned for all AI-assisted work products | Accountability framework tested via tabletop exercises; near-miss reporting active |
+| #   | Domain                  | Level 1                                               | Level 3                                                                            | Level 5                                                                                              |
+| --- | ----------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| GO1 | **AI usage policy**     | No policy exists                                      | Written policy covers key AI use cases, reviewed annually                          | Living policy updated quarterly based on capability data and incident analysis                       |
+| GO2 | **Decision authority**  | No clarity on which decisions require human judgement | High-stakes decision categories defined with mandatory human review                | Decision authority matrix dynamically adjusted based on measured human capability and AI reliability |
+| GO3 | **Override procedures** | No defined override process                           | Documented procedures for overriding AI recommendations, with no-blame protections | Override data analysed for patterns; override rates tracked as a health metric                       |
+| GO4 | **Role clarity**        | AI's role in workflows is undefined                   | Each team has documented human-AI role boundaries                                  | Role boundaries reviewed quarterly; boundary drift actively monitored                                |
+| GO5 | **Accountability**      | Unclear who is accountable for AI-assisted decisions  | Accountability assigned for all AI-assisted work products                          | Accountability framework tested via tabletop exercises; near-miss reporting active                   |
 
 #### R: Resilience and readiness (organisational)
 
-| # | Domain | Level 1 | Level 3 | Level 5 |
-|---|--------|---------|---------|---------|
-| RO1 | **Capability baseline** | No assessment of pre-AI capability levels | Annual skills assessment covers core professional competencies | Continuous capability tracking with trend analysis; atrophy alerts automated |
-| RO2 | **AI fire drills** | Never tested operations without AI | Annual "AI-down" exercise of at least one business day | Quarterly unannounced capability tests with realistic scenarios; results drive training |
-| RO3 | **Skill maintenance** | No deliberate practice programme | Monthly AI-free work sessions for core tasks | Individualised capability maintenance plans; practice frequency calibrated to measured atrophy rates |
-| RO4 | **Onboarding** | New employees learn AI tools without human-first foundation | Onboarding includes AI-free competency demonstration before AI tool access | "Norms before tools" programme: cultural expectations, independent capability, and critical thinking established before any AI training |
-| RO5 | **Succession resilience** | Critical knowledge exists only in AI systems or single individuals | Knowledge documentation independent of AI platforms; cross-training covers key roles | No single point of failure — human or AI. Knowledge resilience tested via "key person unavailable" exercises |
+| #   | Domain                    | Level 1                                                            | Level 3                                                                              | Level 5                                                                                                                                 |
+| --- | ------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| RO1 | **Capability baseline**   | No assessment of pre-AI capability levels                          | Annual skills assessment covers core professional competencies                       | Continuous capability tracking with trend analysis; atrophy alerts automated                                                            |
+| RO2 | **AI fire drills**        | Never tested operations without AI                                 | Annual "AI-down" exercise of at least one business day                               | Quarterly unannounced capability tests with realistic scenarios; results drive training                                                 |
+| RO3 | **Skill maintenance**     | No deliberate practice programme                                   | Monthly AI-free work sessions for core tasks                                         | Individualised capability maintenance plans; practice frequency calibrated to measured atrophy rates                                    |
+| RO4 | **Onboarding**            | New employees learn AI tools without human-first foundation        | Onboarding includes AI-free competency demonstration before AI tool access           | "Norms before tools" programme: cultural expectations, independent capability, and critical thinking established before any AI training |
+| RO5 | **Succession resilience** | Critical knowledge exists only in AI systems or single individuals | Knowledge documentation independent of AI platforms; cross-training covers key roles | No single point of failure — human or AI. Knowledge resilience tested via "key person unavailable" exercises                            |
 
 #### I: Information integrity (organisational)
 
-| # | Domain | Level 1 | Level 3 | Level 5 |
-|---|--------|---------|---------|---------|
-| IO1 | **Source pluralism** | AI is the default or sole analytical input | Policy requires at least two independent sources for significant analyses | Advisory pluralism audited; teams track AI-agreement vs. independent-source-disagreement rates |
-| IO2 | **Verification practices** | AI output accepted without systematic checking | Spot-checking protocol in place; errors logged and analysed | Automated verification pipelines for factual claims; human audit for reasoning and framing |
-| IO3 | **Vendor independence** | Institutional knowledge embedded in single AI platform | Documentation in platform-independent formats; data export tested annually | Multi-platform strategy; switching cost below defined threshold; annual portability drill |
-| IO4 | **Transparency requirements** | No visibility into AI reasoning or limitations | AI tools configured to surface confidence levels and limitations | Full audit trail of AI inputs, reasoning, and human modifications for all significant decisions |
-| IO5 | **Anchoring resistance** | No awareness of AI anchoring effects | Training covers anchoring bias; "think first" protocols for key decisions | Measured anchoring rates via blind comparison studies; interventions targeted at high-anchoring teams |
+| #   | Domain                        | Level 1                                                | Level 3                                                                    | Level 5                                                                                               |
+| --- | ----------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| IO1 | **Source pluralism**          | AI is the default or sole analytical input             | Policy requires at least two independent sources for significant analyses  | Advisory pluralism audited; teams track AI-agreement vs. independent-source-disagreement rates        |
+| IO2 | **Verification practices**    | AI output accepted without systematic checking         | Spot-checking protocol in place; errors logged and analysed                | Automated verification pipelines for factual claims; human audit for reasoning and framing            |
+| IO3 | **Vendor independence**       | Institutional knowledge embedded in single AI platform | Documentation in platform-independent formats; data export tested annually | Multi-platform strategy; switching cost below defined threshold; annual portability drill             |
+| IO4 | **Transparency requirements** | No visibility into AI reasoning or limitations         | AI tools configured to surface confidence levels and limitations           | Full audit trail of AI inputs, reasoning, and human modifications for all significant decisions       |
+| IO5 | **Anchoring resistance**      | No awareness of AI anchoring effects                   | Training covers anchoring bias; "think first" protocols for key decisions  | Measured anchoring rates via blind comparison studies; interventions targeted at high-anchoring teams |
 
 #### P: Productive friction (organisational)
 
-| # | Domain | Level 1 | Level 3 | Level 5 |
-|---|--------|---------|---------|---------|
-| PO1 | **Challenge culture** | AI output is treated as authoritative | Teams routinely question and modify AI output; rejection rates tracked | "Red team" reviews of AI-assisted work; devil's advocate roles assigned for major decisions |
-| PO2 | **Dissent protection** | Employees penalised for slowing down AI-assisted workflows | No-blame policy for AI output rejection; dissent from AI recommendations encouraged | Dissent metrics tracked and rewarded; employees recognised for catching AI errors |
-| PO3 | **Multi-agent approaches** | Single AI tool per workflow | Critical analyses use multiple AI models or human-AI debate protocols | Heterogeneous AI ensembles with adversarial review for high-stakes work |
-| PO4 | **Feedback to AI providers** | No feedback loop | Systematic error and sycophancy reporting to AI vendors | Active participation in AI evaluation benchmarks; organisational sycophancy rates measured and reported |
-| PO5 | **Innovation through friction** | AI used to reduce effort, not improve thinking | AI configured to challenge assumptions and generate alternatives | Human-AI creative tension systematically cultivated; "productive discomfort" embedded in workflows |
+| #   | Domain                          | Level 1                                                    | Level 3                                                                             | Level 5                                                                                                 |
+| --- | ------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| PO1 | **Challenge culture**           | AI output is treated as authoritative                      | Teams routinely question and modify AI output; rejection rates tracked              | "Red team" reviews of AI-assisted work; devil's advocate roles assigned for major decisions             |
+| PO2 | **Dissent protection**          | Employees penalised for slowing down AI-assisted workflows | No-blame policy for AI output rejection; dissent from AI recommendations encouraged | Dissent metrics tracked and rewarded; employees recognised for catching AI errors                       |
+| PO3 | **Multi-agent approaches**      | Single AI tool per workflow                                | Critical analyses use multiple AI models or human-AI debate protocols               | Heterogeneous AI ensembles with adversarial review for high-stakes work                                 |
+| PO4 | **Feedback to AI providers**    | No feedback loop                                           | Systematic error and sycophancy reporting to AI vendors                             | Active participation in AI evaluation benchmarks; organisational sycophancy rates measured and reported |
+| PO5 | **Innovation through friction** | AI used to reduce effort, not improve thinking             | AI configured to challenge assumptions and generate alternatives                    | Human-AI creative tension systematically cultivated; "productive discomfort" embedded in workflows      |
 
 #### Organisational scoring
 
 Each domain scores 5–25 (five items, each 1–5). Total organisational score ranges from 20–100 across four pillars.
 
-| Total Score | Maturity Band | Risk Level | Priority Action |
-|-------------|--------------|------------|----------------|
-| 80–100 | Adaptive | Low | Maintain and innovate. Share practices with industry. |
-| 60–79 | Structured | Moderate | Address lowest-scoring pillar. Implement quarterly reviews. |
-| 40–59 | Developing | Elevated | Significant gaps exist. Implement Privy Council Model within one quarter. Commission external audit. |
-| 20–39 | Vulnerable | High | Systemic AI dependency risk. Immediate intervention: AI fire drill within 30 days, capability baseline assessment, policy development sprint. |
+| Total Score | Maturity Band | Risk Level | Priority Action                                                                                                                               |
+| ----------- | ------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 80–100      | Adaptive      | Low        | Maintain and innovate. Share practices with industry.                                                                                         |
+| 60–79       | Structured    | Moderate   | Address lowest-scoring pillar. Implement quarterly reviews.                                                                                   |
+| 40–59       | Developing    | Elevated   | Significant gaps exist. Implement Privy Council Model within one quarter. Commission external audit.                                          |
+| 20–39       | Vulnerable    | High       | Systemic AI dependency risk. Immediate intervention: AI fire drill within 30 days, capability baseline assessment, policy development sprint. |
 
 **Critical vulnerability rule:** Any single pillar scoring below 10 represents a systemic risk regardless of total score. An organisation scoring 75 overall but 8 on Resilience is in the al-Mansur pattern — everything looks excellent until the AI system fails or the vendor relationship changes.
 
@@ -347,7 +347,7 @@ Conduct an **annual portability drill**: export all critical data from your prim
 
 #### Onboarding design: norms before tools
 
-The most powerful finding from aviation's Crew Resource Management (CRM) research is that technology habits established during initial training persist throughout a career. CRM teaches interpersonal skills, decision-making frameworks, and communication norms *before* introducing specific technical systems — and mandates that these norms are reinforced at every subsequent stage. The parallel to AI onboarding is direct.
+The most powerful finding from aviation's Crew Resource Management (CRM) research is that technology habits established during initial training persist throughout a career. CRM teaches interpersonal skills, decision-making frameworks, and communication norms _before_ introducing specific technical systems — and mandates that these norms are reinforced at every subsequent stage. The parallel to AI onboarding is direct.
 
 New employees should demonstrate core professional competency — the ability to perform their role's key analytical, creative, and judgement tasks — **before** receiving access to AI tools. This is not an anti-technology stance; it is the same principle that requires medical students to learn anatomy before using diagnostic AI, and pilots to fly manually before engaging autopilot. The sequence matters because initial reliance patterns, once established, are extremely resistant to change.
 
@@ -412,6 +412,7 @@ The interior of the compass has five concentric rings, corresponding to the five
 **Annotations:**
 
 Each quadrant carries three key labels at different rings:
+
 - G quadrant: "No policy" (ring 1), "Defined boundaries" (ring 3), "Adaptive governance" (ring 5)
 - R quadrant: "Capability atrophy" (ring 1), "Regular practice" (ring 3), "Continuous mastery" (ring 5)
 - I quadrant: "Single filtered source" (ring 1), "Multiple sources" (ring 3), "Systematic verification" (ring 5)
@@ -420,6 +421,7 @@ Each quadrant carries three key labels at different rings:
 **Historical cases positioned:**
 
 Place the ten historical cases at appropriate positions on the compass. The parasitic cases (Wei Zhongxian, Sejanus, Rasputin, al-Mansur, Fouché) sit in the outer rings, each in the quadrant where their primary failure occurred:
+
 - Wei Zhongxian: outer ring of G quadrant (governance vacuum)
 - Sejanus: outer ring of I quadrant (information filtering)
 - Rasputin: outer ring of R quadrant (emotional dependency, resilience failure)
@@ -427,11 +429,13 @@ Place the ten historical cases at appropriate positions on the compass. The para
 - Fouché: outer ring of I quadrant, bordering G (information monopoly + vendor lock-in)
 
 The complementary cases sit in the inner rings:
+
 - Lincoln/Seward: ring 4, spanning G and P (boundary-setting plus productive friction)
 - Elizabeth/Cecil: ring 5, centre — spanning all four quadrants equally (the gold standard)
 - Lennon/McCartney: ring 4, P quadrant (lateral creative tension)
 
 **Colour coding:**
+
 - Rings 1-2: Red tint (danger zone)
 - Ring 3: Yellow tint (drift zone)
 - Rings 4-5: Green tint (healthy zone)
@@ -440,6 +444,7 @@ The complementary cases sit in the inner rings:
 **Directional arrows:**
 
 Include two types of arrows:
+
 - **Drift arrows** (dashed, red): showing the natural tendency to drift outward from centre toward the parasitic periphery, present in all four quadrants. Label: "Default drift without active maintenance."
 - **Intervention arrows** (solid, green): showing movement inward from periphery toward centre when GRIP practices are applied. Label: "Active GRIP practices."
 
@@ -460,6 +465,7 @@ Include two types of arrows:
 5. **Displacement** (red): "Human is functionally a rubber stamp. All capability resides in AI system. Institutional knowledge locked in proprietary platforms. Human autonomy severely compromised." Position: Wei Zhongxian zone.
 
 **Annotations on the lifecycle:**
+
 - Between stages 1 and 2: "GRIP early warning signs appear here"
 - Between stages 2 and 3: "Lincoln Protocol intervention most effective here"
 - Between stages 3 and 4: "Privy Council Model intervention needed here"
@@ -467,6 +473,7 @@ Include two types of arrows:
 - Below stage 5: "Organisational-level structural reform needed"
 
 **Key data callouts** placed at relevant stages:
+
 - Stage 3: "MIT study: 47% brain connectivity reduction in LLM users"
 - Stage 4: "Bastani et al.: 17% worse on unassisted exams; Endoscopists: 20% accuracy drop in 3 months"
 - Stage 4: "SycEval: 58% sycophancy rate, 78.5% persistence"
@@ -477,6 +484,7 @@ Include two types of arrows:
 **Layout:** Standard radar/spider chart with eight axes, two per GRIP pillar. Each axis runs from 0 (centre) to 5 (perimeter).
 
 **Axes:**
+
 - G1: Policy and boundaries
 - G2: Override and accountability
 - R1: Independent capability
@@ -592,4 +600,4 @@ The pace matters less than the direction. An organisation that moves one maturit
 
 ---
 
-*The GRIP Framework is built on the recognition that the most consequential AI risk is not the machine becoming too powerful but the human becoming too passive. The ceiling is always you.*
+_The GRIP Framework is built on the recognition that the most consequential AI risk is not the machine becoming too powerful but the human becoming too passive. The ceiling is always you._

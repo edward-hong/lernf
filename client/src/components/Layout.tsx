@@ -42,13 +42,11 @@ export function Layout() {
         {
           path: '/mindset/historical-mapping',
           label: 'Historical Context',
-          placeholder: true,
         },
-        { path: '/mindset/ai-mapping', label: 'AI Mapping', placeholder: true },
+        { path: '/mindset/ai-mapping', label: 'AI Mapping' },
         {
           path: '/mindset/grip-framework',
           label: 'GRIP Framework',
-          placeholder: true,
         },
         {
           path: '/mindset/individual-audit',
