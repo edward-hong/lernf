@@ -22,6 +22,7 @@ import { WeiZhengTaizong } from './pages/mindset/case-studies/WeiZhengTaizong'
 import { SewardLincoln } from './pages/mindset/case-studies/SewardLincoln'
 import { LennonMcCartney } from './pages/mindset/case-studies/LennonMcCartney'
 import { WozniakJobs } from './pages/mindset/case-studies/WozniakJobs'
+import { AobaiKangxi } from './pages/mindset/case-studies/AobaiKangxi'
 
 export const router = createBrowserRouter([
   {
@@ -122,6 +123,10 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/case-studies/wozniak-jobs',
         element: <WozniakJobs />,
+      },
+      {
+        path: 'mindset/case-studies/aobai-kangxi',
+        element: <AobaiKangxi />,
       },
     ],
   },
