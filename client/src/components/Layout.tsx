@@ -57,6 +57,10 @@ export function Layout() {
           label: 'Organisational Audit',
         },
         {
+          path: '/mindset/ai-misconceptions',
+          label: 'AI Misconceptions',
+        },
+        {
           path: '/mindset/case-studies',
           label: 'Case Studies',
         },
