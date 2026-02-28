@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface MarkdownPageProps {
   title: string
@@ -9,7 +10,8 @@ export function MarkdownPage({ title, content }: MarkdownPageProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{title}</h1>
-      <div className="prose prose-gray max-w-none
+      <div
+        className="prose prose-gray max-w-none
         [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-8 [&_h1]:mb-4
         [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-gray-800 [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:border-b [&_h2]:border-gray-200 [&_h2]:pb-2
         [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-6 [&_h3]:mb-3
@@ -29,8 +31,9 @@ export function MarkdownPage({ title, content }: MarkdownPageProps) {
         [&_th]:border [&_th]:border-gray-300 [&_th]:bg-gray-50 [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_th]:text-gray-700
         [&_td]:border [&_td]:border-gray-300 [&_td]:px-4 [&_td]:py-2 [&_td]:text-gray-700
         [&_a]:text-blue-600 [&_a]:underline [&_a:hover]:text-blue-800
-      ">
-        <ReactMarkdown>{content}</ReactMarkdown>
+      "
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
       </div>
     </div>
   )

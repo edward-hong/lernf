@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import type { PRScenario, EvaluationResult } from '../../types/pr'
-import DiffLine from '../../components/PRReview/DiffLine'
-import Evaluation from '../../components/PRReview/Evaluation'
+import DiffLine from '../../components/tools/PRReview/DiffLine'
+import Evaluation from '../../components/tools/PRReview/Evaluation'
 
 const PRReview: React.FC = () => {
   const [loading, setLoading] = useState(false)
