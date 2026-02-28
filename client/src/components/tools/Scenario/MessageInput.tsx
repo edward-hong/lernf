@@ -62,7 +62,7 @@ export function MessageInput({
         handleSend()
       }
     },
-    [handleSend],
+    [handleSend]
   )
 
   const charCount = value.length
@@ -83,10 +83,8 @@ export function MessageInput({
             className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400 transition-colors"
           />
           <span
-            className={`absolute bottom-1.5 right-2 text-xs select-none ${
-              charCount > maxLength * 0.9
-                ? 'text-red-400'
-                : 'text-gray-300'
+            className={`absolute bottom-1.5 right-2 text-xs ${
+              charCount > maxLength * 0.9 ? 'text-red-400' : 'text-gray-300'
             }`}
             aria-hidden="true"
           >
@@ -97,7 +95,7 @@ export function MessageInput({
         <button
           onClick={handleSend}
           disabled={disabled || !value.trim()}
-          className="shrink-0 p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="shrink-0 p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed self-start"
           aria-label="Send message"
         >
           <svg
