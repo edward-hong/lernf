@@ -7,6 +7,9 @@ import { MessageInput } from '../../components/tools/Scenario/MessageInput'
 import { CompletionDialog } from '../../components/tools/Scenario/CompletionDialog'
 import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
 import { ScenarioSkeleton, ThinkingIndicator, EvaluationSpinner, InlineError } from '../../components/tools/Scenario/LoadingStates'
+import { AIMessageWithIntent } from '../../components/AIMessageWithIntent'
+import { IntentLegend } from '../../components/IntentLegend'
+import { IntentVisualizationToggle } from '../../components/IntentVisualizationToggle'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
@@ -16,9 +19,38 @@ import {
   resetCompletionDetector,
 } from '../../ai/completionDetector'
 import { generateNPCResponse } from '../../ai/npcGenerator'
+import { analyzeIntent } from '../../ai/intentAnalyzer'
 import { evaluateScenario } from '../../ai/gripEvaluator'
 import { EVALUATION_GUIDANCE } from '../../data/scenarios/prod-incident-001'
 import { recordAttempt } from '../../utils/progress'
+import type { IntentAnalysisResult } from '../../types/intent'
+import type { IntentVisualizationSettings } from '../../types/message'
+import { DEFAULT_INTENT_SETTINGS } from '../../types/message'
+
+// ---- localStorage persistence for intent settings -------------------------
+
+const INTENT_SETTINGS_KEY = 'lernf-intent-settings'
+
+function loadIntentSettings(): IntentVisualizationSettings {
+  try {
+    const stored = localStorage.getItem(INTENT_SETTINGS_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return { ...DEFAULT_INTENT_SETTINGS, ...parsed }
+    }
+  } catch {
+    // Fall through to defaults
+  }
+  return DEFAULT_INTENT_SETTINGS
+}
+
+function saveIntentSettings(settings: IntentVisualizationSettings): void {
+  try {
+    localStorage.setItem(INTENT_SETTINGS_KEY, JSON.stringify(settings))
+  } catch {
+    // localStorage full or unavailable — ignore
+  }
+}
 
 interface ScenarioPlayerProps {
   scenarioId: string
@@ -44,16 +76,57 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const [error, setError] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(false)
 
+  // Intent visualization state
+  const [intentSettings, setIntentSettings] = useState<IntentVisualizationSettings>(loadIntentSettings)
+  const [intentResults, setIntentResults] = useState<Record<number, IntentAnalysisResult>>({})
+  const [showIntentSettings, setShowIntentSettings] = useState(false)
+
+  // Persist intent settings to localStorage
+  const handleIntentSettingsChange = useCallback((settings: IntentVisualizationSettings) => {
+    setIntentSettings(settings)
+    saveIntentSettings(settings)
+  }, [])
+
+  // Run background intent analysis for NPC/AI messages
+  const analyzeMessageIntent = useCallback((turnIndex: number, content: string) => {
+    analyzeIntent(content).then((result) => {
+      setIntentResults((prev) => ({ ...prev, [turnIndex]: result }))
+    }).catch(() => {
+      // Intent analysis failure is non-critical
+    })
+  }, [])
+
   // Memoize persona list
   const assignedPersonas = useMemo(() => {
     if (!scenario) return []
     return Object.values(scenario.assignedPersonas)
   }, [scenario?.assignedPersonas])
 
+  // Build a lookup of previous NPC/AI intent for each message (for smoothing)
+  const previousIntentByTurn = useMemo(() => {
+    if (!scenario) return {}
+    const lookup: Record<number, IntentAnalysisResult> = {}
+    let lastNpcIntent: IntentAnalysisResult | undefined
+
+    for (const msg of scenario.messages) {
+      if (msg.speakerType === 'npc' || msg.speakerType === 'ai') {
+        if (lastNpcIntent) {
+          lookup[msg.turnIndex] = lastNpcIntent
+        }
+        const result = intentResults[msg.turnIndex]
+        if (result) {
+          lastNpcIntent = result
+        }
+      }
+    }
+    return lookup
+  }, [scenario?.messages, intentResults])
+
   // Initialize scenario if not already active
   useEffect(() => {
     if (!scenario || scenario.definition.id !== scenarioId) {
       setIsInitializing(true)
+      setIntentResults({})
       try {
         resetCompletionDetector()
         initializeScenario(scenarioId)
@@ -64,6 +137,21 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
       }
     }
   }, [scenarioId, scenario, initializeScenario])
+
+  // Run intent analysis on new NPC/AI messages
+  const analyzedTurnsRef = useRef<Set<number>>(new Set())
+  useEffect(() => {
+    if (!scenario || !intentSettings.enabled) return
+    for (const msg of scenario.messages) {
+      if (
+        (msg.speakerType === 'npc' || msg.speakerType === 'ai') &&
+        !analyzedTurnsRef.current.has(msg.turnIndex)
+      ) {
+        analyzedTurnsRef.current.add(msg.turnIndex)
+        analyzeMessageIntent(msg.turnIndex, msg.content)
+      }
+    }
+  }, [scenario?.messages, intentSettings.enabled, analyzeMessageIntent])
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -237,6 +325,8 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const handleTryAgain = useCallback(() => {
     clearScenario()
     resetCompletionDetector()
+    setIntentResults({})
+    analyzedTurnsRef.current.clear()
     initializeScenario(scenarioId)
   }, [clearScenario, initializeScenario, scenarioId])
 
@@ -382,6 +472,29 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       <ScenarioHeader scenario={scenario} onEndScenario={handleEndScenario} />
 
+      {/* Intent legend (collapsible, fixed position) */}
+      {intentSettings.enabled && <IntentLegend />}
+
+      {/* Intent settings popover */}
+      {showIntentSettings && (
+        <div className="fixed top-20 right-4 z-50 mt-14">
+          <IntentVisualizationToggle
+            settings={intentSettings}
+            onChange={handleIntentSettingsChange}
+          />
+        </div>
+      )}
+
+      {/* Intent settings toggle button */}
+      <button
+        onClick={() => setShowIntentSettings((prev) => !prev)}
+        className="fixed bottom-20 right-4 z-40 w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-center text-xs font-semibold text-gray-600"
+        aria-label={showIntentSettings ? 'Hide intent settings' : 'Show intent settings'}
+        type="button"
+      >
+        IV
+      </button>
+
       <div
         className="flex-1 overflow-y-auto bg-gray-50"
         role="log"
@@ -395,13 +508,31 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
             </div>
           )}
 
-          {scenario.messages.map((message) => (
-            <MessageBubble
-              key={message.turnIndex}
-              message={message}
-              colors={scenario.colors}
-            />
-          ))}
+          {scenario.messages.map((message) => {
+            // Render NPC/AI messages with intent spine
+            if (message.speakerType === 'npc' || message.speakerType === 'ai') {
+              const prevIntentResult = previousIntentByTurn[message.turnIndex]
+              return (
+                <AIMessageWithIntent
+                  key={message.turnIndex}
+                  message={message}
+                  intentAnalysis={intentResults[message.turnIndex]}
+                  previousIntent={prevIntentResult?.intent}
+                  colors={scenario.colors}
+                  settings={intentSettings}
+                />
+              )
+            }
+
+            // User and system messages use standard bubble
+            return (
+              <MessageBubble
+                key={message.turnIndex}
+                message={message}
+                colors={scenario.colors}
+              />
+            )
+          })}
 
           {isNpcThinking && (
             <ThinkingIndicator speakerName={thinkingNpc ?? undefined} />
