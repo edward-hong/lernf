@@ -23,6 +23,7 @@ import { SewardLincoln } from './pages/mindset/case-studies/SewardLincoln'
 import { LennonMcCartney } from './pages/mindset/case-studies/LennonMcCartney'
 import { WozniakJobs } from './pages/mindset/case-studies/WozniakJobs'
 import { AobaiKangxi } from './pages/mindset/case-studies/AobaiKangxi'
+import { AiMisconceptions } from './pages/mindset/AiMisconceptions'
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/organisational-audit',
         element: <OrganisationalAudit />,
+      },
+      {
+        path: 'mindset/ai-misconceptions',
+        element: <AiMisconceptions />,
       },
       // Case Studies routes
       {
