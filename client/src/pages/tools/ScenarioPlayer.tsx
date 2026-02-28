@@ -7,7 +7,7 @@ import { MessageInput } from '../../components/tools/Scenario/MessageInput'
 import { CompletionDialog } from '../../components/tools/Scenario/CompletionDialog'
 import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
 import { ScenarioSkeleton, ThinkingIndicator, EvaluationSpinner, InlineError } from '../../components/tools/Scenario/LoadingStates'
-import { AIMessageWithIntent } from '../../components/AIMessageWithIntent'
+import { AIMessageWithIntentAnalysis } from '../../components/AIMessageWithIntentAnalysis'
 import { IntentLegend } from '../../components/IntentLegend'
 import { IntentVisualizationToggle } from '../../components/IntentVisualizationToggle'
 import ReactMarkdown from 'react-markdown'
@@ -19,38 +19,9 @@ import {
   resetCompletionDetector,
 } from '../../ai/completionDetector'
 import { generateNPCResponse } from '../../ai/npcGenerator'
-import { analyzeIntent } from '../../ai/intentAnalyzer'
 import { evaluateScenario } from '../../ai/gripEvaluator'
 import { EVALUATION_GUIDANCE } from '../../data/scenarios/prod-incident-001'
 import { recordAttempt } from '../../utils/progress'
-import type { IntentAnalysisResult } from '../../types/intent'
-import type { IntentVisualizationSettings } from '../../types/message'
-import { DEFAULT_INTENT_SETTINGS } from '../../types/message'
-
-// ---- localStorage persistence for intent settings -------------------------
-
-const INTENT_SETTINGS_KEY = 'lernf-intent-settings'
-
-function loadIntentSettings(): IntentVisualizationSettings {
-  try {
-    const stored = localStorage.getItem(INTENT_SETTINGS_KEY)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      return { ...DEFAULT_INTENT_SETTINGS, ...parsed }
-    }
-  } catch {
-    // Fall through to defaults
-  }
-  return DEFAULT_INTENT_SETTINGS
-}
-
-function saveIntentSettings(settings: IntentVisualizationSettings): void {
-  try {
-    localStorage.setItem(INTENT_SETTINGS_KEY, JSON.stringify(settings))
-  } catch {
-    // localStorage full or unavailable — ignore
-  }
-}
 
 interface ScenarioPlayerProps {
   scenarioId: string
@@ -61,12 +32,16 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const {
     scenario,
     pendingCompletion,
+    intentSettings,
+    intentCache,
     initializeScenario,
     addTurn,
     setPhase,
     checkCompletion,
     setPendingCompletion,
     clearScenario,
+    setIntentSettings,
+    clearIntentCache,
   } = useScenarioStore()
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -75,26 +50,15 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(false)
-
-  // Intent visualization state
-  const [intentSettings, setIntentSettings] = useState<IntentVisualizationSettings>(loadIntentSettings)
-  const [intentResults, setIntentResults] = useState<Record<number, IntentAnalysisResult>>({})
   const [showIntentSettings, setShowIntentSettings] = useState(false)
 
-  // Persist intent settings to localStorage
-  const handleIntentSettingsChange = useCallback((settings: IntentVisualizationSettings) => {
-    setIntentSettings(settings)
-    saveIntentSettings(settings)
-  }, [])
-
-  // Run background intent analysis for NPC/AI messages
-  const analyzeMessageIntent = useCallback((turnIndex: number, content: string) => {
-    analyzeIntent(content).then((result) => {
-      setIntentResults((prev) => ({ ...prev, [turnIndex]: result }))
-    }).catch(() => {
-      // Intent analysis failure is non-critical
-    })
-  }, [])
+  // Intent settings change handler (persists via Zustand store → localStorage)
+  const handleIntentSettingsChange = useCallback(
+    (settings: Parameters<typeof setIntentSettings>[0]) => {
+      setIntentSettings(settings)
+    },
+    [setIntentSettings],
+  )
 
   // Memoize persona list
   const assignedPersonas = useMemo(() => {
@@ -104,29 +68,29 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
 
   // Build a lookup of previous NPC/AI intent for each message (for smoothing)
   const previousIntentByTurn = useMemo(() => {
-    if (!scenario) return {}
-    const lookup: Record<number, IntentAnalysisResult> = {}
-    let lastNpcIntent: IntentAnalysisResult | undefined
+    if (!scenario) return {} as Record<number, typeof intentCache[number]>
+    const lookup: Record<number, typeof intentCache[number]> = {}
+    let lastNpcIntent: typeof intentCache[number] | undefined
 
     for (const msg of scenario.messages) {
       if (msg.speakerType === 'npc' || msg.speakerType === 'ai') {
         if (lastNpcIntent) {
           lookup[msg.turnIndex] = lastNpcIntent
         }
-        const result = intentResults[msg.turnIndex]
+        const result = intentCache[msg.turnIndex]
         if (result) {
           lastNpcIntent = result
         }
       }
     }
     return lookup
-  }, [scenario?.messages, intentResults])
+  }, [scenario?.messages, intentCache])
 
   // Initialize scenario if not already active
   useEffect(() => {
     if (!scenario || scenario.definition.id !== scenarioId) {
       setIsInitializing(true)
-      setIntentResults({})
+      clearIntentCache()
       try {
         resetCompletionDetector()
         initializeScenario(scenarioId)
@@ -136,22 +100,7 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
         setIsInitializing(false)
       }
     }
-  }, [scenarioId, scenario, initializeScenario])
-
-  // Run intent analysis on new NPC/AI messages
-  const analyzedTurnsRef = useRef<Set<number>>(new Set())
-  useEffect(() => {
-    if (!scenario || !intentSettings.enabled) return
-    for (const msg of scenario.messages) {
-      if (
-        (msg.speakerType === 'npc' || msg.speakerType === 'ai') &&
-        !analyzedTurnsRef.current.has(msg.turnIndex)
-      ) {
-        analyzedTurnsRef.current.add(msg.turnIndex)
-        analyzeMessageIntent(msg.turnIndex, msg.content)
-      }
-    }
-  }, [scenario?.messages, intentSettings.enabled, analyzeMessageIntent])
+  }, [scenarioId, scenario, initializeScenario, clearIntentCache])
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -325,8 +274,6 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const handleTryAgain = useCallback(() => {
     clearScenario()
     resetCompletionDetector()
-    setIntentResults({})
-    analyzedTurnsRef.current.clear()
     initializeScenario(scenarioId)
   }, [clearScenario, initializeScenario, scenarioId])
 
@@ -509,14 +456,13 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
           )}
 
           {scenario.messages.map((message) => {
-            // Render NPC/AI messages with intent spine
+            // Render NPC/AI messages with intent spine and async analysis
             if (message.speakerType === 'npc' || message.speakerType === 'ai') {
               const prevIntentResult = previousIntentByTurn[message.turnIndex]
               return (
-                <AIMessageWithIntent
+                <AIMessageWithIntentAnalysis
                   key={message.turnIndex}
                   message={message}
-                  intentAnalysis={intentResults[message.turnIndex]}
                   previousIntent={prevIntentResult?.intent}
                   colors={scenario.colors}
                   settings={intentSettings}

@@ -19,6 +19,9 @@ import type {
 } from '../types/scenario'
 import type { AiPersonaVariant } from '../data/scenarios/prod-incident-001'
 import type { CompletionDetectionResult } from '../ai/completionDetector'
+import type { IntentAnalysisResult } from '../types/intent'
+import type { IntentVisualizationSettings } from '../types/message'
+import { DEFAULT_INTENT_SETTINGS } from '../types/message'
 import { PROD_INCIDENT_001 } from '../data/scenarios/prod-incident-001'
 import { PROJECT_LEAD_DELAYS_002 } from '../data/scenarios/project-lead-delays-002'
 import { PERF_REVIEW_PROMOTION_003 } from '../data/scenarios/perf-review-promotion-003'
@@ -49,6 +52,30 @@ export type CompletionTrigger =
   | 'user-ended'
   | null
 
+// ---- Intent Settings Persistence ------------------------------------------
+
+const INTENT_SETTINGS_KEY = 'lernf-intent-settings'
+
+function loadIntentSettings(): IntentVisualizationSettings {
+  try {
+    const stored = localStorage.getItem(INTENT_SETTINGS_KEY)
+    if (stored) {
+      return { ...DEFAULT_INTENT_SETTINGS, ...JSON.parse(stored) }
+    }
+  } catch {
+    // Fall through to defaults
+  }
+  return DEFAULT_INTENT_SETTINGS
+}
+
+function saveIntentSettings(settings: IntentVisualizationSettings): void {
+  try {
+    localStorage.setItem(INTENT_SETTINGS_KEY, JSON.stringify(settings))
+  } catch {
+    // localStorage full or unavailable — ignore
+  }
+}
+
 // ---- Store Shape ----------------------------------------------------------
 
 interface ScenarioStoreState {
@@ -60,6 +87,13 @@ interface ScenarioStoreState {
   accessedTools: string[]
   /** Pending completion detection result awaiting user confirmation, or null. */
   pendingCompletion: CompletionDetectionResult | null
+
+  /** Intent visualization settings (persisted to localStorage). */
+  intentSettings: IntentVisualizationSettings
+  /** Cache of intent analysis results keyed by turn index. */
+  intentCache: Record<number, IntentAnalysisResult>
+  /** Turn index currently being analyzed, or null. */
+  analyzingIntent: number | null
 }
 
 interface ScenarioStoreActions {
@@ -106,6 +140,18 @@ interface ScenarioStoreActions {
 
   /** Clear all scenario state and remove persisted data. */
   clearScenario: () => void
+
+  /** Update intent visualization settings (persists to localStorage). */
+  setIntentSettings: (settings: IntentVisualizationSettings) => void
+
+  /** Store an intent analysis result for a given turn index. */
+  setIntentResult: (turnIndex: number, result: IntentAnalysisResult) => void
+
+  /** Set which turn is currently being analyzed (null when idle). */
+  setAnalyzingIntent: (turnIndex: number | null) => void
+
+  /** Clear all cached intent results. */
+  clearIntentCache: () => void
 }
 
 export type ScenarioStore = ScenarioStoreState & ScenarioStoreActions
@@ -125,6 +171,9 @@ export const useScenarioStore = create<ScenarioStore>()(
       aiPersona: null,
       accessedTools: [],
       pendingCompletion: null,
+      intentSettings: loadIntentSettings(),
+      intentCache: {},
+      analyzingIntent: null,
 
       // -- Actions --------------------------------------------------------
 
@@ -263,7 +312,33 @@ export const useScenarioStore = create<ScenarioStore>()(
       },
 
       clearScenario: () => {
-        set({ scenario: null, aiPersona: null, accessedTools: [], pendingCompletion: null })
+        set({
+          scenario: null,
+          aiPersona: null,
+          accessedTools: [],
+          pendingCompletion: null,
+          intentCache: {},
+          analyzingIntent: null,
+        })
+      },
+
+      setIntentSettings: (settings) => {
+        saveIntentSettings(settings)
+        set({ intentSettings: settings })
+      },
+
+      setIntentResult: (turnIndex, result) => {
+        set((state) => ({
+          intentCache: { ...state.intentCache, [turnIndex]: result },
+        }))
+      },
+
+      setAnalyzingIntent: (turnIndex) => {
+        set({ analyzingIntent: turnIndex })
+      },
+
+      clearIntentCache: () => {
+        set({ intentCache: {}, analyzingIntent: null })
       },
     }),
     {
@@ -273,6 +348,7 @@ export const useScenarioStore = create<ScenarioStore>()(
         aiPersona: state.aiPersona,
         accessedTools: state.accessedTools,
         pendingCompletion: state.pendingCompletion,
+        intentCache: state.intentCache,
       }),
     },
   ),
