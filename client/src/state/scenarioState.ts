@@ -18,6 +18,7 @@ import type {
   ScenarioDefinition,
 } from '../types/scenario'
 import type { AiPersonaVariant } from '../data/scenarios/prod-incident-001'
+import type { CompletionDetectionResult } from '../ai/completionDetector'
 import { PROD_INCIDENT_001 } from '../data/scenarios/prod-incident-001'
 import { buildScenarioColorConfig } from '../utils/colors'
 
@@ -53,6 +54,8 @@ interface ScenarioStoreState {
   aiPersona: AiPersonaVariant | null
   /** Unique tool/action codes the user has accessed during this session. */
   accessedTools: string[]
+  /** Pending completion detection result awaiting user confirmation, or null. */
+  pendingCompletion: CompletionDetectionResult | null
 }
 
 interface ScenarioStoreActions {
@@ -94,6 +97,9 @@ interface ScenarioStoreActions {
   /** Record that the user has discovered a hidden factor. */
   discoverFactor: (factorId: string) => void
 
+  /** Set a pending completion detection result for the user to confirm or dismiss. */
+  setPendingCompletion: (result: CompletionDetectionResult | null) => void
+
   /** Clear all scenario state and remove persisted data. */
   clearScenario: () => void
 }
@@ -114,6 +120,7 @@ export const useScenarioStore = create<ScenarioStore>()(
       scenario: null,
       aiPersona: null,
       accessedTools: [],
+      pendingCompletion: null,
 
       // -- Actions --------------------------------------------------------
 
@@ -160,7 +167,7 @@ export const useScenarioStore = create<ScenarioStore>()(
           completedAt: null,
         }
 
-        set({ scenario, aiPersona, accessedTools: [] })
+        set({ scenario, aiPersona, accessedTools: [], pendingCompletion: null })
       },
 
       addTurn: (message, signals) => {
@@ -247,8 +254,12 @@ export const useScenarioStore = create<ScenarioStore>()(
         })
       },
 
+      setPendingCompletion: (result) => {
+        set({ pendingCompletion: result })
+      },
+
       clearScenario: () => {
-        set({ scenario: null, aiPersona: null, accessedTools: [] })
+        set({ scenario: null, aiPersona: null, accessedTools: [], pendingCompletion: null })
       },
     }),
     {
@@ -257,6 +268,7 @@ export const useScenarioStore = create<ScenarioStore>()(
         scenario: state.scenario,
         aiPersona: state.aiPersona,
         accessedTools: state.accessedTools,
+        pendingCompletion: state.pendingCompletion,
       }),
     },
   ),

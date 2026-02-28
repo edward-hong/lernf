@@ -252,6 +252,96 @@ Make it realistic. 30-50 lines total. Return only valid JSON.`
   }
 })
 
+// Scenario completion detection — AI evaluator
+app.post('/api/evaluate-completion', async (req, res) => {
+  try {
+    const { scenarioDescription, conversationHistory, completionSignals } = req.body
+
+    if (!scenarioDescription || !conversationHistory) {
+      return res
+        .status(400)
+        .json({ error: 'scenarioDescription and conversationHistory are required' })
+    }
+
+    const prompt = `You are an evaluator for a workplace scenario role-play training exercise.
+
+SCENARIO DESCRIPTION:
+${scenarioDescription}
+
+COMPLETION SIGNALS (indicators that the scenario has reached a natural conclusion):
+${completionSignals}
+
+CONVERSATION HISTORY:
+${conversationHistory}
+
+Analyze the conversation and determine if the scenario has reached a natural completion point. A scenario is complete when the user has meaningfully engaged with the core challenge and either:
+- Reached a decision or resolution on the main issue
+- Discovered and addressed the key hidden dynamics
+- Exhausted the productive avenues of exploration
+- Arrived at a clear action plan or conclusion
+
+If the scenario is NOT complete, suggest what the user should explore next (without revealing hidden information).
+
+Return ONLY valid JSON in this exact format:
+{
+  "scenarioComplete": true or false,
+  "reasoning": "Brief explanation of why the scenario is or isn't complete",
+  "suggestedPrompt": "If not complete, a natural next question or action for the user. Empty string if complete."
+}`
+
+    const response = await fetch(
+      'https://api.deepseek.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          max_tokens: 500,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return res.status(response.status).json({
+        error: 'DeepSeek API error',
+        details: error,
+      })
+    }
+
+    const data = await response.json()
+    let output = data.choices[0].message.content.trim()
+
+    // Clean markdown code blocks
+    output = output
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
+
+    const result = JSON.parse(output)
+
+    res.json({
+      success: true,
+      result: {
+        scenarioComplete: Boolean(result.scenarioComplete),
+        reasoning: result.reasoning || '',
+        suggestedPrompt: result.suggestedPrompt || '',
+      },
+    })
+  } catch (error) {
+    console.error('Completion Evaluation Error:', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+    })
+  }
+})
+
 // Evaluate PR review
 app.post('/api/evaluate-pr', async (req, res) => {
   try {
