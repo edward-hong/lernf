@@ -415,3 +415,33 @@ export const generateConsequence = api(
     return { success: true, result };
   },
 );
+
+// ---- Analyze Intent -------------------------------------------------------
+
+interface AnalyzeIntentRequest {
+  prompt: string;
+}
+
+interface AnalyzeIntentResponse {
+  success: boolean;
+  output: string;
+}
+
+export const analyzeIntent = api(
+  { method: "POST", path: "/api/analyze-intent", expose: true },
+  async (req: AnalyzeIntentRequest): Promise<AnalyzeIntentResponse> => {
+    if (!req.prompt) {
+      throw new APIError(ErrCode.InvalidArgument, "prompt is required");
+    }
+
+    const rawOutput = await callDeepseek(
+      [{ role: "user", content: req.prompt }],
+      0,
+      500,
+    );
+
+    const output = cleanJsonOutput(rawOutput);
+
+    return { success: true, output };
+  },
+);
