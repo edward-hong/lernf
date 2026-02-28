@@ -55,6 +55,12 @@ export function HomePage() {
       icon: '💡',
     },
     {
+      title: 'GRIP Compass',
+      description: 'Interactive visualization of 13 case studies on the GRIP power dynamics compass',
+      path: '/mindset/grip-compass',
+      icon: '🧭',
+    },
+    {
       title: 'Case Studies',
       description: '13 historical case studies analysed through the GRIP framework',
       path: '/mindset/case-studies',

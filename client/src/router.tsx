@@ -24,6 +24,7 @@ import { LennonMcCartney } from './pages/mindset/case-studies/LennonMcCartney'
 import { WozniakJobs } from './pages/mindset/case-studies/WozniakJobs'
 import { AobaiKangxi } from './pages/mindset/case-studies/AobaiKangxi'
 import { AiMisconceptions } from './pages/mindset/AiMisconceptions'
+import { GripCompass } from './pages/mindset/GripCompass'
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
       {
         path: 'mindset/ai-misconceptions',
         element: <AiMisconceptions />,
+      },
+      {
+        path: 'mindset/grip-compass',
+        element: <GripCompass />,
       },
       // Case Studies routes
       {
