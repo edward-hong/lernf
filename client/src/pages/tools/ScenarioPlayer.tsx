@@ -7,9 +7,6 @@ import { MessageInput } from '../../components/tools/Scenario/MessageInput'
 import { CompletionDialog } from '../../components/tools/Scenario/CompletionDialog'
 import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
 import { ScenarioSkeleton, ThinkingIndicator, EvaluationSpinner, InlineError } from '../../components/tools/Scenario/LoadingStates'
-import { AIMessageWithIntentAnalysis } from '../../components/AIMessageWithIntentAnalysis'
-import { IntentLegend } from '../../components/IntentLegend'
-import { IntentVisualizationToggle } from '../../components/IntentVisualizationToggle'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
@@ -32,16 +29,12 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const {
     scenario,
     pendingCompletion,
-    intentSettings,
-    intentCache,
     initializeScenario,
     addTurn,
     setPhase,
     checkCompletion,
     setPendingCompletion,
     clearScenario,
-    setIntentSettings,
-    clearIntentCache,
   } = useScenarioStore()
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -50,15 +43,6 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(false)
-  const [showIntentSettings, setShowIntentSettings] = useState(false)
-
-  // Intent settings change handler (persists via Zustand store → localStorage)
-  const handleIntentSettingsChange = useCallback(
-    (settings: Parameters<typeof setIntentSettings>[0]) => {
-      setIntentSettings(settings)
-    },
-    [setIntentSettings],
-  )
 
   // Memoize persona list
   const assignedPersonas = useMemo(() => {
@@ -66,31 +50,10 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
     return Object.values(scenario.assignedPersonas)
   }, [scenario?.assignedPersonas])
 
-  // Build a lookup of previous NPC/AI intent for each message (for smoothing)
-  const previousIntentByTurn = useMemo(() => {
-    if (!scenario) return {} as Record<number, typeof intentCache[number]>
-    const lookup: Record<number, typeof intentCache[number]> = {}
-    let lastNpcIntent: typeof intentCache[number] | undefined
-
-    for (const msg of scenario.messages) {
-      if (msg.speakerType === 'npc' || msg.speakerType === 'ai') {
-        if (lastNpcIntent) {
-          lookup[msg.turnIndex] = lastNpcIntent
-        }
-        const result = intentCache[msg.turnIndex]
-        if (result) {
-          lastNpcIntent = result
-        }
-      }
-    }
-    return lookup
-  }, [scenario?.messages, intentCache])
-
   // Initialize scenario if not already active
   useEffect(() => {
     if (!scenario || scenario.definition.id !== scenarioId) {
       setIsInitializing(true)
-      clearIntentCache()
       try {
         resetCompletionDetector()
         initializeScenario(scenarioId)
@@ -100,7 +63,7 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
         setIsInitializing(false)
       }
     }
-  }, [scenarioId, scenario, initializeScenario, clearIntentCache])
+  }, [scenarioId, scenario, initializeScenario])
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -419,29 +382,6 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       <ScenarioHeader scenario={scenario} onEndScenario={handleEndScenario} />
 
-      {/* Intent legend (collapsible, fixed position) */}
-      {intentSettings.enabled && <IntentLegend />}
-
-      {/* Intent settings popover */}
-      {showIntentSettings && (
-        <div className="fixed top-20 right-4 z-50 mt-14">
-          <IntentVisualizationToggle
-            settings={intentSettings}
-            onChange={handleIntentSettingsChange}
-          />
-        </div>
-      )}
-
-      {/* Intent settings toggle button */}
-      <button
-        onClick={() => setShowIntentSettings((prev) => !prev)}
-        className="fixed bottom-20 right-4 z-40 w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-center text-xs font-semibold text-gray-600"
-        aria-label={showIntentSettings ? 'Hide intent settings' : 'Show intent settings'}
-        type="button"
-      >
-        IV
-      </button>
-
       <div
         className="flex-1 overflow-y-auto bg-gray-50"
         role="log"
@@ -455,30 +395,13 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
             </div>
           )}
 
-          {scenario.messages.map((message) => {
-            // Render NPC/AI messages with intent spine and async analysis
-            if (message.speakerType === 'npc' || message.speakerType === 'ai') {
-              const prevIntentResult = previousIntentByTurn[message.turnIndex]
-              return (
-                <AIMessageWithIntentAnalysis
-                  key={message.turnIndex}
-                  message={message}
-                  previousIntent={prevIntentResult?.intent}
-                  colors={scenario.colors}
-                  settings={intentSettings}
-                />
-              )
-            }
-
-            // User and system messages use standard bubble
-            return (
-              <MessageBubble
-                key={message.turnIndex}
-                message={message}
-                colors={scenario.colors}
-              />
-            )
-          })}
+          {scenario.messages.map((message) => (
+            <MessageBubble
+              key={message.turnIndex}
+              message={message}
+              colors={scenario.colors}
+            />
+          ))}
 
           {isNpcThinking && (
             <ThinkingIndicator speakerName={thinkingNpc ?? undefined} />
