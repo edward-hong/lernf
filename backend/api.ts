@@ -43,10 +43,71 @@ async function callDeepseek(
 }
 
 function cleanJsonOutput(text: string): string {
-  return text
+  // Strip markdown code fences
+  let cleaned = text
     .replace(/```json\n?/g, '')
     .replace(/```\n?/g, '')
     .trim()
+
+  // Extract the JSON object/array (first { or [ to its matching closing bracket)
+  const startObj = cleaned.indexOf('{')
+  const startArr = cleaned.indexOf('[')
+  let start: number
+  let closingBracket: string
+
+  if (startObj === -1 && startArr === -1) return cleaned
+  if (startObj === -1) {
+    start = startArr
+    closingBracket = ']'
+  } else if (startArr === -1) {
+    start = startObj
+    closingBracket = '}'
+  } else if (startObj < startArr) {
+    start = startObj
+    closingBracket = '}'
+  } else {
+    start = startArr
+    closingBracket = ']'
+  }
+
+  const end = cleaned.lastIndexOf(closingBracket)
+  if (end === -1) return cleaned
+  cleaned = cleaned.slice(start, end + 1)
+
+  // Remove single-line comments (// ...) that are NOT inside JSON strings.
+  // Process line by line: track whether we're inside a string to avoid
+  // stripping comment-like content within string values.
+  cleaned = cleaned
+    .split('\n')
+    .map((line) => {
+      let inString = false
+      let escaped = false
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i]
+        if (escaped) {
+          escaped = false
+          continue
+        }
+        if (ch === '\\') {
+          escaped = true
+          continue
+        }
+        if (ch === '"') {
+          inString = !inString
+          continue
+        }
+        if (!inString && ch === '/' && line[i + 1] === '/') {
+          return line.slice(0, i).trimEnd()
+        }
+      }
+      return line
+    })
+    .join('\n')
+
+  // Remove trailing commas before } or ]
+  cleaned = cleaned.replace(/,\s*([}\]])/g, '$1')
+
+  return cleaned.trim()
 }
 
 // ---- Health Check -----------------------------------------------------------
