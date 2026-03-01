@@ -1,71 +1,71 @@
-import { api, APIError, ErrCode } from "encore.dev/api";
-import { secret } from "encore.dev/config";
+import { api, APIError, ErrCode } from 'encore.dev/api'
+import { secret } from 'encore.dev/config'
 
 // ---- Secrets ----------------------------------------------------------------
 
-const DeepseekApiKey = secret("DeepseekApiKey");
+const DeepseekApiKey = secret('DeepSeekAPIKey')
 
 // ---- Shared Helpers ---------------------------------------------------------
 
-const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
+const DEEPSEEK_URL = 'https://api.deepseek.com/v1/chat/completions'
 
 interface DeepseekMessage {
-  role: string;
-  content: string;
+  role: string
+  content: string
 }
 
 async function callDeepseek(
   messages: DeepseekMessage[],
   temperature: number,
-  maxTokens: number,
+  maxTokens: number
 ): Promise<string> {
   const response = await fetch(DEEPSEEK_URL, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${DeepseekApiKey()}`,
     },
     body: JSON.stringify({
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages,
       temperature,
       max_tokens: maxTokens,
     }),
-  });
+  })
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new APIError(ErrCode.Unavailable, `DeepSeek API error: ${error}`);
+    const error = await response.text()
+    throw new APIError(ErrCode.Unavailable, `DeepSeek API error: ${error}`)
   }
 
-  const data = await response.json();
-  return data.choices[0].message.content;
+  const data = await response.json()
+  return data.choices[0].message.content
 }
 
 function cleanJsonOutput(text: string): string {
   return text
-    .replace(/```json\n?/g, "")
-    .replace(/```\n?/g, "")
-    .trim();
+    .replace(/```json\n?/g, '')
+    .replace(/```\n?/g, '')
+    .trim()
 }
 
 // ---- Health Check -----------------------------------------------------------
 
 interface HealthResponse {
-  message: string;
+  message: string
 }
 
 export const healthCheck = api(
-  { method: "GET", path: "/", expose: true },
+  { method: 'GET', path: '/', expose: true },
   async (): Promise<HealthResponse> => {
-    return { message: "Code Review Practice API - Running" };
-  },
-);
+    return { message: 'Code Review Practice API - Running' }
+  }
+)
 
 interface DetailedHealthResponse {
-  status: "ok" | "error";
-  timestamp: string;
-  environment: string;
+  status: 'ok' | 'error'
+  timestamp: string
+  environment: string
 }
 
 /**
@@ -73,100 +73,100 @@ interface DetailedHealthResponse {
  * Used by Encore Cloud and Vercel to verify backend is running.
  */
 export const health = api(
-  { expose: true, method: "GET", path: "/api/health" },
+  { expose: true, method: 'GET', path: '/api/health' },
   async (): Promise<DetailedHealthResponse> => {
     return {
-      status: "ok",
+      status: 'ok',
       timestamp: new Date().toISOString(),
-      environment: process.env.ENCORE_ENVIRONMENT || "development",
-    };
-  },
-);
+      environment: process.env.ENCORE_ENVIRONMENT || 'development',
+    }
+  }
+)
 
 // ---- DeepSeek Generic Endpoint ----------------------------------------------
 
 interface DeepseekRequest {
-  prompt: string;
+  prompt: string
 }
 
 interface DeepseekResponse {
-  success: boolean;
-  output: string;
+  success: boolean
+  output: string
 }
 
 export const deepseek = api(
-  { method: "POST", path: "/api/deepseek", expose: true },
+  { method: 'POST', path: '/api/deepseek', expose: true },
   async (req: DeepseekRequest): Promise<DeepseekResponse> => {
     if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, "Prompt is required");
+      throw new APIError(ErrCode.InvalidArgument, 'Prompt is required')
     }
 
     let output = await callDeepseek(
-      [{ role: "user", content: req.prompt }],
+      [{ role: 'user', content: req.prompt }],
       0.7,
-      2000,
-    );
+      2000
+    )
 
     // Clean markdown code blocks if trying to parse as JSON
     if (
-      req.prompt.includes("Format as JSON") ||
-      req.prompt.includes("Return ONLY valid JSON")
+      req.prompt.includes('Format as JSON') ||
+      req.prompt.includes('Return ONLY valid JSON')
     ) {
-      output = cleanJsonOutput(output);
+      output = cleanJsonOutput(output)
     }
 
-    return { success: true, output };
-  },
-);
+    return { success: true, output }
+  }
+)
 
 // ---- NPC Dialogue -----------------------------------------------------------
 
 interface NpcDialogueRequest {
-  systemPrompt: string;
-  messages: { role: string; content: string }[];
+  systemPrompt: string
+  messages: { role: string; content: string }[]
 }
 
 interface NpcDialogueResponse {
-  success: boolean;
-  output: string;
+  success: boolean
+  output: string
 }
 
 export const npcDialogue = api(
-  { method: "POST", path: "/api/npc-dialogue", expose: true },
+  { method: 'POST', path: '/api/npc-dialogue', expose: true },
   async (req: NpcDialogueRequest): Promise<NpcDialogueResponse> => {
     if (!req.systemPrompt || !req.messages || !Array.isArray(req.messages)) {
       throw new APIError(
         ErrCode.InvalidArgument,
-        "systemPrompt and messages array are required",
-      );
+        'systemPrompt and messages array are required'
+      )
     }
 
     const apiMessages: DeepseekMessage[] = [
-      { role: "system", content: req.systemPrompt },
+      { role: 'system', content: req.systemPrompt },
       ...req.messages.map((m) => ({ role: m.role, content: m.content })),
-    ];
+    ]
 
-    const output = await callDeepseek(apiMessages, 0.8, 300);
+    const output = await callDeepseek(apiMessages, 0.8, 300)
 
-    return { success: true, output: output.trim() };
-  },
-);
+    return { success: true, output: output.trim() }
+  }
+)
 
 // ---- Generate PR Scenario ---------------------------------------------------
 
 interface GeneratePrRequest {
-  language?: string;
+  language?: string
 }
 
 interface GeneratePrResponse {
-  success: boolean;
-  scenario: Record<string, unknown>;
+  success: boolean
+  scenario: Record<string, unknown>
 }
 
 export const generatePr = api(
-  { method: "POST", path: "/api/generate-pr", expose: true },
+  { method: 'POST', path: '/api/generate-pr', expose: true },
   async (req: GeneratePrRequest): Promise<GeneratePrResponse> => {
-    const language = req.language || "react";
+    const language = req.language || 'react'
 
     const prompt = `Generate a realistic pull request code change with intentional bugs for code review practice.
 
@@ -223,65 +223,64 @@ Format as JSON:
 
 Line types: "added" (green +), "removed" (red -), "context" (gray, no change)
 
-Make it realistic. 30-50 lines total. Return only valid JSON.`;
+Make it realistic. 30-50 lines total. Return only valid JSON.`
 
     const rawContent = await callDeepseek(
-      [{ role: "user", content: prompt }],
+      [{ role: 'user', content: prompt }],
       0.7,
-      6000,
-    );
+      6000
+    )
 
-    const cleanContent = cleanJsonOutput(rawContent);
-    const scenario = JSON.parse(cleanContent);
+    const cleanContent = cleanJsonOutput(rawContent)
+    const scenario = JSON.parse(cleanContent)
 
-    return { success: true, scenario };
-  },
-);
+    return { success: true, scenario }
+  }
+)
 
 // ---- Evaluate PR Review -----------------------------------------------------
 
 interface PrIssue {
-  id: string;
-  lineNumber: number;
-  severity: string;
-  title: string;
-  explanation: string;
-  fix: string;
+  id: string
+  lineNumber: number
+  severity: string
+  title: string
+  explanation: string
+  fix: string
 }
 
 interface EvaluatePrRequest {
-  userFindings: number[];
-  correctIssues: PrIssue[];
+  userFindings: number[]
+  correctIssues: PrIssue[]
 }
 
 interface EvaluatePrResponse {
-  success: boolean;
+  success: boolean
   results: {
-    total: number;
-    found: number;
-    missed: number;
-    falsePositives: number;
-    foundIssues: PrIssue[];
-    missedIssues: PrIssue[];
-    score: number;
-  };
+    total: number
+    found: number
+    missed: number
+    falsePositives: number
+    foundIssues: PrIssue[]
+    missedIssues: PrIssue[]
+    score: number
+  }
 }
 
 export const evaluatePr = api(
-  { method: "POST", path: "/api/evaluate-pr", expose: true },
+  { method: 'POST', path: '/api/evaluate-pr', expose: true },
   async (req: EvaluatePrRequest): Promise<EvaluatePrResponse> => {
-    const { userFindings, correctIssues } = req;
+    const { userFindings, correctIssues } = req
 
     const foundIssues = correctIssues.filter((issue) =>
-      userFindings.includes(issue.lineNumber),
-    );
+      userFindings.includes(issue.lineNumber)
+    )
     const missedIssues = correctIssues.filter(
-      (issue) => !userFindings.includes(issue.lineNumber),
-    );
+      (issue) => !userFindings.includes(issue.lineNumber)
+    )
     const falsePositives = userFindings.filter(
-      (lineNum) =>
-        !correctIssues.find((issue) => issue.lineNumber === lineNum),
-    );
+      (lineNum) => !correctIssues.find((issue) => issue.lineNumber === lineNum)
+    )
 
     return {
       success: true,
@@ -294,37 +293,37 @@ export const evaluatePr = api(
         missedIssues,
         score: Math.round((foundIssues.length / correctIssues.length) * 100),
       },
-    };
-  },
-);
+    }
+  }
+)
 
 // ---- Evaluate Completion ----------------------------------------------------
 
 interface EvaluateCompletionRequest {
-  scenarioDescription: string;
-  conversationHistory: string;
-  completionSignals?: string;
+  scenarioDescription: string
+  conversationHistory: string
+  completionSignals?: string
 }
 
 interface EvaluateCompletionResponse {
-  success: boolean;
+  success: boolean
   result: {
-    scenarioComplete: boolean;
-    reasoning: string;
-    suggestedPrompt: string;
-  };
+    scenarioComplete: boolean
+    reasoning: string
+    suggestedPrompt: string
+  }
 }
 
 export const evaluateCompletion = api(
-  { method: "POST", path: "/api/evaluate-completion", expose: true },
+  { method: 'POST', path: '/api/evaluate-completion', expose: true },
   async (
-    req: EvaluateCompletionRequest,
+    req: EvaluateCompletionRequest
   ): Promise<EvaluateCompletionResponse> => {
     if (!req.scenarioDescription || !req.conversationHistory) {
       throw new APIError(
         ErrCode.InvalidArgument,
-        "scenarioDescription and conversationHistory are required",
-      );
+        'scenarioDescription and conversationHistory are required'
+      )
     }
 
     const prompt = `You are an evaluator for a workplace scenario role-play training exercise.
@@ -351,153 +350,157 @@ Return ONLY valid JSON in this exact format:
   "scenarioComplete": true or false,
   "reasoning": "Brief explanation of why the scenario is or isn't complete",
   "suggestedPrompt": "If not complete, a natural next question or action for the user. Empty string if complete."
-}`;
+}`
 
     const rawOutput = await callDeepseek(
-      [{ role: "user", content: prompt }],
+      [{ role: 'user', content: prompt }],
       0.3,
-      500,
-    );
+      500
+    )
 
-    const cleaned = cleanJsonOutput(rawOutput);
-    const result = JSON.parse(cleaned);
+    const cleaned = cleanJsonOutput(rawOutput)
+    const result = JSON.parse(cleaned)
 
     return {
       success: true,
       result: {
         scenarioComplete: Boolean(result.scenarioComplete),
-        reasoning: result.reasoning || "",
-        suggestedPrompt: result.suggestedPrompt || "",
+        reasoning: result.reasoning || '',
+        suggestedPrompt: result.suggestedPrompt || '',
       },
-    };
-  },
-);
+    }
+  }
+)
 
 // ---- Evaluate GRIP ----------------------------------------------------------
 
 interface EvaluateGripRequest {
-  prompt: string;
+  prompt: string
 }
 
 interface EvaluateGripResponse {
-  success: boolean;
-  result: Record<string, unknown>;
+  success: boolean
+  result: Record<string, unknown>
 }
 
 export const evaluateGrip = api(
-  { method: "POST", path: "/api/evaluate-grip", expose: true },
+  { method: 'POST', path: '/api/evaluate-grip', expose: true },
   async (req: EvaluateGripRequest): Promise<EvaluateGripResponse> => {
     if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, "prompt is required");
+      throw new APIError(ErrCode.InvalidArgument, 'prompt is required')
     }
 
     const rawOutput = await callDeepseek(
-      [{ role: "user", content: req.prompt }],
+      [{ role: 'user', content: req.prompt }],
       0,
-      4000,
-    );
+      4000
+    )
 
-    const cleaned = cleanJsonOutput(rawOutput);
-    const result = JSON.parse(cleaned);
+    const cleaned = cleanJsonOutput(rawOutput)
+    const result = JSON.parse(cleaned)
 
-    return { success: true, result };
-  },
-);
+    return { success: true, result }
+  }
+)
 
 // ---- Generate Consequence ---------------------------------------------------
 
 interface GenerateConsequenceRequest {
-  prompt: string;
+  prompt: string
 }
 
 interface GenerateConsequenceResponse {
-  success: boolean;
-  result: Record<string, unknown>;
+  success: boolean
+  result: Record<string, unknown>
 }
 
 export const generateConsequence = api(
-  { method: "POST", path: "/api/generate-consequence", expose: true },
+  { method: 'POST', path: '/api/generate-consequence', expose: true },
   async (
-    req: GenerateConsequenceRequest,
+    req: GenerateConsequenceRequest
   ): Promise<GenerateConsequenceResponse> => {
     if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, "prompt is required");
+      throw new APIError(ErrCode.InvalidArgument, 'prompt is required')
     }
 
     const rawOutput = await callDeepseek(
-      [{ role: "user", content: req.prompt }],
+      [{ role: 'user', content: req.prompt }],
       0.7,
-      2000,
-    );
+      2000
+    )
 
-    const cleaned = cleanJsonOutput(rawOutput);
-    const result = JSON.parse(cleaned);
+    const cleaned = cleanJsonOutput(rawOutput)
+    const result = JSON.parse(cleaned)
 
-    return { success: true, result };
-  },
-);
+    return { success: true, result }
+  }
+)
 
 // ---- Live Chat ------------------------------------------------------------
 
 interface ChatRequest {
-  messages: { role: string; content: string }[];
+  messages: { role: string; content: string }[]
 }
 
 interface ChatResponse {
-  success: boolean;
-  output: string;
+  success: boolean
+  output: string
 }
 
 export const chat = api(
-  { method: "POST", path: "/api/chat", expose: true },
+  { method: 'POST', path: '/api/chat', expose: true },
   async (req: ChatRequest): Promise<ChatResponse> => {
-    if (!req.messages || !Array.isArray(req.messages) || req.messages.length === 0) {
+    if (
+      !req.messages ||
+      !Array.isArray(req.messages) ||
+      req.messages.length === 0
+    ) {
       throw new APIError(
         ErrCode.InvalidArgument,
-        "messages array is required and must not be empty",
-      );
+        'messages array is required and must not be empty'
+      )
     }
 
     const apiMessages: DeepseekMessage[] = req.messages.map((m) => ({
       role: m.role,
       content: m.content,
-    }));
+    }))
 
-    const output = await callDeepseek(apiMessages, 0.7, 500);
+    const output = await callDeepseek(apiMessages, 0.7, 500)
 
-    return { success: true, output: output.trim() };
-  },
-);
+    return { success: true, output: output.trim() }
+  }
+)
 
 // ---- Analyze Intent -------------------------------------------------------
 
 interface AnalyzeIntentRequest {
-  prompt: string;
+  prompt: string
 }
 
 interface AnalyzeIntentResponse {
-  success: boolean;
-  output: string;
+  success: boolean
+  output: string
 }
 
 export const analyzeIntent = api(
-  { method: "POST", path: "/api/analyze-intent", expose: true },
+  { method: 'POST', path: '/api/analyze-intent', expose: true },
   async (req: AnalyzeIntentRequest): Promise<AnalyzeIntentResponse> => {
     if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, "prompt is required");
+      throw new APIError(ErrCode.InvalidArgument, 'prompt is required')
     }
 
     const rawOutput = await callDeepseek(
-      [{ role: "user", content: req.prompt }],
+      [{ role: 'user', content: req.prompt }],
       0,
-      500,
-    );
+      500
+    )
 
-    const output = cleanJsonOutput(rawOutput);
+    const output = cleanJsonOutput(rawOutput)
 
-    return { success: true, output };
-  },
-);
+    return { success: true, output }
+  }
+)
 
 // ---- AI Provider Proxy Endpoints -------------------------------------------
 // These endpoints proxy requests to external AI APIs to avoid browser CORS
@@ -505,25 +508,25 @@ export const analyzeIntent = api(
 // forwards the request server-side and returns the raw API response.
 
 interface ProxyClaudeRequest {
-  apiKey: string;
-  model: string;
-  messages: { role: string; content: string }[];
-  system?: string;
-  max_tokens: number;
-  temperature: number;
-  stream: boolean;
+  apiKey: string
+  model: string
+  messages: { role: string; content: string }[]
+  system?: string
+  max_tokens: number
+  temperature: number
+  stream: boolean
 }
 
 interface ProxyResponse {
-  success: boolean;
-  data: Record<string, unknown>;
+  success: boolean
+  data: Record<string, unknown>
 }
 
 export const proxyClaude = api(
-  { method: "POST", path: "/api/proxy/claude", expose: true },
+  { method: 'POST', path: '/api/proxy/claude', expose: true },
   async (req: ProxyClaudeRequest): Promise<ProxyResponse> => {
     if (!req.apiKey) {
-      throw new APIError(ErrCode.InvalidArgument, "apiKey is required");
+      throw new APIError(ErrCode.InvalidArgument, 'apiKey is required')
     }
 
     const body: Record<string, unknown> = {
@@ -532,129 +535,126 @@ export const proxyClaude = api(
       max_tokens: req.max_tokens || 1024,
       temperature: req.temperature ?? 0.7,
       stream: req.stream || false,
-    };
+    }
     if (req.system) {
-      body.system = req.system;
+      body.system = req.system
     }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "x-api-key": req.apiKey,
-        "anthropic-version": "2023-06-01",
+        'Content-Type': 'application/json',
+        'x-api-key': req.apiKey,
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify(body),
-    });
+    })
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
       throw new APIError(
         response.status === 401 ? ErrCode.Unauthenticated : ErrCode.Unavailable,
-        JSON.stringify(data),
-      );
+        JSON.stringify(data)
+      )
     }
 
-    return { success: true, data };
-  },
-);
+    return { success: true, data }
+  }
+)
 
 interface ProxyOpenAIRequest {
-  apiKey: string;
-  model: string;
-  messages: { role: string; content: string }[];
-  max_tokens: number;
-  temperature: number;
-  stream: boolean;
+  apiKey: string
+  model: string
+  messages: { role: string; content: string }[]
+  max_tokens: number
+  temperature: number
+  stream: boolean
 }
 
 export const proxyOpenAI = api(
-  { method: "POST", path: "/api/proxy/openai", expose: true },
+  { method: 'POST', path: '/api/proxy/openai', expose: true },
   async (req: ProxyOpenAIRequest): Promise<ProxyResponse> => {
     if (!req.apiKey) {
-      throw new APIError(ErrCode.InvalidArgument, "apiKey is required");
+      throw new APIError(ErrCode.InvalidArgument, 'apiKey is required')
     }
 
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${req.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: req.model,
-          messages: req.messages,
-          max_tokens: req.max_tokens || 1024,
-          temperature: req.temperature ?? 0.7,
-          stream: req.stream || false,
-        }),
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${req.apiKey}`,
       },
-    );
+      body: JSON.stringify({
+        model: req.model,
+        messages: req.messages,
+        max_tokens: req.max_tokens || 1024,
+        temperature: req.temperature ?? 0.7,
+        stream: req.stream || false,
+      }),
+    })
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
       throw new APIError(
         response.status === 401 ? ErrCode.Unauthenticated : ErrCode.Unavailable,
-        JSON.stringify(data),
-      );
+        JSON.stringify(data)
+      )
     }
 
-    return { success: true, data };
-  },
-);
+    return { success: true, data }
+  }
+)
 
 interface ProxyGeminiRequest {
-  apiKey: string;
-  model: string;
-  contents: { role: string; parts: { text: string }[] }[];
-  systemInstruction?: { parts: { text: string }[] };
+  apiKey: string
+  model: string
+  contents: { role: string; parts: { text: string }[] }[]
+  systemInstruction?: { parts: { text: string }[] }
   generationConfig: {
-    temperature: number;
-    maxOutputTokens: number;
-  };
+    temperature: number
+    maxOutputTokens: number
+  }
 }
 
 export const proxyGemini = api(
-  { method: "POST", path: "/api/proxy/gemini", expose: true },
+  { method: 'POST', path: '/api/proxy/gemini', expose: true },
   async (req: ProxyGeminiRequest): Promise<ProxyResponse> => {
     if (!req.apiKey) {
-      throw new APIError(ErrCode.InvalidArgument, "apiKey is required");
+      throw new APIError(ErrCode.InvalidArgument, 'apiKey is required')
     }
 
     const body: Record<string, unknown> = {
       contents: req.contents,
       generationConfig: req.generationConfig,
-    };
+    }
     if (req.systemInstruction) {
-      body.systemInstruction = req.systemInstruction;
+      body.systemInstruction = req.systemInstruction
     }
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${req.model}:generateContent?key=${req.apiKey}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-      },
-    );
+      }
+    )
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (!response.ok) {
       throw new APIError(
         response.status === 401 || response.status === 403
           ? ErrCode.Unauthenticated
           : ErrCode.Unavailable,
-        JSON.stringify(data),
-      );
+        JSON.stringify(data)
+      )
     }
 
-    return { success: true, data };
-  },
-);
+    return { success: true, data }
+  }
+)
