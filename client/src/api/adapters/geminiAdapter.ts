@@ -29,31 +29,32 @@ export async function callGemini(
       parts: [{ text: msg.content }],
     }));
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents,
-          ...(systemInstruction && {
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-          }),
-          generationConfig: {
-            temperature: request.temperature ?? 0.7,
-            maxOutputTokens: request.maxTokens || 1024,
-          },
-        }),
+    // Route through backend proxy to avoid CORS restrictions
+    const response = await fetch('/api/proxy/gemini', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
+      body: JSON.stringify({
+        apiKey: config.apiKey,
+        model: config.model,
+        contents,
+        ...(systemInstruction && {
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+        }),
+        generationConfig: {
+          temperature: request.temperature ?? 0.7,
+          maxOutputTokens: request.maxTokens || 1024,
+        },
+      }),
+    });
 
     if (!response.ok) {
       throw await handleGeminiError(response);
     }
 
-    const data = await response.json();
+    const proxyResult = await response.json();
+    const data = proxyResult.data;
 
     const candidate = data.candidates?.[0];
     if (!candidate) {

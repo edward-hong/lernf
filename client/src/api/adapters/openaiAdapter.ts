@@ -22,32 +22,31 @@ export async function callOpenAI(
         ]
       : request.messages;
 
-    const response = await fetch(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: config.model,
-          messages: messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-          max_tokens: request.maxTokens || 1024,
-          temperature: request.temperature ?? 0.7,
-          stream: request.stream || false,
-        }),
+    // Route through backend proxy to avoid CORS restrictions
+    const response = await fetch('/api/proxy/openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
+      body: JSON.stringify({
+        apiKey: config.apiKey,
+        model: config.model,
+        messages: messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        max_tokens: request.maxTokens || 1024,
+        temperature: request.temperature ?? 0.7,
+        stream: request.stream || false,
+      }),
+    });
 
     if (!response.ok) {
       throw await handleOpenAIError(response);
     }
 
-    const data = await response.json();
+    const proxyResult = await response.json();
+    const data = proxyResult.data;
 
     return {
       content: data.choices[0].message.content,

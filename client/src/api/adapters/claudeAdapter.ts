@@ -23,14 +23,14 @@ export async function callClaude(
       (m) => m.role !== 'system',
     );
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Route through backend proxy to avoid CORS restrictions
+    const response = await fetch('/api/proxy/claude', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': config.apiKey,
-        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
+        apiKey: config.apiKey,
         model: config.model,
         messages: conversationMessages.map((msg) => ({
           role: msg.role,
@@ -47,7 +47,8 @@ export async function callClaude(
       throw await handleClaudeError(response);
     }
 
-    const data = await response.json();
+    const proxyResult = await response.json();
+    const data = proxyResult.data;
 
     return {
       content: data.content[0].text,

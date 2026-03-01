@@ -477,3 +477,163 @@ export const analyzeIntent = api(
     return { success: true, output };
   },
 );
+
+// ---- AI Provider Proxy Endpoints -------------------------------------------
+// These endpoints proxy requests to external AI APIs to avoid browser CORS
+// restrictions. The frontend sends the API key and request body; the backend
+// forwards the request server-side and returns the raw API response.
+
+interface ProxyClaudeRequest {
+  apiKey: string;
+  model: string;
+  messages: { role: string; content: string }[];
+  system?: string;
+  max_tokens: number;
+  temperature: number;
+  stream: boolean;
+}
+
+interface ProxyResponse {
+  success: boolean;
+  data: Record<string, unknown>;
+}
+
+export const proxyClaude = api(
+  { method: "POST", path: "/api/proxy/claude", expose: true },
+  async (req: ProxyClaudeRequest): Promise<ProxyResponse> => {
+    if (!req.apiKey) {
+      throw new APIError(ErrCode.InvalidArgument, "apiKey is required");
+    }
+
+    const body: Record<string, unknown> = {
+      model: req.model,
+      messages: req.messages,
+      max_tokens: req.max_tokens || 1024,
+      temperature: req.temperature ?? 0.7,
+      stream: req.stream || false,
+    };
+    if (req.system) {
+      body.system = req.system;
+    }
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": req.apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(
+        response.status === 401 ? ErrCode.Unauthenticated : ErrCode.Unavailable,
+        JSON.stringify(data),
+      );
+    }
+
+    return { success: true, data };
+  },
+);
+
+interface ProxyOpenAIRequest {
+  apiKey: string;
+  model: string;
+  messages: { role: string; content: string }[];
+  max_tokens: number;
+  temperature: number;
+  stream: boolean;
+}
+
+export const proxyOpenAI = api(
+  { method: "POST", path: "/api/proxy/openai", expose: true },
+  async (req: ProxyOpenAIRequest): Promise<ProxyResponse> => {
+    if (!req.apiKey) {
+      throw new APIError(ErrCode.InvalidArgument, "apiKey is required");
+    }
+
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${req.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: req.model,
+          messages: req.messages,
+          max_tokens: req.max_tokens || 1024,
+          temperature: req.temperature ?? 0.7,
+          stream: req.stream || false,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(
+        response.status === 401 ? ErrCode.Unauthenticated : ErrCode.Unavailable,
+        JSON.stringify(data),
+      );
+    }
+
+    return { success: true, data };
+  },
+);
+
+interface ProxyGeminiRequest {
+  apiKey: string;
+  model: string;
+  contents: { role: string; parts: { text: string }[] }[];
+  systemInstruction?: { parts: { text: string }[] };
+  generationConfig: {
+    temperature: number;
+    maxOutputTokens: number;
+  };
+}
+
+export const proxyGemini = api(
+  { method: "POST", path: "/api/proxy/gemini", expose: true },
+  async (req: ProxyGeminiRequest): Promise<ProxyResponse> => {
+    if (!req.apiKey) {
+      throw new APIError(ErrCode.InvalidArgument, "apiKey is required");
+    }
+
+    const body: Record<string, unknown> = {
+      contents: req.contents,
+      generationConfig: req.generationConfig,
+    };
+    if (req.systemInstruction) {
+      body.systemInstruction = req.systemInstruction;
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${req.model}:generateContent?key=${req.apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new APIError(
+        response.status === 401 || response.status === 403
+          ? ErrCode.Unauthenticated
+          : ErrCode.Unavailable,
+        JSON.stringify(data),
+      );
+    }
+
+    return { success: true, data };
+  },
+);
