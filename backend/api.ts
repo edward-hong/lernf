@@ -416,6 +416,38 @@ export const generateConsequence = api(
   },
 );
 
+// ---- Live Chat ------------------------------------------------------------
+
+interface ChatRequest {
+  messages: { role: string; content: string }[];
+}
+
+interface ChatResponse {
+  success: boolean;
+  output: string;
+}
+
+export const chat = api(
+  { method: "POST", path: "/api/chat", expose: true },
+  async (req: ChatRequest): Promise<ChatResponse> => {
+    if (!req.messages || !Array.isArray(req.messages) || req.messages.length === 0) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        "messages array is required and must not be empty",
+      );
+    }
+
+    const apiMessages: DeepseekMessage[] = req.messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const output = await callDeepseek(apiMessages, 0.7, 500);
+
+    return { success: true, output: output.trim() };
+  },
+);
+
 // ---- Analyze Intent -------------------------------------------------------
 
 interface AnalyzeIntentRequest {

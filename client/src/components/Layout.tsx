@@ -26,6 +26,7 @@ export function Layout() {
         { path: '/practice/code-comparison', label: 'Code Comparison' },
         { path: '/practice/pr-review', label: 'PR Review' },
         { path: '/practice/ai-intent', label: 'AI Intent Analysis' },
+        { path: '/practice/intent-chat', label: 'Live Intent Chat' },
         {
           path: '/practice/ai-coding',
           label: 'AI Assisted Coding',
