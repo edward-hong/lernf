@@ -15,8 +15,26 @@ import {
 import { getDominantDimensions } from './intentSmoothing'
 
 /**
+ * Visual weight multipliers for each dimension.
+ * Cooperative is reduced because it's nearly always present in helpful responses.
+ * We want to see the OTHER behaviours more clearly.
+ */
+const VISUAL_WEIGHT_MULTIPLIERS: Record<keyof IntentVector, number> = {
+  epistemic: 1.0,
+  cooperative: 0.3,
+  persuasive: 1.2,
+  defensive: 1.2,
+  constraint: 1.0,
+  uncertainty: 0.8,
+}
+
+/**
  * Converts an intent vector to a single OKLCH colour string.
  * Blends multiple dimensions using a weighted average of hues.
+ *
+ * Applies visual weight multipliers to reduce cooperative dominance —
+ * cooperative is nearly always present in helpful AI responses, so
+ * reducing its contribution makes other behaviours more visible.
  *
  * @param intent - Intent vector with 6 dimensions (0–1 each).
  * @returns OKLCH colour string, e.g. `"oklch(0.75 0.12 180)"`.
@@ -28,15 +46,36 @@ export function intentToColor(intent: IntentVector): string {
   ;(Object.keys(intent) as Array<keyof IntentVector>).forEach((dimension) => {
     const score = intent[dimension]
     const anchor = INTENT_COLOR_ANCHORS[dimension]
+    const visualWeight = VISUAL_WEIGHT_MULTIPLIERS[dimension]
 
-    totalWeight += score
-    weightedHue += anchor.hue * score
+    const adjustedScore = score * visualWeight
+
+    totalWeight += adjustedScore
+    weightedHue += anchor.hue * adjustedScore
   })
 
   // Default to neutral epistemic blue when all scores are zero.
   const avgHue = totalWeight > 0 ? weightedHue / totalWeight : 240
 
   return `oklch(${INTENT_COLOR_LIGHTNESS} ${INTENT_COLOR_CHROMA} ${avgHue})`
+}
+
+/**
+ * Returns the effective intent after applying visual weight multipliers.
+ * Useful for debugging why a certain colour was chosen.
+ *
+ * @param intent - Original intent vector.
+ * @returns Weighted intent vector (not normalised).
+ */
+export function getWeightedIntent(intent: IntentVector): IntentVector {
+  return {
+    epistemic: intent.epistemic * VISUAL_WEIGHT_MULTIPLIERS.epistemic,
+    cooperative: intent.cooperative * VISUAL_WEIGHT_MULTIPLIERS.cooperative,
+    persuasive: intent.persuasive * VISUAL_WEIGHT_MULTIPLIERS.persuasive,
+    defensive: intent.defensive * VISUAL_WEIGHT_MULTIPLIERS.defensive,
+    constraint: intent.constraint * VISUAL_WEIGHT_MULTIPLIERS.constraint,
+    uncertainty: intent.uncertainty * VISUAL_WEIGHT_MULTIPLIERS.uncertainty,
+  }
 }
 
 /**

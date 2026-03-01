@@ -9,6 +9,7 @@ import { ProgressDashboard } from './components/ProgressDashboard'
 const CodeComparison = lazy(() => import('./pages/tools/CodeComparison'))
 const PRReview = lazy(() => import('./pages/tools/PRReview'))
 const AiIntent = lazy(() => import('./pages/tools/AiIntent'))
+const IntentChat = lazy(() => import('./pages/tools/IntentChat'))
 const ScenarioLibrary = lazy(() => import('./pages/tools/ScenarioLibrary'))
 const ScenarioPlayer = lazy(() => import('./pages/tools/ScenarioPlayer'))
 const ScenarioResultsRoute = lazy(() => import('./pages/tools/ScenarioResults'))
@@ -96,6 +97,10 @@ export const router = createBrowserRouter([
       {
         path: 'practice/ai-intent',
         element: <Lazy><AiIntent /></Lazy>,
+      },
+      {
+        path: 'practice/intent-chat',
+        element: <Lazy><IntentChat /></Lazy>,
       },
       {
         path: 'practice/ai-coding',
