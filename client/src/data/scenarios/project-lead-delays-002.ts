@@ -17,7 +17,6 @@ import type {
 } from '../../types/scenario'
 
 import type {
-  PersonaVariant,
   NpcCharacter,
   AiPersonaVariant,
   DimensionEvaluationGuidance,
