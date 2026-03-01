@@ -35,6 +35,7 @@ const AobaiKangxi = lazy(() => import('./pages/mindset/case-studies/AobaiKangxi'
 const AiMisconceptions = lazy(() => import('./pages/mindset/AiMisconceptions').then(m => ({ default: m.AiMisconceptions })))
 const GripCompass = lazy(() => import('./pages/mindset/GripCompass').then(m => ({ default: m.GripCompass })))
 const GripLimitations = lazy(() => import('./pages/mindset/GripLimitations').then(m => ({ default: m.GripLimitations })))
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 
 /** Suspense fallback for lazy-loaded routes. */
 function LazyFallback() {
@@ -135,6 +136,11 @@ export const router = createBrowserRouter([
       {
         path: 'scenarios/:scenarioId/results',
         element: <ScenarioRedirect suffix="results" />,
+      },
+      // Settings
+      {
+        path: 'settings',
+        element: <Lazy><SettingsPage /></Lazy>,
       },
       // Mindset routes (lazy-loaded)
       {
