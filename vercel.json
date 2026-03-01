@@ -6,7 +6,7 @@
   "framework": "vite",
   "regions": ["sfo1"],
   "env": {
-    "VITE_API_URL": "@vite-api-url"
+    "VITE_API_URL": "@vite_api_url"
   },
   "headers": [
     {
