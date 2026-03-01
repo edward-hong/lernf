@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "encore run",
-    "test": "vitest",
     "deploy:preview": "encore cloud deploy --env preview",
     "deploy:production": "encore cloud deploy --env production",
     "logs:production": "encore logs --env production",
