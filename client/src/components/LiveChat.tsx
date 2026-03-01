@@ -7,6 +7,7 @@
 // ---------------------------------------------------------------------------
 
 import { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { useLiveChat } from '../hooks/useLiveChat'
 import { ConversationTimeline } from './ConversationTimeline'
 import { PatternAlerts } from './PatternAlerts'
@@ -51,6 +52,18 @@ export function LiveChat() {
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
+          <Link to="/" className="hover:text-blue-600 transition-colors">
+            Home
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link to="/practice/ai-intent" className="hover:text-blue-600 transition-colors">
+            AI Intent Analysis
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="text-gray-900 font-medium">Live Chat</span>
+        </nav>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">
