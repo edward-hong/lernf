@@ -1,7 +1,7 @@
 import React from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { ghcolors } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import type { DiffLine as DiffLineType } from '../../types/pr'
+import type { DiffLine as DiffLineType } from '../../../types/pr'
 
 interface Props {
   line: DiffLineType

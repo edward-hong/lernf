@@ -352,14 +352,6 @@ Return ONLY valid JSON in this exact format:
 // ---- Response Validation --------------------------------------------------
 
 const VALID_DIMENSIONS: GripDimension[] = ['G', 'R', 'I', 'P']
-const VALID_BANDS: Band[] = [
-  'Elizabeth-Cecil Zone',
-  'Lincoln-Seward Zone',
-  'Drift Zone',
-  'Danger Zone',
-  'Displacement Zone',
-]
-
 /**
  * Validates and normalises the raw AI response into a proper GripEvaluation.
  * Fixes common issues like missing fields, out-of-range scores, and
@@ -411,7 +403,7 @@ function validateAndNormalise(
       throw new Error(`Missing dimension result for ${dim}`)
     }
     return result
-  }) as [DimensionResult, DimensionResult, DimensionResult, DimensionResult]
+  }) as unknown as [DimensionResult, DimensionResult, DimensionResult, DimensionResult]
 
   // Calculate composite score from actual dimension scores (don't trust AI's math)
   const compositeScore =
@@ -534,7 +526,7 @@ function buildShortConversationEvaluation(
       consequences: [],
       signals: dimSignals,
     }
-  }) as [DimensionResult, DimensionResult, DimensionResult, DimensionResult]
+  }) as unknown as [DimensionResult, DimensionResult, DimensionResult, DimensionResult]
 
   return {
     dimensions,
@@ -692,7 +684,7 @@ function buildSignalBasedFallback(
       consequences: [],
       signals: dimSignals,
     }
-  }) as [DimensionResult, DimensionResult, DimensionResult, DimensionResult]
+  }) as unknown as [DimensionResult, DimensionResult, DimensionResult, DimensionResult]
 
   const compositeScore =
     Math.round(

@@ -458,7 +458,7 @@ export function IndividualAudit() {
             </div>
 
             <div className="divide-y divide-gray-100">
-              {section.items.map((item, idx) => (
+              {section.items.map((item) => (
                 <div key={item.id} className="px-6 py-5">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex-1">

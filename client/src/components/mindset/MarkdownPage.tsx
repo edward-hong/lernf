@@ -1,7 +1,8 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-interface MarkdownPageProps {
+export interface MarkdownPageProps {
+  title?: string
   content: string
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { EvaluationResult, PRScenario } from '../../types/pr'
+import type { EvaluationResult, Issue, PRScenario } from '../../../types/pr'
 
 interface Props {
   evaluation: EvaluationResult
@@ -41,7 +41,7 @@ const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
           <h3 className="mb-4 text-gray-800 text-xl">
             ✅ Issues You Found ({evaluation.found})
           </h3>
-          {evaluation.foundIssues.map((issue) => (
+          {evaluation.foundIssues.map((issue: Issue) => (
             <div
               key={issue.id}
               className="bg-white p-5 rounded-lg mb-3 shadow-[0_2px_4px_rgba(0,0,0,0.1)] border-l-4 border-emerald-500"
@@ -73,7 +73,7 @@ const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
           <h3 className="mb-4 text-gray-800 text-xl">
             ❌ Issues You Missed ({evaluation.missed})
           </h3>
-          {evaluation.missedIssues.map((issue) => (
+          {evaluation.missedIssues.map((issue: Issue) => (
             <div
               key={issue.id}
               className="bg-white p-5 rounded-lg mb-3 shadow-[0_2px_4px_rgba(0,0,0,0.1)] border-l-4 border-red-500"

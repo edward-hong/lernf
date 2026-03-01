@@ -31,7 +31,7 @@ import { buildScenarioColorConfig } from '../utils/colors'
  * here as they are authored — the store uses this to look up builders and
  * variant pools at init time.
  */
-const SCENARIO_REGISTRY: Record<string, typeof PROD_INCIDENT_001> = {
+const SCENARIO_REGISTRY: Record<string, { readonly buildScenario: () => ScenarioDefinition; readonly aiPersonaVariants: readonly AiPersonaVariant[] }> = {
   'prod-incident-001': PROD_INCIDENT_001,
   'project-lead-delays-002': PROJECT_LEAD_DELAYS_002,
   'perf-review-promotion-003': PERF_REVIEW_PROMOTION_003,

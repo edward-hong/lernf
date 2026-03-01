@@ -249,7 +249,6 @@ function buildFallbackConsequence(
   const missedFactors = scenario.hiddenFactors.filter(
     (f) => !discoveredFactorIds.includes(f.id),
   )
-  const discoveredCount = discoveredFactorIds.length
   const totalFactors = scenario.hiddenFactors.length
 
   // Immediate outcome based on composite score
