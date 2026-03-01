@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import { callAI } from '../../api/aiClient'
 import type { PRScenario, EvaluationResult } from '../../types/pr'
 import DiffLine from '../../components/tools/PRReview/DiffLine'
 import Evaluation from '../../components/tools/PRReview/Evaluation'
@@ -18,14 +19,77 @@ const PRReview: React.FC = () => {
     setEvaluation(null)
 
     try {
-      const response = await axios.post(
-        'http://localhost:4000/api/generate-pr',
-        {
-          language: 'react',
-        }
-      )
+      const language = 'react'
+      const prompt = `Generate a realistic pull request code change with intentional bugs for code review practice.
 
-      setScenario(response.data.scenario)
+Language: ${language}
+
+Create a realistic PR scenario with 5-7 intentional issues. Issues should be subtle and realistic (not syntax errors).
+
+Types of issues to include:
+- Missing error handling
+- Race conditions
+- Memory leaks
+- Security vulnerabilities
+- Performance problems
+- Missing edge cases
+- Bad patterns
+
+Format as JSON:
+{
+  "title": "PR title (e.g., 'Add user authentication caching')",
+  "description": "What this PR does",
+  "language": "${language}",
+  "diff": [
+    {
+      "lineNumber": 1,
+      "type": "context",
+      "content": "import React from 'react';",
+      "hasIssue": false
+    },
+    {
+      "lineNumber": 2,
+      "type": "added",
+      "content": "const UserProfile = () => {",
+      "hasIssue": false
+    },
+    {
+      "lineNumber": 3,
+      "type": "added",
+      "content": "  useEffect(async () => {",
+      "hasIssue": true,
+      "issueId": "issue-1"
+    }
+  ],
+  "issues": [
+    {
+      "id": "issue-1",
+      "lineNumber": 3,
+      "severity": "high",
+      "title": "Async useEffect",
+      "explanation": "useEffect callback cannot be async. This returns a Promise instead of cleanup function.",
+      "fix": "Define async function inside useEffect and call it."
+    }
+  ]
+}
+
+Line types: "added" (green +), "removed" (red -), "context" (gray, no change)
+
+Make it realistic. 30-50 lines total. Return only valid JSON.`
+
+      const aiResponse = await callAI({
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        maxTokens: 6000,
+      })
+
+      const cleaned = aiResponse.content
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim()
+      const scenarioData = JSON.parse(cleaned)
+
+      setScenario(scenarioData)
     } catch (error) {
       console.error('Error generating PR:', error)
       alert('Failed to generate PR. Please try again.')
@@ -54,7 +118,7 @@ const PRReview: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:4000/api/evaluate-pr',
+        '/api/evaluate-pr',
         {
           userFindings: Array.from(markedLines),
           correctIssues: scenario.issues,

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import axios from 'axios'
+import { callAI } from '../../api/aiClient'
 import CodeBlock from '../../components/tools/CodeComparison/CodeBlock'
 import Evaluation from '../../components/tools/CodeComparison/Evaluation'
 import LanguageSelector from '../../components/tools/CodeComparison/LanguageSelector'
@@ -32,15 +32,14 @@ function CodeComparison() {
     try {
       const prompt = generateComparisonPrompt(language)
 
-      const response = await axios.post('http://localhost:4000/api/deepseek', {
-        prompt,
+      const response = await callAI({
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        maxTokens: 2000,
       })
 
-      // response.data.output is a string like: "{\n  \"context\": ..."
-      let outputString = response.data.output
-
-      // Sometimes AI adds markdown code blocks, strip them
-      outputString = outputString
+      // Strip markdown code blocks if present
+      let outputString = response.content
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
 
@@ -55,8 +54,6 @@ function CodeComparison() {
       ) {
         throw new Error('Invalid scenario structure')
       }
-
-      console.log(scenarioData)
 
       setScenario(scenarioData)
     } catch (error) {
@@ -77,11 +74,13 @@ function CodeComparison() {
     setEvaluating(true)
 
     try {
-      const response = await axios.post('http://localhost:4000/api/deepseek', {
-        prompt: evaluateOptions(scenario, reasoning, selectedOption),
+      const response = await callAI({
+        messages: [{ role: 'user', content: evaluateOptions(scenario, reasoning, selectedOption) }],
+        temperature: 0,
+        maxTokens: 1500,
       })
 
-      setEvaluation(response.data.output)
+      setEvaluation(response.content)
     } catch (error) {
       console.error('Error evaluating answer:', error)
       alert('Failed to evaluate answer. Please try again.')

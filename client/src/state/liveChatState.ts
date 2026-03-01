@@ -16,6 +16,10 @@ export interface ChatMessage {
   intent?: IntentVector
   /** Whether intent is currently being analysed. */
   analyzingIntent?: boolean
+  /** Provider that generated this message (only for assistant messages). */
+  provider?: string
+  /** Model used to generate this message (only for assistant messages). */
+  model?: string
 }
 
 export interface LiveChatState {
