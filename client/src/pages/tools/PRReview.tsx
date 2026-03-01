@@ -6,34 +6,73 @@ import DiffLine from '../../components/tools/PRReview/DiffLine'
 import Evaluation from '../../components/tools/PRReview/Evaluation'
 
 function cleanJsonOutput(text: string): string {
-  // Strip markdown code fences
-  let cleaned = text
-    .replace(/```json\n?/g, '')
-    .replace(/```\n?/g, '')
-    .trim()
+  // Strip markdown code fences (any language tag: ```json, ```JSON, ```ts, etc.)
+  let cleaned = text.replace(/```[^\n]*\n?/g, '').trim()
 
-  // Extract the JSON object/array (first { or [ to its matching closing bracket)
+  // Extract JSON using brace-counting to find the matching close bracket.
+  // This is more robust than lastIndexOf which breaks when the LLM adds
+  // commentary containing braces after the JSON block.
   const startObj = cleaned.indexOf('{')
   const startArr = cleaned.indexOf('[')
   let start: number
-  let closingBracket: string
+  let openBracket: string
+  let closeBracket: string
 
   if (startObj === -1 && startArr === -1) return cleaned
   if (startObj === -1) {
     start = startArr
-    closingBracket = ']'
+    openBracket = '['
+    closeBracket = ']'
   } else if (startArr === -1) {
     start = startObj
-    closingBracket = '}'
+    openBracket = '{'
+    closeBracket = '}'
   } else if (startObj < startArr) {
     start = startObj
-    closingBracket = '}'
+    openBracket = '{'
+    closeBracket = '}'
   } else {
     start = startArr
-    closingBracket = ']'
+    openBracket = '['
+    closeBracket = ']'
   }
 
-  const end = cleaned.lastIndexOf(closingBracket)
+  // Walk forward from the opening bracket, counting depth while respecting strings
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let end = -1
+
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i]
+    if (escaped) {
+      escaped = false
+      continue
+    }
+    if (ch === '\\' && inString) {
+      escaped = true
+      continue
+    }
+    if (ch === '"') {
+      inString = !inString
+      continue
+    }
+    if (!inString) {
+      if (ch === openBracket) depth++
+      else if (ch === closeBracket) {
+        depth--
+        if (depth === 0) {
+          end = i
+          break
+        }
+      }
+    }
+  }
+
+  if (end === -1) {
+    // Brace counting failed (unbalanced), fall back to lastIndexOf
+    end = cleaned.lastIndexOf(closeBracket)
+  }
   if (end === -1) return cleaned
   cleaned = cleaned.slice(start, end + 1)
 
@@ -41,23 +80,23 @@ function cleanJsonOutput(text: string): string {
   cleaned = cleaned
     .split('\n')
     .map((line) => {
-      let inString = false
-      let escaped = false
+      let inStr = false
+      let esc = false
       for (let i = 0; i < line.length; i++) {
         const ch = line[i]
-        if (escaped) {
-          escaped = false
+        if (esc) {
+          esc = false
           continue
         }
         if (ch === '\\') {
-          escaped = true
+          esc = true
           continue
         }
         if (ch === '"') {
-          inString = !inString
+          inStr = !inStr
           continue
         }
-        if (!inString && ch === '/' && line[i + 1] === '/') {
+        if (!inStr && ch === '/' && line[i + 1] === '/') {
           return line.slice(0, i).trimEnd()
         }
       }

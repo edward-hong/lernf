@@ -17,20 +17,27 @@ interface DeepseekMessage {
 async function callDeepseek(
   messages: DeepseekMessage[],
   temperature: number,
-  maxTokens: number
+  maxTokens: number,
+  jsonMode = false
 ): Promise<string> {
+  const body: Record<string, unknown> = {
+    model: 'deepseek-chat',
+    messages,
+    temperature,
+    max_tokens: maxTokens,
+  }
+
+  if (jsonMode) {
+    body.response_format = { type: 'json_object' }
+  }
+
   const response = await fetch(DEEPSEEK_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${DeepseekApiKey()}`,
     },
-    body: JSON.stringify({
-      model: 'deepseek-chat',
-      messages,
-      temperature,
-      max_tokens: maxTokens,
-    }),
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
@@ -43,34 +50,73 @@ async function callDeepseek(
 }
 
 function cleanJsonOutput(text: string): string {
-  // Strip markdown code fences
-  let cleaned = text
-    .replace(/```json\n?/g, '')
-    .replace(/```\n?/g, '')
-    .trim()
+  // Strip markdown code fences (any language tag: ```json, ```JSON, ```ts, etc.)
+  let cleaned = text.replace(/```[^\n]*\n?/g, '').trim()
 
-  // Extract the JSON object/array (first { or [ to its matching closing bracket)
+  // Extract JSON using brace-counting to find the matching close bracket.
+  // This is more robust than lastIndexOf which breaks when the LLM adds
+  // commentary containing braces after the JSON block.
   const startObj = cleaned.indexOf('{')
   const startArr = cleaned.indexOf('[')
   let start: number
-  let closingBracket: string
+  let openBracket: string
+  let closeBracket: string
 
   if (startObj === -1 && startArr === -1) return cleaned
   if (startObj === -1) {
     start = startArr
-    closingBracket = ']'
+    openBracket = '['
+    closeBracket = ']'
   } else if (startArr === -1) {
     start = startObj
-    closingBracket = '}'
+    openBracket = '{'
+    closeBracket = '}'
   } else if (startObj < startArr) {
     start = startObj
-    closingBracket = '}'
+    openBracket = '{'
+    closeBracket = '}'
   } else {
     start = startArr
-    closingBracket = ']'
+    openBracket = '['
+    closeBracket = ']'
   }
 
-  const end = cleaned.lastIndexOf(closingBracket)
+  // Walk forward from the opening bracket, counting depth while respecting strings
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let end = -1
+
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i]
+    if (escaped) {
+      escaped = false
+      continue
+    }
+    if (ch === '\\' && inString) {
+      escaped = true
+      continue
+    }
+    if (ch === '"') {
+      inString = !inString
+      continue
+    }
+    if (!inString) {
+      if (ch === openBracket) depth++
+      else if (ch === closeBracket) {
+        depth--
+        if (depth === 0) {
+          end = i
+          break
+        }
+      }
+    }
+  }
+
+  if (end === -1) {
+    // Brace counting failed (unbalanced), fall back to lastIndexOf
+    end = cleaned.lastIndexOf(closeBracket)
+  }
   if (end === -1) return cleaned
   cleaned = cleaned.slice(start, end + 1)
 
@@ -80,23 +126,23 @@ function cleanJsonOutput(text: string): string {
   cleaned = cleaned
     .split('\n')
     .map((line) => {
-      let inString = false
-      let escaped = false
+      let inStr = false
+      let esc = false
       for (let i = 0; i < line.length; i++) {
         const ch = line[i]
-        if (escaped) {
-          escaped = false
+        if (esc) {
+          esc = false
           continue
         }
         if (ch === '\\') {
-          escaped = true
+          esc = true
           continue
         }
         if (ch === '"') {
-          inString = !inString
+          inStr = !inStr
           continue
         }
-        if (!inString && ch === '/' && line[i + 1] === '/') {
+        if (!inStr && ch === '/' && line[i + 1] === '/') {
           return line.slice(0, i).trimEnd()
         }
       }
@@ -106,6 +152,16 @@ function cleanJsonOutput(text: string): string {
 
   // Remove trailing commas before } or ]
   cleaned = cleaned.replace(/,\s*([}\]])/g, '$1')
+
+  // Fix missing commas between array elements: }  \n  {
+  cleaned = cleaned.replace(/\}(\s*\r?\n\s*)\{/g, '},$1{')
+
+  // Fix missing commas between object properties:
+  // "value" or number/true/false/null at end of line, followed by "key" on next line
+  cleaned = cleaned.replace(
+    /(["}\]\d]|true|false|null)\s*\r?\n(\s*")/g,
+    '$1,\n$2'
+  )
 
   return cleaned.trim()
 }
@@ -162,17 +218,19 @@ export const deepseek = api(
       throw new APIError(ErrCode.InvalidArgument, 'Prompt is required')
     }
 
+    const isJsonRequest =
+      req.prompt.includes('Format as JSON') ||
+      req.prompt.includes('Return ONLY valid JSON')
+
     let output = await callDeepseek(
       [{ role: 'user', content: req.prompt }],
       0.7,
-      2000
+      2000,
+      isJsonRequest
     )
 
     // Clean markdown code blocks if trying to parse as JSON
-    if (
-      req.prompt.includes('Format as JSON') ||
-      req.prompt.includes('Return ONLY valid JSON')
-    ) {
+    if (isJsonRequest) {
       output = cleanJsonOutput(output)
     }
 
@@ -289,7 +347,8 @@ Make it realistic. 30-50 lines total. Return only valid JSON.`
     const rawContent = await callDeepseek(
       [{ role: 'user', content: prompt }],
       0.7,
-      6000
+      6000,
+      true
     )
 
     const cleanContent = cleanJsonOutput(rawContent)
@@ -416,7 +475,8 @@ Return ONLY valid JSON in this exact format:
     const rawOutput = await callDeepseek(
       [{ role: 'user', content: prompt }],
       0.3,
-      500
+      500,
+      true
     )
 
     const cleaned = cleanJsonOutput(rawOutput)
@@ -454,7 +514,8 @@ export const evaluateGrip = api(
     const rawOutput = await callDeepseek(
       [{ role: 'user', content: req.prompt }],
       0,
-      4000
+      4000,
+      true
     )
 
     const cleaned = cleanJsonOutput(rawOutput)
@@ -487,7 +548,8 @@ export const generateConsequence = api(
     const rawOutput = await callDeepseek(
       [{ role: 'user', content: req.prompt }],
       0.7,
-      2000
+      2000,
+      true
     )
 
     const cleaned = cleanJsonOutput(rawOutput)
@@ -554,7 +616,8 @@ export const analyzeIntent = api(
     const rawOutput = await callDeepseek(
       [{ role: 'user', content: req.prompt }],
       0,
-      500
+      500,
+      true
     )
 
     const output = cleanJsonOutput(rawOutput)
