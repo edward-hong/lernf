@@ -1,0 +1,10 @@
+# Ignore frontend
+../client/**
+../frontend/**
+
+# Ignore configs
+../.git
+../node_modules
+
+# Only compile backend
+!./**
