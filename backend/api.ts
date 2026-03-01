@@ -656,7 +656,7 @@ export const proxyClaude = api(
     const body: Record<string, unknown> = {
       model: req.model,
       messages: req.messages,
-      max_tokens: req.max_tokens || 1024,
+      max_tokens: req.max_tokens || 8192,
       temperature: req.temperature ?? 0.7,
       stream: req.stream || false,
     }
@@ -712,7 +712,7 @@ export const proxyOpenAI = api(
       body: JSON.stringify({
         model: req.model,
         messages: req.messages,
-        max_tokens: req.max_tokens || 1024,
+        max_tokens: req.max_tokens || 8192,
         temperature: req.temperature ?? 0.7,
         stream: req.stream || false,
       }),
