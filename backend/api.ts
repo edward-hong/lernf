@@ -62,6 +62,27 @@ export const healthCheck = api(
   },
 );
 
+interface DetailedHealthResponse {
+  status: "ok" | "error";
+  timestamp: string;
+  environment: string;
+}
+
+/**
+ * Detailed health check endpoint for monitoring.
+ * Used by Encore Cloud and Vercel to verify backend is running.
+ */
+export const health = api(
+  { expose: true, method: "GET", path: "/api/health" },
+  async (): Promise<DetailedHealthResponse> => {
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.ENCORE_ENVIRONMENT || "development",
+    };
+  },
+);
+
 // ---- DeepSeek Generic Endpoint ----------------------------------------------
 
 interface DeepseekRequest {

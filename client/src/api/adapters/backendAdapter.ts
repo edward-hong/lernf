@@ -1,3 +1,4 @@
+import { getApiUrl } from '../config';
 import type { AIRequest, AIResponse, AIProviderError } from '../../types/aiRequest';
 
 /**
@@ -11,7 +12,7 @@ import type { AIRequest, AIResponse, AIProviderError } from '../../types/aiReque
 export async function callBackendAI(request: AIRequest): Promise<AIResponse> {
   try {
     // Call the existing backend endpoint that proxies to DeepSeek
-    const response = await fetch('/api/chat', {
+    const response = await fetch(getApiUrl('/api/chat'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
