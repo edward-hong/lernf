@@ -9,10 +9,10 @@ export const SAMPLE_CLAUDE_CONFIG: ProviderConfig = {
   enabled: true,
   apiKey:
     'sk-ant-api03-test-key-for-development-only-do-not-use-in-production-this-is-a-placeholder',
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'claude-sonnet-4-5-20250514',
   availableModels: [
-    'claude-3-5-sonnet-20241022',
-    'claude-3-5-haiku-20241022',
+    'claude-sonnet-4-5-20250514',
+    'claude-haiku-4-5-20251001',
     'claude-opus-4-20250514',
   ],
   lastValidated: new Date(),
@@ -28,7 +28,7 @@ export const SAMPLE_OPENAI_CONFIG: ProviderConfig = {
   enabled: true,
   apiKey: 'sk-proj-test-key-for-development-only',
   model: 'gpt-4o',
-  availableModels: ['gpt-4o', 'gpt-4o-mini', 'o1-preview', 'o1-mini'],
+  availableModels: ['gpt-4o', 'gpt-4o-mini', 'o1', 'o3-mini'],
   lastValidated: new Date(),
   isValid: true,
 };

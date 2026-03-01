@@ -7,17 +7,17 @@ Lernf supports multiple AI providers, giving you control over which models power
 ## Supported Providers
 
 ### Claude (Anthropic)
-- **Models:** Sonnet 3.5, Haiku 3.5, Opus 4
+- **Models:** Sonnet 4.5, Haiku 4.5, Opus 4
 - **Best for:** Complex reasoning, long conversations
 - **Get API Key:** https://console.anthropic.com/
 
 ### OpenAI
-- **Models:** GPT-4o, GPT-4o-mini, o1-preview
+- **Models:** GPT-4o, GPT-4o-mini, o1, o3-mini
 - **Best for:** General purpose, fast responses
 - **Get API Key:** https://platform.openai.com/api-keys
 
 ### Google Gemini
-- **Models:** Gemini 2.0 Flash, Gemini 1.5 Pro
+- **Models:** Gemini 2.0 Flash, Gemini 1.5 Pro, Gemini 1.5 Flash
 - **Best for:** Free tier (15 req/min), multimodal
 - **Get API Key:** https://makersuite.google.com/app/apikey
 
@@ -49,7 +49,7 @@ Lernf supports multiple AI providers, giving you control over which models power
 
 ### Performance
 - Set faster models (Haiku, GPT-4o-mini) as primary
-- Use slower models (Opus, o1) for complex tasks
+- Use powerful models (Opus, o1) for complex tasks
 - Configure backups to avoid interruptions
 
 ### Cost Management
