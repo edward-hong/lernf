@@ -1,6 +1,7 @@
 import type { AIRequest, AIResponse, AIProviderError } from '../types/aiRequest';
 import type { AIProviderId, AIProviderSettings } from '../types/aiProvider';
 import { loadProviderSettings } from '../utils/providerStorage';
+import { performanceMonitor } from '../utils/aiPerformanceMonitor';
 import { callClaude } from './adapters/claudeAdapter';
 import { callOpenAI } from './adapters/openaiAdapter';
 import { callGemini } from './adapters/geminiAdapter';
@@ -39,8 +40,14 @@ export async function callAI(request: AIRequest): Promise<AIResponse> {
     chain.push('backend-default');
   }
 
+  // Track AI request count for notification banner
+  const count = parseInt(localStorage.getItem('ai-request-count') || '0', 10);
+  localStorage.setItem('ai-request-count', String(count + 1));
+
   // Try each provider in order
   for (const providerId of chain) {
+    const startTime = Date.now();
+
     try {
       console.log(`[AI Client] Attempting provider: ${providerId}`);
 
@@ -50,6 +57,16 @@ export async function callAI(request: AIRequest): Promise<AIResponse> {
         providerId,
         success: true,
         response,
+      });
+
+      // Record successful request
+      performanceMonitor.recordRequest({
+        provider: response.provider,
+        model: response.model,
+        requestTime: Date.now() - startTime,
+        tokenCount: response.tokensUsed,
+        success: true,
+        timestamp: new Date(),
       });
 
       console.log(`[AI Client] Success with provider: ${providerId}`);
@@ -62,6 +79,15 @@ export async function callAI(request: AIRequest): Promise<AIResponse> {
         `[AI Client] Provider ${providerId} failed:`,
         providerError.message,
       );
+
+      // Record failed request
+      performanceMonitor.recordRequest({
+        provider: String(providerId),
+        model: settings.providers[providerId as keyof typeof settings.providers]?.model || 'unknown',
+        requestTime: Date.now() - startTime,
+        success: false,
+        timestamp: new Date(),
+      });
 
       attempts.push({
         providerId,

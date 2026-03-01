@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { AIProviderSettings } from '../types/aiProvider';
 import {
   loadProviderSettings,
   saveProviderSettings,
 } from '../utils/providerStorage';
+import { exportSettings, importSettings } from '../utils/settingsImportExport';
 import { ProviderCard } from '../components/settings/ProviderCard';
 import { PriorityChainBuilder } from '../components/settings/PriorityChainBuilder';
 import { SecurityNotice } from '../components/settings/SecurityNotice';
 import { TestConfiguration } from '../components/settings/TestConfiguration';
+import { OnboardingModal } from '../components/settings/OnboardingModal';
+import { HelpTooltip } from '../components/settings/HelpTooltip';
+import { PerformanceStats } from '../components/settings/PerformanceStats';
 import { getAllProviderIds } from '../constants/aiProviders';
 
 export function SettingsPage() {
@@ -18,6 +22,7 @@ export function SettingsPage() {
   const [saveStatus, setSaveStatus] = useState<
     'idle' | 'saving' | 'saved' | 'error'
   >('idle');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-save on changes (with debounce)
   useEffect(() => {
@@ -62,8 +67,33 @@ export function SettingsPage() {
     }
   };
 
+  const handleExport = () => {
+    exportSettings();
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await importSettings(file);
+      alert('Settings imported successfully!');
+      setSettings(loadProviderSettings());
+    } catch {
+      alert('Failed to import settings. Please check the file format.');
+    }
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Onboarding modal */}
+      <OnboardingModal />
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-6 py-8">
@@ -84,9 +114,14 @@ export function SettingsPage() {
 
         {/* Primary Provider Selection */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Primary Provider
-          </h2>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Primary Provider
+            </h2>
+            <HelpTooltip
+              content="The primary provider is tried first for all AI requests. If it fails, Lernf will automatically try your backup providers."
+            />
+          </div>
           <p className="text-sm text-gray-600 mb-4">
             Select which AI provider to use by default for all features.
           </p>
@@ -276,6 +311,45 @@ export function SettingsPage() {
 
         {/* Test Configuration */}
         <TestConfiguration settings={settings} />
+
+        {/* Performance Stats */}
+        <PerformanceStats />
+
+        {/* Backup & Restore */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Backup & Restore
+          </h2>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Export Settings
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Import Settings
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </div>
+
+          <p className="text-sm text-gray-500 mt-2">
+            Note: API keys are partially hidden in exports for security. You'll
+            need to re-enter them after importing.
+          </p>
+        </div>
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-200">
