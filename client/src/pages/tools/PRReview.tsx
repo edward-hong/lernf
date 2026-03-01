@@ -68,7 +68,30 @@ function cleanJsonOutput(text: string): string {
   // Remove trailing commas before } or ]
   cleaned = cleaned.replace(/,\s*([}\]])/g, '$1')
 
+  // Fix missing commas between array elements: }  \n  {
+  cleaned = cleaned.replace(/\}(\s*\r?\n\s*)\{/g, '},$1{')
+
+  // Fix missing commas between object properties:
+  // "value" or number/true/false/null at end of line, followed by "key" on next line
+  cleaned = cleaned.replace(
+    /(["}\]\d]|true|false|null)\s*\r?\n(\s*")/g,
+    '$1,\n$2'
+  )
+
   return cleaned.trim()
+}
+
+function validateScenario(data: unknown): data is PRScenario {
+  if (!data || typeof data !== 'object') return false
+  const obj = data as Record<string, unknown>
+  return (
+    typeof obj.title === 'string' &&
+    typeof obj.description === 'string' &&
+    Array.isArray(obj.diff) &&
+    obj.diff.length > 0 &&
+    Array.isArray(obj.issues) &&
+    obj.issues.length > 0
+  )
 }
 
 const PRReview: React.FC = () => {
@@ -84,9 +107,8 @@ const PRReview: React.FC = () => {
     setMarkedLines(new Set())
     setEvaluation(null)
 
-    try {
-      const language = 'react'
-      const prompt = `Generate a realistic pull request code change with intentional bugs for code review practice.
+    const language = 'react'
+    const prompt = `Generate a realistic pull request code change with intentional bugs for code review practice.
 
 Language: ${language}
 
@@ -100,6 +122,8 @@ Types of issues to include:
 - Performance problems
 - Missing edge cases
 - Bad patterns
+
+IMPORTANT: Return ONLY valid JSON. Escape all double quotes inside string values with \\". Do not include comments. Ensure every array element and object property is separated by a comma.
 
 Format as JSON:
 {
@@ -143,13 +167,36 @@ Line types: "added" (green +), "removed" (red -), "context" (gray, no change)
 
 Make it realistic. 30-50 lines total. Return only valid JSON.`
 
-      const aiResponse = await callAI({
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        maxTokens: 6000,
-      })
+    try {
+      let scenarioData: PRScenario | null = null
+      let lastError: unknown = null
 
-      const scenarioData = JSON.parse(cleanJsonOutput(aiResponse.content))
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const aiResponse = await callAI({
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.7,
+            maxTokens: 6000,
+          })
+
+          const cleaned = cleanJsonOutput(aiResponse.content)
+          const parsed = JSON.parse(cleaned)
+
+          if (!validateScenario(parsed)) {
+            throw new Error('Invalid scenario structure: missing required fields')
+          }
+
+          scenarioData = parsed
+          break
+        } catch (error) {
+          lastError = error
+          console.warn(`PR generation attempt ${attempt + 1} failed:`, error)
+        }
+      }
+
+      if (!scenarioData) {
+        throw lastError
+      }
 
       setScenario(scenarioData)
     } catch (error) {
