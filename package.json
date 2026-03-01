@@ -5,7 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "encore run",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy:preview": "encore cloud deploy --env preview",
+    "deploy:production": "encore cloud deploy --env production",
+    "logs:production": "encore logs --env production",
+    "secrets:set": "encore secret set"
   },
   "author": "",
   "license": "ISC",
