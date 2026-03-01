@@ -97,6 +97,13 @@ export function HomePage() {
       icon: '🎨',
     },
     {
+      title: 'Live Intent Chat',
+      description: 'Chat with AI and watch intent patterns emerge in real-time',
+      path: '/practice/intent-chat',
+      status: 'ready',
+      icon: '💬',
+    },
+    {
       title: 'AI-Assisted Coding',
       description: 'Practice agentic coding workflows',
       path: '/practice/ai-coding',
