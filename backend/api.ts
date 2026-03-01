@@ -225,7 +225,7 @@ export const deepseek = api(
     let output = await callDeepseek(
       [{ role: 'user', content: req.prompt }],
       0.7,
-      2000,
+      8192,
       isJsonRequest
     )
 
