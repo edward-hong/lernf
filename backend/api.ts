@@ -287,67 +287,39 @@ export const generatePr = api(
   async (req: GeneratePrRequest): Promise<GeneratePrResponse> => {
     const language = req.language || 'react'
 
-    const prompt = `Generate a realistic pull request code change with intentional bugs for code review practice.
+    // Much simpler prompt that requests minimal output
+    const prompt = `Create a ${language} code review exercise with exactly 5 bugs.
 
-Language: ${language}
-
-Create a realistic PR scenario with 5-7 intentional issues. Issues should be subtle and realistic (not syntax errors).
-
-Types of issues to include:
-- Missing error handling
-- Race conditions
-- Memory leaks
-- Security vulnerabilities
-- Performance problems
-- Missing edge cases
-- Bad patterns
-
-Format as JSON:
-{
-  "title": "PR title (e.g., 'Add user authentication caching')",
-  "description": "What this PR does",
-  "language": "${language}",
-  "diff": [
+    REQUIRED FORMAT:
     {
-      "lineNumber": 1,
-      "type": "context",
-      "content": "import React from 'react';",
-      "hasIssue": false
-    },
-    {
-      "lineNumber": 2,
-      "type": "added",
-      "content": "const UserProfile = () => {",
-      "hasIssue": false
-    },
-    {
-      "lineNumber": 3,
-      "type": "added",
-      "content": "  useEffect(async () => {",
-      "hasIssue": true,
-      "issueId": "issue-1"
+      "title": "string",
+      "description": "string",
+      "language": "${language}",
+      "code": "string with \\n for newlines",
+      "bugs": [{"id": "1", "line": 5, "severity": "high", "title": "x", "why": "y", "fix": "z"}]
     }
-  ],
-  "issues": [
-    {
-      "id": "issue-1",
-      "lineNumber": 3,
-      "severity": "high",
-      "title": "Async useEffect",
-      "explanation": "useEffect callback cannot be async. This returns a Promise instead of cleanup function.",
-      "fix": "Define async function inside useEffect and call it."
-    }
-  ]
-}
-
-Line types: "added" (green +), "removed" (red -), "context" (gray, no change)
-
-Make it realistic. 30-50 lines total. Return only valid JSON.`
+    
+    FORBIDDEN FORMATS (DO NOT USE):
+    - NO "diff" array ❌
+    - NO "lineNumber" fields ❌  
+    - NO "type" field ❌
+    - NO "content" field ❌
+    - NO "hasIssue" field ❌
+    
+    Return 15-20 lines of ${language} code as a SINGLE STRING in the "code" field.
+    Include exactly 5 bugs. Keep all text brief.`
 
     const rawContent = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0.7,
-      6000,
+      [
+        {
+          role: 'system',
+          content:
+            'You are a code review trainer. Return ONLY compact JSON with no markdown. Keep all text brief.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      0.3,
+      3000, // Even smaller limit
       true
     )
 

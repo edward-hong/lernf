@@ -146,101 +146,58 @@ const PRReview: React.FC = () => {
     setMarkedLines(new Set())
     setEvaluation(null)
 
-    const language = 'react'
-    const prompt = `Generate a realistic pull request code change with intentional bugs for code review practice.
-
-Language: ${language}
-
-Create a realistic PR scenario with 5-7 intentional issues. Issues should be subtle and realistic (not syntax errors).
-
-Types of issues to include:
-- Missing error handling
-- Race conditions
-- Memory leaks
-- Security vulnerabilities
-- Performance problems
-- Missing edge cases
-- Bad patterns
-
-IMPORTANT: Return ONLY valid JSON. Escape all double quotes inside string values with \\". Do not include comments. Ensure every array element and object property is separated by a comma.
-
-Format as JSON:
-{
-  "title": "PR title (e.g., 'Add user authentication caching')",
-  "description": "What this PR does",
-  "language": "${language}",
-  "diff": [
-    {
-      "lineNumber": 1,
-      "type": "context",
-      "content": "import React from 'react';",
-      "hasIssue": false
-    },
-    {
-      "lineNumber": 2,
-      "type": "added",
-      "content": "const UserProfile = () => {",
-      "hasIssue": false
-    },
-    {
-      "lineNumber": 3,
-      "type": "added",
-      "content": "  useEffect(async () => {",
-      "hasIssue": true,
-      "issueId": "issue-1"
-    }
-  ],
-  "issues": [
-    {
-      "id": "issue-1",
-      "lineNumber": 3,
-      "severity": "high",
-      "title": "Async useEffect",
-      "explanation": "useEffect callback cannot be async. This returns a Promise instead of cleanup function.",
-      "fix": "Define async function inside useEffect and call it."
-    }
-  ]
-}
-
-Line types: "added" (green +), "removed" (red -), "context" (gray, no change)
-
-Make it realistic. 30-50 lines total. Return only valid JSON.`
-
     try {
-      let scenarioData: PRScenario | null = null
-      let lastError: unknown = null
+      const response = await axios.post('/api/generate-pr', {
+        language: 'react',
+      })
 
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          const aiResponse = await callAI({
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            maxTokens: 6000,
-          })
+      if (!response.data.success) {
+        throw new Error('Server returned error')
+      }
 
-          const cleaned = cleanJsonOutput(aiResponse.content)
-          const parsed = JSON.parse(cleaned)
+      const scenario = response.data.scenario
 
-          if (!validateScenario(parsed)) {
-            throw new Error('Invalid scenario structure: missing required fields')
+      // Convert new backend format to expected frontend format
+      if (scenario.code && !scenario.diff) {
+        console.log('Converting new format to old format...')
+
+        const lines = scenario.code.split('\n')
+
+        // Create diff array
+        scenario.diff = lines.map((content: string, idx: number) => {
+          const lineNum = idx + 1
+          const bug = scenario.bugs?.find((b: any) => b.line === lineNum)
+          return {
+            lineNumber: lineNum,
+            type: 'added' as const,
+            content,
+            hasIssue: !!bug,
+            issueId: bug?.id,
           }
+        })
 
-          scenarioData = parsed
-          break
-        } catch (error) {
-          lastError = error
-          console.warn(`PR generation attempt ${attempt + 1} failed:`, error)
-        }
+        // Convert bugs to issues format (NORMALIZE FIELD NAMES)
+        scenario.issues =
+          scenario.bugs?.map((bug: any) => ({
+            id: bug.id,
+            lineNumber: bug.line, // line → lineNumber
+            severity: bug.severity,
+            title: bug.title,
+            explanation: bug.why, // why → explanation
+            fix: bug.fix,
+          })) || []
+
+        console.log('Converted issues:', scenario.issues)
       }
 
-      if (!scenarioData) {
-        throw lastError
+      if (!validateScenario(scenario)) {
+        throw new Error('Invalid scenario format')
       }
 
-      setScenario(scenarioData)
+      setScenario(scenario)
     } catch (error) {
       console.error('Error generating PR:', error)
-      alert('Failed to generate PR. Please try again.')
+      alert(error instanceof Error ? error.message : 'Failed to generate PR')
     } finally {
       setLoading(false)
     }
@@ -265,13 +222,10 @@ Make it realistic. 30-50 lines total. Return only valid JSON.`
     setEvaluating(true)
 
     try {
-      const response = await axios.post(
-        '/api/evaluate-pr',
-        {
-          userFindings: Array.from(markedLines),
-          correctIssues: scenario.issues,
-        }
-      )
+      const response = await axios.post('/api/evaluate-pr', {
+        userFindings: Array.from(markedLines),
+        correctIssues: scenario.issues,
+      })
 
       setEvaluation(response.data.results)
     } catch (error) {
