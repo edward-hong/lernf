@@ -6,7 +6,7 @@
 // structured GripEvaluation matching the Phase 1 type definitions.
 // ---------------------------------------------------------------------------
 
-import axios from 'axios'
+import { callAI } from '../api/aiClient'
 import type {
   ScenarioDefinition,
   ScenarioMessage,
@@ -47,10 +47,6 @@ interface RawAIEvaluation {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:4000/api/evaluate-grip'
-const REQUEST_TIMEOUT_MS = 60_000
-const RETRY_DELAY_BASE_MS = 2_000
-const MAX_RETRIES = 3
 const MIN_TURNS_FOR_FULL_EVALUATION = 3
 
 // ---- Historical Spectrum Reference ----------------------------------------
@@ -494,41 +490,26 @@ function scoresAreConsistent(
 
 // ---- API Call with Retry --------------------------------------------------
 
+/**
+ * Calls the unified AI client with the GRIP evaluation prompt.
+ * The callAI() client handles provider fallback and retries internally.
+ * Returns the parsed raw evaluation or null on failure.
+ */
 async function callGripAPI(prompt: string): Promise<RawAIEvaluation | null> {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const response = await axios.post(
-        API_URL,
-        { prompt },
-        { timeout: REQUEST_TIMEOUT_MS },
-      )
+  try {
+    const response = await callAI({
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0, // Deterministic evaluation
+      maxTokens: 2000,
+    })
 
-      if (response.data.success && response.data.result) {
-        return response.data.result as RawAIEvaluation
-      }
-      // Non-success — don't retry on bad responses
-      return null
-    } catch (error) {
-      if (attempt < MAX_RETRIES && isRetryableError(error)) {
-        const delay = RETRY_DELAY_BASE_MS * Math.pow(2, attempt)
-        await sleep(delay)
-        continue
-      }
-      return null
-    }
+    // Parse JSON response (strip markdown fences if present)
+    const cleaned = response.content.replace(/```json|```/g, '').trim()
+    return JSON.parse(cleaned) as RawAIEvaluation
+  } catch (error) {
+    console.error('[gripEvaluator] AI evaluation call failed:', error)
+    return null
   }
-  return null
-}
-
-function isRetryableError(error: unknown): boolean {
-  if (!axios.isAxiosError(error)) return false
-  if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') return true
-  const status = error.response?.status
-  return status === 429 || (status !== undefined && status >= 500)
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 // ---- Short Conversation Fallback ------------------------------------------

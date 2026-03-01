@@ -12,6 +12,7 @@ import { useLiveChat } from '../hooks/useLiveChat'
 import { ConversationTimeline } from './ConversationTimeline'
 import { PatternAlerts } from './PatternAlerts'
 import { IntentTooltip } from './IntentTooltip'
+import { ProviderIndicator } from './ProviderIndicator'
 import { intentToColor, getIntentLabel } from '../utils/colorBlending'
 import { smoothIntent } from '../utils/intentSmoothing'
 import { INTENT_COLOR_ANCHORS } from '../constants/intentColors'
@@ -172,7 +173,7 @@ export function LiveChat() {
                               : undefined
                           }
                         >
-                          {/* Speaker name + intent label */}
+                          {/* Speaker name + intent label + provider */}
                           <div className="flex items-center gap-2">
                             <span className="block text-xs font-semibold text-indigo-700">
                               AI
@@ -189,6 +190,12 @@ export function LiveChat() {
                                   ({intentLabel})
                                 </span>
                               )}
+                            {message.provider && message.model && (
+                              <ProviderIndicator
+                                provider={message.provider}
+                                model={message.model}
+                              />
+                            )}
                           </div>
 
                           {/* Message content */}

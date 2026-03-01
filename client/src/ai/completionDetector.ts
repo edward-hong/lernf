@@ -6,7 +6,7 @@
 // turn counting for the long-running-scenario nudge, and request deduplication.
 // ---------------------------------------------------------------------------
 
-import axios from 'axios'
+import { callAI } from '../api/aiClient'
 import type { ScenarioDefinition, ScenarioMessage } from '../types/scenario'
 
 // ---- Types ----------------------------------------------------------------
@@ -39,8 +39,6 @@ export interface CompletionDetectionResult {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:4000/api/evaluate-completion'
-const REQUEST_TIMEOUT_MS = 20_000
 const LONG_RUNNING_THRESHOLD = 15
 /** Minimum user turns before AI evaluation kicks in (avoid premature checks). */
 const MIN_TURNS_FOR_EVALUATION = 4
@@ -114,7 +112,7 @@ function buildCompletionSignals(definition: ScenarioDefinition): string {
 // ---- API Call -------------------------------------------------------------
 
 /**
- * Calls the backend completion evaluation endpoint.
+ * Calls the unified AI client to evaluate scenario completion.
  * Returns null on failure (the caller should treat this as "not complete").
  */
 async function callCompletionAPI(
@@ -123,17 +121,36 @@ async function callCompletionAPI(
   completionSignals: string,
 ): Promise<CompletionEvaluation | null> {
   try {
-    const response = await axios.post(
-      API_URL,
-      { scenarioDescription, conversationHistory, completionSignals },
-      { timeout: REQUEST_TIMEOUT_MS },
-    )
+    const prompt = `You are evaluating whether a workplace training scenario has reached a natural completion point.
 
-    if (response.data.success && response.data.result) {
-      return response.data.result as CompletionEvaluation
-    }
-    return null
-  } catch {
+## SCENARIO
+${scenarioDescription}
+
+## COMPLETION SIGNALS
+${completionSignals}
+
+## CONVERSATION HISTORY
+${conversationHistory}
+
+## YOUR TASK
+Determine if this scenario has reached a natural conclusion. Return ONLY valid JSON:
+{
+  "scenarioComplete": true/false,
+  "reasoning": "Brief explanation of why the scenario is or isn't complete",
+  "suggestedPrompt": "If not complete, suggest what the user should explore next"
+}`
+
+    const response = await callAI({
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0, // Deterministic evaluation
+      maxTokens: 300,
+    })
+
+    // Parse JSON response (strip markdown fences if present)
+    const cleaned = response.content.replace(/```json|```/g, '').trim()
+    return JSON.parse(cleaned) as CompletionEvaluation
+  } catch (error) {
+    console.error('[completionDetector] Completion evaluation failed:', error)
     return null
   }
 }

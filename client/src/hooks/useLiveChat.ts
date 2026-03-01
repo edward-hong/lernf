@@ -45,16 +45,18 @@ export function useLiveChat() {
     }))
 
     try {
-      // Generate AI response
+      // Generate AI response (returns full AIResponse with provider info)
       const conversationHistory = [...currentMessages, userMessage]
-      const aiResponseText = await generateAIResponse(conversationHistory)
+      const aiResult = await generateAIResponse(conversationHistory)
 
       const aiMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: aiResponseText,
+        content: aiResult.content,
         timestamp: new Date(),
         analyzingIntent: true,
+        provider: aiResult.provider,
+        model: aiResult.model,
       }
 
       // Add AI message
@@ -66,7 +68,7 @@ export function useLiveChat() {
 
       // Analyse intent asynchronously (don't block chat)
       if (state.intentVisualizationEnabled) {
-        analyzeIntent(aiResponseText)
+        analyzeIntent(aiResult.content)
           .then((result) => {
             setState((prev) => ({
               ...prev,

@@ -8,7 +8,7 @@
 // narrative that surfaces second-order effects the user didn't anticipate.
 // ---------------------------------------------------------------------------
 
-import axios from 'axios'
+import { callAI } from '../api/aiClient'
 import type {
   ScenarioDefinition,
   ScenarioMessage,
@@ -45,10 +45,7 @@ interface RawConsequenceResponse {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:4000/api/generate-consequence'
-const REQUEST_TIMEOUT_MS = 45_000
-const RETRY_DELAY_BASE_MS = 2_000
-const MAX_RETRIES = 2
+// Configuration is handled by the unified AI client
 
 // ---- Conversation Summary Builder -----------------------------------------
 
@@ -323,40 +320,26 @@ function buildFallbackConsequence(
 
 // ---- API Call with Retry --------------------------------------------------
 
+/**
+ * Calls the unified AI client with the consequence generation prompt.
+ * The callAI() client handles provider fallback and retries internally.
+ * Returns the parsed raw response or null on failure.
+ */
 async function callConsequenceAPI(prompt: string): Promise<RawConsequenceResponse | null> {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const response = await axios.post(
-        API_URL,
-        { prompt },
-        { timeout: REQUEST_TIMEOUT_MS },
-      )
+  try {
+    const response = await callAI({
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7, // Some creativity for narrative consequences
+      maxTokens: 1500,
+    })
 
-      if (response.data.success && response.data.result) {
-        return response.data.result as RawConsequenceResponse
-      }
-      return null
-    } catch (error) {
-      if (attempt < MAX_RETRIES && isRetryableError(error)) {
-        const delay = RETRY_DELAY_BASE_MS * Math.pow(2, attempt)
-        await sleep(delay)
-        continue
-      }
-      return null
-    }
+    // Parse JSON response (strip markdown fences if present)
+    const cleaned = response.content.replace(/```json|```/g, '').trim()
+    return JSON.parse(cleaned) as RawConsequenceResponse
+  } catch (error) {
+    console.error('[consequenceGenerator] AI consequence generation failed:', error)
+    return null
   }
-  return null
-}
-
-function isRetryableError(error: unknown): boolean {
-  if (!axios.isAxiosError(error)) return false
-  if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') return true
-  const status = error.response?.status
-  return status === 429 || (status !== undefined && status >= 500)
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 // ---- Public API -----------------------------------------------------------

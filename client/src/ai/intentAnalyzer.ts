@@ -2,11 +2,11 @@
 // Intent Analysis Engine
 // ---------------------------------------------------------------------------
 // Analyses an AI assistant's message across 6 behavioural dimensions and
-// returns an IntentVector. Uses the DeepSeek API via the backend, with
-// localStorage caching to avoid redundant API calls.
+// returns an IntentVector. Uses the unified AI client with provider fallback,
+// plus localStorage caching to avoid redundant API calls.
 // ---------------------------------------------------------------------------
 
-import axios from 'axios'
+import { callAI } from '../api/aiClient'
 import type {
   IntentVector,
   IntentDimension,
@@ -20,9 +20,6 @@ import {
 } from '../utils/intentCache'
 
 // ---- Configuration --------------------------------------------------------
-
-const API_URL = 'http://localhost:4000/api/analyze-intent'
-const REQUEST_TIMEOUT_MS = 30_000
 
 const INTENT_DIMENSIONS: IntentDimension[] = [
   'epistemic',
@@ -50,8 +47,8 @@ function neutralIntent(): IntentVector {
 // ---- Prompt ---------------------------------------------------------------
 
 /**
- * Builds the intent analysis prompt for DeepSeek.
- * Temperature is set to 0 on the backend for scoring consistency.
+ * Builds the intent analysis prompt.
+ * Temperature is set to 0 for scoring consistency.
  */
 function buildIntentPrompt(message: string): string {
   return `You are analyzing the behavioral intent of an AI assistant's response.
@@ -110,7 +107,9 @@ Respond ONLY with JSON in this exact format:
  * missing required dimensions.
  */
 function parseIntentResponse(raw: string): IntentVector {
-  const parsed = JSON.parse(raw)
+  // Strip markdown code fences if present
+  const cleaned = raw.replace(/```json|```/g, '').trim()
+  const parsed = JSON.parse(cleaned)
 
   const vector: Record<string, number> = {}
   for (const dim of INTENT_DIMENSIONS) {
@@ -150,7 +149,7 @@ function rankDimensions(
  * Analyses an AI message and returns an IntentAnalysisResult.
  *
  * 1. Hashes the message and checks the cache.
- * 2. On cache miss, calls the DeepSeek API via the backend.
+ * 2. On cache miss, calls the unified AI client (with provider fallback).
  * 3. Parses the response into an IntentVector.
  * 4. Identifies primary and secondary dimensions.
  * 5. Caches the result for future lookups.
@@ -179,23 +178,18 @@ export async function analyzeIntent(
     }
   }
 
-  // 2. Call API
+  // 2. Call unified AI client
   let intent: IntentVector
   try {
     const prompt = buildIntentPrompt(message)
 
-    const response = await axios.post(
-      API_URL,
-      { prompt },
-      { timeout: REQUEST_TIMEOUT_MS },
-    )
+    const response = await callAI({
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0, // Deterministic for consistency
+      maxTokens: 200, // Intent response is small
+    })
 
-    if (!response.data.success || !response.data.output) {
-      console.warn('[intentAnalyzer] API returned unsuccessful response')
-      intent = neutralIntent()
-    } else {
-      intent = parseIntentResponse(response.data.output)
-    }
+    intent = parseIntentResponse(response.content)
   } catch (error) {
     console.warn('[intentAnalyzer] Analysis failed, returning neutral intent:', error)
     intent = neutralIntent()

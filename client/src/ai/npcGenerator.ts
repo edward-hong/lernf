@@ -2,11 +2,11 @@
 // NPC Dialogue Generation System
 // ---------------------------------------------------------------------------
 // Generates in-character NPC responses by building persona-encoded system
-// prompts and calling the DeepSeek API via the backend. Handles retries,
-// fallback responses, and rate-limit queuing.
+// prompts and calling the unified AI client. Handles fallback responses
+// and rate-limit queuing.
 // ---------------------------------------------------------------------------
 
-import axios from 'axios'
+import { callAI } from '../api/aiClient'
 import type {
   PersonaDefinition,
   BehaviorParameters,
@@ -15,7 +15,7 @@ import type {
 
 // ---- Types ----------------------------------------------------------------
 
-/** Chat message format for the DeepSeek API. */
+/** Chat message format for the AI API. */
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
@@ -29,10 +29,7 @@ interface NPCResponse {
 
 // ---- Configuration --------------------------------------------------------
 
-const API_URL = 'http://localhost:4000/api/npc-dialogue'
 const MAX_HISTORY_TURNS = 10
-const REQUEST_TIMEOUT_MS = 15_000
-const RETRY_DELAY_MS = 2_000
 
 // ---- Behavior Mapping -----------------------------------------------------
 
@@ -228,58 +225,14 @@ class RequestQueue {
 
 const requestQueue = new RequestQueue()
 
-// ---- API Call with Retry --------------------------------------------------
-
-/**
- * Makes the API call with a single retry on timeout/network error.
- * Returns the raw response text on success, or null on failure.
- */
-async function callAPI(
-  systemPrompt: string,
-  messages: ChatMessage[],
-): Promise<string | null> {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const response = await axios.post(
-        API_URL,
-        { systemPrompt, messages },
-        { timeout: REQUEST_TIMEOUT_MS },
-      )
-
-      if (response.data.success && response.data.output) {
-        return response.data.output
-      }
-      // Non-success response from our backend — don't retry
-      return null
-    } catch (error) {
-      if (attempt === 0 && isRetryableError(error)) {
-        await delay(RETRY_DELAY_MS)
-        continue
-      }
-      return null
-    }
-  }
-  return null
-}
-
-function isRetryableError(error: unknown): boolean {
-  if (!axios.isAxiosError(error)) return false
-  // Retry on timeout or network errors
-  if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') return true
-  // Retry on 429 (rate limit) or 5xx (server errors)
-  const status = error.response?.status
-  return status === 429 || (status !== undefined && status >= 500)
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 // ---- Public API -----------------------------------------------------------
 
 /**
  * Generates an in-character NPC response for the given persona and
  * conversation context.
+ *
+ * Uses the unified `callAI()` client which respects user provider settings
+ * (primary -> backup -> backend-default fallback chain).
  *
  * @param npc          - NPC identifier (e.g. "npc-sarah", "npc-mike", "npc-rachel")
  * @param persona      - The assigned PersonaDefinition with behavior parameters
@@ -304,9 +257,20 @@ export async function generateNPCResponse(
     })
   }
 
-  const result = await requestQueue.enqueue(() =>
-    callAPI(systemPrompt, messages),
-  )
+  const result = await requestQueue.enqueue(async () => {
+    try {
+      const response = await callAI({
+        systemPrompt,
+        messages,
+        temperature: 0.8, // More creative for NPC personality
+        maxTokens: 300,
+      })
+      return response.content
+    } catch (error) {
+      console.error(`[npcGenerator] NPC response generation failed for ${npc}:`, error)
+      return null
+    }
+  })
 
   if (result) {
     return { content: result, fromFallback: false }

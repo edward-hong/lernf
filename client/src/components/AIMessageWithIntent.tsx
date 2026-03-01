@@ -15,6 +15,7 @@ import { intentToColor, getIntentLabel } from '../utils/colorBlending'
 import { smoothIntent } from '../utils/intentSmoothing'
 import { getPersonaColors } from '../utils/colors'
 import { IntentTooltip } from './IntentTooltip'
+import { ProviderIndicator } from './ProviderIndicator'
 
 interface AIMessageWithIntentProps {
   message: ScenarioMessage
@@ -28,6 +29,10 @@ interface AIMessageWithIntentProps {
   settings: IntentVisualizationSettings
   /** Whether intent is currently being analyzed. */
   isAnalyzing?: boolean
+  /** Provider that generated this message (for ProviderIndicator). */
+  provider?: string
+  /** Model used to generate this message (for ProviderIndicator). */
+  model?: string
 }
 
 function getColorsForMessage(
@@ -65,6 +70,8 @@ function AIMessageWithIntentInner({
   colors,
   settings,
   isAnalyzing = false,
+  provider,
+  model,
 }: AIMessageWithIntentProps) {
   const messageColors = getColorsForMessage(message, colors)
 
@@ -142,7 +149,7 @@ function AIMessageWithIntentInner({
             borderLeft: `6px solid ${spineColor}`,
           }}
         >
-          {/* Speaker name with optional intent label or analyzing indicator */}
+          {/* Speaker name with optional intent label, provider, or analyzing indicator */}
           <div className="flex items-center gap-2">
             <span
               className={`block text-xs font-semibold ${messageColors.label}`}
@@ -158,6 +165,9 @@ function AIMessageWithIntentInner({
               <span className="text-xs font-normal text-gray-400">
                 ({intentLabel})
               </span>
+            )}
+            {provider && model && (
+              <ProviderIndicator provider={provider} model={model} />
             )}
           </div>
 
