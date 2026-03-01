@@ -24,6 +24,8 @@ const PRReview: React.FC = () => {
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null)
   const [evaluating, setEvaluating] = useState(false)
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
   const generatePR = async () => {
     setLoading(true)
     setScenario(null)
@@ -31,7 +33,7 @@ const PRReview: React.FC = () => {
     setEvaluation(null)
 
     try {
-      const response = await axios.post('/api/generate-pr', {
+      const response = await axios.post(`${API_URL}/api/generate-pr`, {
         language: 'react',
       })
 
@@ -106,7 +108,7 @@ const PRReview: React.FC = () => {
     setEvaluating(true)
 
     try {
-      const response = await axios.post('/api/evaluate-pr', {
+      const response = await axios.post(`${API_URL}/api/evaluate-pr`, {
         userFindings: Array.from(markedLines),
         correctIssues: scenario.issues,
       })
