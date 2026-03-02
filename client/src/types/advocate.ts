@@ -44,3 +44,32 @@ export interface AdvocateSession {
   status: 'setup' | 'proposing' | 'deliberating' | 'complete'
   currentRound: number
 }
+
+export interface PatternAnalysis {
+  overallPattern: string
+  turningPoint: number | null
+  taizongParallel: string
+  trajectory: 'improving' | 'stable' | 'worsening'
+}
+
+export interface KeyDismissal {
+  criticism: string
+  advocateId: string
+  howDismissed: string
+}
+
+export interface SessionAnalysis {
+  roundByRound: Array<{
+    roundNumber: number
+    userMessage: string
+    intent: UserIntent
+  }>
+  trends: {
+    defensiveness: number[]
+    epistemicOpenness: number[]
+    cooperation: number[]
+    persuasive: number[]
+  }
+  pattern: PatternAnalysis
+  keyDismissals: KeyDismissal[]
+}

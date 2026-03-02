@@ -3,17 +3,20 @@ import { useAdvocateStore } from '../../state/advocateState'
 import AdvocateSetup from '../../components/DevilsAdvocate/AdvocateSetup'
 import ProposalInput from '../../components/DevilsAdvocate/ProposalInput'
 import Deliberation from '../../components/DevilsAdvocate/Deliberation'
+import SessionSummary from '../../components/DevilsAdvocate/SessionSummary'
 
-type Step = 'setup' | 'proposal' | 'deliberation'
+type Step = 'setup' | 'proposal' | 'deliberation' | 'summary'
 
 const DevilsAdvocate: React.FC = () => {
   const [step, setStep] = useState<Step>('setup')
   const { currentSession } = useAdvocateStore()
 
-  // If we have an active session, go straight to deliberation
+  // Auto-navigate based on session status
   React.useEffect(() => {
     if (currentSession?.status === 'deliberating') {
       setStep('deliberation')
+    } else if (currentSession?.status === 'complete') {
+      setStep('summary')
     }
   }, [currentSession])
 
@@ -23,7 +26,7 @@ const DevilsAdvocate: React.FC = () => {
         <div className="max-w-4xl mx-auto px-6 py-8">
           <h1 className="text-4xl font-bold mb-2">Devil's Advocates</h1>
           <p className="text-xl text-gray-600">
-            "You are my mirror" - Emperor Taizong to Wei Zheng
+            "You are my mirror" ({'\u4EE5\u4EBA\u70BA\u93E1'}) - Emperor Taizong to Wei Zheng
           </p>
         </div>
       </div>
@@ -38,6 +41,10 @@ const DevilsAdvocate: React.FC = () => {
 
       {step === 'deliberation' && (
         <Deliberation />
+      )}
+
+      {step === 'summary' && (
+        <SessionSummary />
       )}
     </div>
   )
