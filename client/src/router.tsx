@@ -109,7 +109,7 @@ export const router = createBrowserRouter([
         element: <div>AI Assisted Coding - Coming Soon</div>,
       },
       {
-        path: 'tools/devils-advocate',
+        path: 'tools/devils-advocate/*',
         element: <Lazy><DevilsAdvocate /></Lazy>,
       },
       // Scenario routes (canonical paths)
