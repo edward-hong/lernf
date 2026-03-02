@@ -19,6 +19,10 @@ interface CaseStudy {
   oneLiner: string
   color: string
   description: string
+  arrowTo?: number
+  arrowLabel?: string
+  arrowType?: 'recovery' | 'deterioration'
+  arrowFrom?: number
 }
 
 const caseStudies: CaseStudy[] = [
@@ -105,17 +109,20 @@ const caseStudies: CaseStudy[] = [
   },
   {
     id: 7,
-    label: 'Mao / Zhou',
-    shortLabel: 'Mao-Zhou',
+    label: 'Early Mao',
+    shortLabel: 'Early Mao',
     ring: 3,
     quadrant: 'P',
-    pattern: 'Sycophancy Equilibrium',
+    pattern: 'Sycophancy Equilibrium (Pre-Cultural Revolution)',
     type: 'transition',
     oneLiner:
-      'The AI that always agrees with you is not serving you — it is surviving you.',
+      'Limited but real debate within the CCP — Peng Dehuai could challenge Mao at the 1959 Lushan Conference.',
     color: '#ca8a04',
     description:
-      'Productive partnership degrades through recognition threat into sycophancy equilibrium. AI parallel: RLHF optimising for agreement over accuracy (GPT-4o incident).',
+      'Early People\'s Republic (1949-1966) featured limited but real debate within the CCP. The Hundred Flowers Campaign (1956) invited intellectual criticism. At the 1959 Lushan Conference, Defense Minister Peng Dehuai directly criticized Mao\'s Great Leap Forward policies, demonstrating that high-level dissent was still possible within party structures, though increasingly risky.',
+    arrowTo: 14,
+    arrowLabel: 'Cultural Revolution (1966)',
+    arrowType: 'deterioration',
   },
   {
     id: 8,
@@ -201,6 +208,21 @@ const caseStudies: CaseStudy[] = [
     description:
       'Recovery trajectory from Ring 1 to Ring 5. Concealed capability-building, decisive restructuring. AI parallel: breaking free from AI dependency through the Kangxi Protocol.',
   },
+  {
+    id: 14,
+    label: 'Late Mao',
+    shortLabel: 'Late Mao',
+    ring: 2,
+    quadrant: 'I',
+    pattern: 'Institutional Collapse',
+    type: 'parasitic',
+    oneLiner:
+      'Even Lin Biao, Mao\'s designated successor, was purged for suspected dissent — any questioning meant political death.',
+    color: '#ea580c',
+    description:
+      'The Cultural Revolution (1966-76) dismantled institutional checks entirely. Red Guards enforced ideological purity through struggle sessions. Even Lin Biao, Mao\'s designated successor, was purged when suspected of questioning the Chairman. Information flow collapsed — famine deaths were hidden, ideology trumped reality, and any form of dissent became politically fatal. A one-ring deterioration from Early Mao in 17 years.',
+    arrowFrom: 7,
+  },
 ]
 
 // ─── Color Constants ───────────────────────────────────────────────
@@ -216,6 +238,7 @@ const COLORS = {
   transition: '#ca8a04',
   generative: '#16a34a',
   recovery: '#8b5cf6',
+  deterioration: '#ef4444',
 }
 
 const RING_TINTS = ['#fca5a5', '#fdba74', '#fde047', '#86efac', '#4ade80']
@@ -393,6 +416,20 @@ export function GripCompass() {
       .attr('d', 'M 0 0 L 10 5 L 0 10 Z')
       .attr('fill', COLORS.textSecondary)
       .attr('opacity', 0.3)
+
+    // Arrow marker for deterioration trajectory
+    defs
+      .append('marker')
+      .attr('id', 'arrowhead-deterioration')
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 5)
+      .attr('refY', 5)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M 0 0 L 10 5 L 0 10 Z')
+      .attr('fill', COLORS.deterioration)
 
     // ─── Concentric Rings ──────────────────────────────────────
 
@@ -712,6 +749,73 @@ export function GripCompass() {
       .attr('font-style', 'italic')
       .attr('opacity', recoveryDimmed ? 0.1 : 0.8)
       .text('Recovery Trajectory')
+
+    // ─── Mao Deterioration Trajectory ────────────────────────
+    // Trajectory connects Early Mao (Ring 3, P) to Late Mao (Ring 2, I)
+
+    const earlyMaoCase = caseStudies.find((c) => c.id === 7)!
+    const lateMaoCase = caseStudies.find((c) => c.id === 14)!
+
+    const earlyMaoPos = casePosition(earlyMaoCase, outerRadius, innerRadius)
+    const lateMaoPos = casePosition(lateMaoCase, outerRadius, innerRadius)
+    const deteriorationDimmed =
+      isDimmed(earlyMaoCase) && isDimmed(lateMaoCase)
+
+    // Create curved path from Early Mao (P, 315°) to Late Mao (I, 225°)
+    // sweeping through the bottom of the compass (270°)
+    const detPoints: [number, number][] = []
+    const detSteps = 30
+    const earlyAngleRad =
+      (quadrantAngle(earlyMaoCase.quadrant) * Math.PI) / 180
+    const lateAngleRad =
+      (quadrantAngle(lateMaoCase.quadrant) * Math.PI) / 180
+    const earlyRingRadius = outerRadius - 2.5 * ringWidth // Ring 3
+    const lateRingRadius = outerRadius - 1.5 * ringWidth // Ring 2
+
+    for (let i = 0; i <= detSteps; i++) {
+      const t = i / detSteps
+      // Interpolate angle from Early Mao to Late Mao
+      const angle = earlyAngleRad + (lateAngleRad - earlyAngleRad) * t
+      // Interpolate radius from ring 3 to ring 2 (outward)
+      const radius =
+        earlyRingRadius + (lateRingRadius - earlyRingRadius) * t
+      // Add slight outward curve for visual distinction
+      const curveOffset = Math.sin(t * Math.PI) * ringWidth * 0.3
+      const r = radius + curveOffset
+      detPoints.push([r * Math.cos(angle), -r * Math.sin(angle)])
+    }
+
+    // Deterioration trajectory path
+    g.append('path')
+      .attr('d', lineGen(detPoints))
+      .attr('fill', 'none')
+      .attr('stroke', COLORS.deterioration)
+      .attr('stroke-width', 2.5)
+      .attr('stroke-dasharray', '8,4')
+      .attr('opacity', deteriorationDimmed ? 0.1 : 0.6)
+      .attr('marker-end', 'url(#arrowhead-deterioration)')
+      .attr('class', 'deterioration-trajectory')
+
+    // Deterioration trajectory label
+    const detLabelT = 0.5
+    const detLabelAngle =
+      earlyAngleRad + (lateAngleRad - earlyAngleRad) * detLabelT
+    const detLabelRadius =
+      earlyRingRadius +
+      (lateRingRadius - earlyRingRadius) * detLabelT +
+      ringWidth * 0.3 +
+      18
+
+    g.append('text')
+      .attr('x', detLabelRadius * Math.cos(detLabelAngle))
+      .attr('y', -detLabelRadius * Math.sin(detLabelAngle))
+      .attr('fill', COLORS.deterioration)
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('font-style', 'italic')
+      .attr('text-anchor', 'middle')
+      .attr('opacity', deteriorationDimmed ? 0.1 : 0.8)
+      .text('Cultural Revolution (1966)')
 
     // ─── Kangxi/Aobai Dot (Case 13) — placed at Ring 5, R ───
 
@@ -1070,7 +1174,7 @@ export function GripCompass() {
       .attr('y', 48)
       .attr('fill', COLORS.textSecondary)
       .attr('font-size', '12px')
-      .text('Human-AI Power Dynamics — 13 Historical Case Studies')
+      .text('Human-AI Power Dynamics — 14 Historical Case Studies')
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions, selectedCase, activeQuadrant, activeType])
@@ -1225,6 +1329,52 @@ export function GripCompass() {
             {selectedCase.description}
           </p>
 
+          {/* Arc indicator */}
+          {selectedCase.arrowTo && (
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '10px 14px',
+                background:
+                  selectedCase.arrowType === 'deterioration'
+                    ? COLORS.deterioration + '15'
+                    : COLORS.recovery + '15',
+                borderLeft: `3px solid ${
+                  selectedCase.arrowType === 'deterioration'
+                    ? COLORS.deterioration
+                    : COLORS.recovery
+                }`,
+                borderRadius: '0 6px 6px 0',
+                fontSize: '12px',
+                color:
+                  selectedCase.arrowType === 'deterioration'
+                    ? COLORS.deterioration
+                    : COLORS.recovery,
+                fontWeight: 600,
+              }}
+            >
+              {selectedCase.arrowType === 'deterioration'
+                ? `\u2192 Deteriorates to ${caseStudies.find((c) => c.id === selectedCase.arrowTo)?.label} \u2014 ${selectedCase.arrowLabel}`
+                : `\u2192 Recovers to ${caseStudies.find((c) => c.id === selectedCase.arrowTo)?.label}`}
+            </div>
+          )}
+          {selectedCase.arrowFrom && (
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '10px 14px',
+                background: COLORS.deterioration + '15',
+                borderLeft: `3px solid ${COLORS.deterioration}`,
+                borderRadius: '0 6px 6px 0',
+                fontSize: '12px',
+                color: COLORS.deterioration,
+                fontWeight: 600,
+              }}
+            >
+              {`\u2190 Deteriorated from ${caseStudies.find((c) => c.id === selectedCase.arrowFrom)?.label} (17 years)`}
+            </div>
+          )}
+
           {/* Link to full case study */}
           {getCaseStudyPath(selectedCase.id) && (
             <a
@@ -1269,6 +1419,7 @@ function getCaseStudyPath(id: number): string | null {
     5: '/mindset/case-studies/al-mansur-hisham',
     6: '/mindset/case-studies/fouche-napoleon',
     7: '/mindset/case-studies/zhou-mao',
+    14: '/mindset/case-studies/zhou-mao',
     8: '/mindset/case-studies/cecil-elizabeth',
     9: '/mindset/case-studies/wei-zheng-taizong',
     10: '/mindset/case-studies/seward-lincoln',
