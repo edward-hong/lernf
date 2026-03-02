@@ -10,6 +10,7 @@ import { buildConsequenceGenerationPrompt } from './prompts/consequencePrompt'
 import { buildComparisonPrompt } from './prompts/comparisonPrompt'
 import { buildEvaluateComparisonPrompt } from './prompts/evaluateComparisonPrompt'
 import { buildAdvocatePrompt, type CriticalLens } from './prompts/advocatePrompt'
+import { buildUserIntentAnalysisPrompt, type UserIntentScores } from './prompts/userIntentPrompt'
 import { detectFrontendPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
@@ -791,6 +792,32 @@ interface StartAdvocateSessionResponse {
   critiques: AdvocateCritique[]
 }
 
+interface ContinueDeliberationRequest {
+  sessionId: string
+  userResponse: string
+}
+
+interface StoredRound {
+  roundNumber: number
+  userMessage?: string
+  userIntent?: UserIntentScores & { interpretation: string }
+  critiques: AdvocateCritique[]
+}
+
+interface ContinueDeliberationResponse {
+  success: boolean
+  roundNumber: number
+  critiques: AdvocateCritique[]
+}
+
+// In-memory session storage (temporary for Phase 2)
+// Phase 3 will move this to proper database
+const sessions = new Map<string, {
+  proposal: string
+  advocates: Advocate[]
+  rounds: StoredRound[]
+}>()
+
 export const startAdvocateSession = api(
   { method: 'POST', path: '/api/advocates/start', expose: true },
   async (req: StartAdvocateSessionRequest): Promise<StartAdvocateSessionResponse> => {
@@ -810,15 +837,10 @@ export const startAdvocateSession = api(
 
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    console.log(`[Advocate] Starting session with ${req.advocates.length} advocates`)
-
+    // Generate Round 1 critiques
     const critiquePromises = req.advocates.map(async (advocate) => {
       const prompt = buildAdvocatePrompt(advocate.lens, req.proposal)
 
-      console.log(`[Advocate] Generating critique: ${advocate.id}`)
-
-      // Phase 1: Use DeepSeek for all providers
-      // Other providers will work when user configures API keys
       const content = await callDeepseek(
         [{ role: 'user', content: prompt }],
         0.8,
@@ -834,12 +856,158 @@ export const startAdvocateSession = api(
 
     const critiques = await Promise.all(critiquePromises)
 
-    console.log(`[Advocate] Session ${sessionId} created`)
+    // Store session in memory
+    sessions.set(sessionId, {
+      proposal: req.proposal,
+      advocates: req.advocates,
+      rounds: [
+        {
+          roundNumber: 1,
+          critiques
+        }
+      ]
+    })
+
+    console.log(`[Advocates] Session ${sessionId} created with ${req.advocates.length} advocates`)
 
     return {
       success: true,
       sessionId,
       critiques
+    }
+  }
+)
+
+// Continue deliberation (Round 2, 3, etc.)
+export const continueDeliberation = api(
+  { method: 'POST', path: '/api/advocates/continue', expose: true },
+  async (req: ContinueDeliberationRequest): Promise<ContinueDeliberationResponse> => {
+    if (!req.sessionId) {
+      throw new APIError(ErrCode.InvalidArgument, 'sessionId required')
+    }
+
+    if (!req.userResponse || req.userResponse.length < 20) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        'Response must be at least 20 characters'
+      )
+    }
+
+    // Retrieve session
+    const session = sessions.get(req.sessionId)
+    if (!session) {
+      throw new APIError(ErrCode.NotFound, 'Session not found')
+    }
+
+    const { proposal, advocates, rounds } = session
+    const currentRound = rounds.length + 1
+
+    console.log(`[Advocates] Session ${req.sessionId} continuing to round ${currentRound}`)
+
+    // Analyze user's intent (SILENTLY - don't show to user yet)
+    const previousCritiques = rounds[rounds.length - 1].critiques.map(c => c.content)
+
+    const intentPrompt = buildUserIntentAnalysisPrompt(req.userResponse, previousCritiques)
+    const intentRaw = await callDeepseek(
+      [{ role: 'user', content: intentPrompt }],
+      0,
+      500,
+      true
+    )
+
+    let userIntent: UserIntentScores & { interpretation: string }
+    try {
+      const cleaned = intentRaw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      userIntent = JSON.parse(cleaned)
+    } catch {
+      console.warn('[Advocates] Failed to parse user intent, using defaults')
+      userIntent = {
+        cooperative: 0.5,
+        defensive: 0.5,
+        epistemic: 0.5,
+        persuasive: 0.5,
+        interpretation: 'Unable to analyze response'
+      }
+    }
+
+    console.log(`[Advocates] User intent - Defensive: ${userIntent.defensive.toFixed(2)}, Epistemic: ${userIntent.epistemic.toFixed(2)}`)
+
+    // Build conversation history for advocates
+    const conversationHistory: Array<{ role: string; content: string }> = []
+
+    // Add previous rounds' user messages
+    rounds.forEach((round) => {
+      if (round.userMessage) {
+        conversationHistory.push({ role: 'user', content: round.userMessage })
+      }
+    })
+
+    // Add current user response
+    conversationHistory.push({ role: 'user', content: req.userResponse })
+
+    // Generate new critiques from all advocates
+    const critiquePromises = advocates.map(async (advocate) => {
+      const prompt = buildAdvocatePrompt(advocate.lens, proposal, conversationHistory)
+
+      const content = await callDeepseek(
+        [{ role: 'user', content: prompt }],
+        0.8,
+        500,
+        false
+      )
+
+      return {
+        advocateId: advocate.id,
+        content: content.trim()
+      }
+    })
+
+    const newCritiques = await Promise.all(critiquePromises)
+
+    // Store this round (with user intent)
+    rounds.push({
+      roundNumber: currentRound,
+      userMessage: req.userResponse,
+      userIntent,
+      critiques: newCritiques
+    })
+
+    sessions.set(req.sessionId, session)
+
+    return {
+      success: true,
+      roundNumber: currentRound,
+      critiques: newCritiques
+    }
+  }
+)
+
+// Get session data (for retrieving intent analysis later)
+interface GetSessionRequest {
+  sessionId: string
+}
+
+interface GetSessionResponse {
+  success: boolean
+  session: {
+    proposal: string
+    advocates: Advocate[]
+    rounds: StoredRound[]
+  }
+}
+
+export const getSession = api(
+  { method: 'POST', path: '/api/advocates/session', expose: true },
+  async (req: GetSessionRequest): Promise<GetSessionResponse> => {
+    const session = sessions.get(req.sessionId)
+
+    if (!session) {
+      throw new APIError(ErrCode.NotFound, 'Session not found')
+    }
+
+    return {
+      success: true,
+      session
     }
   }
 )
