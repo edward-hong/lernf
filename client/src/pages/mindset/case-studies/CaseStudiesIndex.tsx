@@ -82,7 +82,7 @@ const caseStudies = [
   {
     id: '07a',
     path: '/mindset/case-studies/zhou-mao',
-    title: 'Early Mao (1949–1966)',
+    title: 'Early Mao-Zhou (1949–1966)',
     period: "People's Republic of China, 1949–1966",
     pattern: 'Sycophancy Equilibrium (Pre-Cultural Revolution)',
     gripPosition: 'Ring 3 — P quadrant',
@@ -95,7 +95,7 @@ const caseStudies = [
   {
     id: '07b',
     path: '/mindset/case-studies/zhou-mao',
-    title: 'Late Mao (1966–1976)',
+    title: 'Late Mao-Zhou (1966–1976)',
     period: "People's Republic of China, 1966–1976",
     pattern: 'Institutional Collapse',
     gripPosition: 'Ring 2 — I quadrant (deteriorated from Ring 3)',

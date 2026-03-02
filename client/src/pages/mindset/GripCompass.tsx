@@ -109,8 +109,8 @@ const caseStudies: CaseStudy[] = [
   },
   {
     id: 7,
-    label: 'Early Mao',
-    shortLabel: 'Early Mao',
+    label: 'Early Mao-Zhou',
+    shortLabel: 'Early Mao-Zhou',
     ring: 3,
     quadrant: 'P',
     pattern: 'Sycophancy Equilibrium (Pre-Cultural Revolution)',
@@ -210,8 +210,8 @@ const caseStudies: CaseStudy[] = [
   },
   {
     id: 14,
-    label: 'Late Mao',
-    shortLabel: 'Late Mao',
+    label: 'Late Mao-Zhou',
+    shortLabel: 'Late Mao-Zhou',
     ring: 2,
     quadrant: 'I',
     pattern: 'Institutional Collapse',
@@ -220,7 +220,7 @@ const caseStudies: CaseStudy[] = [
       'Even Lin Biao, Mao\'s designated successor, was purged for suspected dissent — any questioning meant political death.',
     color: '#ea580c',
     description:
-      'The Cultural Revolution (1966-76) dismantled institutional checks entirely. Red Guards enforced ideological purity through struggle sessions. Even Lin Biao, Mao\'s designated successor, was purged when suspected of questioning the Chairman. Information flow collapsed — famine deaths were hidden, ideology trumped reality, and any form of dissent became politically fatal. A one-ring deterioration from Early Mao in 17 years.',
+      'The Cultural Revolution (1966-76) dismantled institutional checks entirely. Red Guards enforced ideological purity through struggle sessions. Even Lin Biao, Mao\'s designated successor, was purged when suspected of questioning the Chairman. Information flow collapsed — famine deaths were hidden, ideology trumped reality, and any form of dissent became politically fatal. A one-ring deterioration from Early Mao-Zhou in 17 years.',
     arrowFrom: 7,
   },
 ]
@@ -751,7 +751,7 @@ export function GripCompass() {
       .text('Recovery Trajectory')
 
     // ─── Mao Deterioration Trajectory ────────────────────────
-    // Trajectory connects Early Mao (Ring 3, P) to Late Mao (Ring 2, I)
+    // Trajectory connects Early Mao-Zhou (Ring 3, P) to Late Mao-Zhou (Ring 2, I)
 
     const earlyMaoCase = caseStudies.find((c) => c.id === 7)!
     const lateMaoCase = caseStudies.find((c) => c.id === 14)!
@@ -759,7 +759,7 @@ export function GripCompass() {
     const deteriorationDimmed =
       isDimmed(earlyMaoCase) && isDimmed(lateMaoCase)
 
-    // Create curved path from Early Mao (P, 315°) to Late Mao (I, 225°)
+    // Create curved path from Early Mao-Zhou (P, 315°) to Late Mao-Zhou (I, 225°)
     // sweeping through the bottom of the compass (270°)
     const detPoints: [number, number][] = []
     const detSteps = 30
@@ -772,7 +772,7 @@ export function GripCompass() {
 
     for (let i = 0; i <= detSteps; i++) {
       const t = i / detSteps
-      // Interpolate angle from Early Mao to Late Mao
+      // Interpolate angle from Early Mao-Zhou to Late Mao-Zhou
       const angle = earlyAngleRad + (lateAngleRad - earlyAngleRad) * t
       // Interpolate radius from ring 3 to ring 2 (outward)
       const radius =
@@ -793,6 +793,45 @@ export function GripCompass() {
       .attr('opacity', deteriorationDimmed ? 0.1 : 0.6)
       .attr('marker-end', 'url(#arrowhead-deterioration)')
       .attr('class', 'deterioration-trajectory')
+
+    // Animated traveling dot along the deterioration trajectory
+    const detTravelDot = g
+      .append('circle')
+      .attr('r', 3)
+      .attr('fill', COLORS.deterioration)
+      .attr('opacity', deteriorationDimmed ? 0.1 : 0.9)
+
+    function animateDetTravelDot() {
+      const pathNode = g
+        .select('.deterioration-trajectory')
+        .node() as SVGPathElement | null
+      if (!pathNode) return
+      const totalLength = pathNode.getTotalLength()
+
+      detTravelDot
+        .attr('opacity', deteriorationDimmed ? 0.1 : 0.9)
+        .transition()
+        .duration(4000)
+        .ease(d3.easeLinear)
+        .attrTween('cx', () => (t: number) => {
+          const pt = pathNode.getPointAtLength(t * totalLength)
+          return String(pt.x)
+        })
+        .attrTween('cy', () => (t: number) => {
+          const pt = pathNode.getPointAtLength(t * totalLength)
+          return String(pt.y)
+        })
+        .on('end', () => {
+          detTravelDot
+            .transition()
+            .duration(800)
+            .attr('opacity', 0)
+            .transition()
+            .duration(200)
+            .on('end', animateDetTravelDot)
+        })
+    }
+    animateDetTravelDot()
 
     // Deterioration trajectory label
     const detLabelT = 0.5
@@ -1055,17 +1094,35 @@ export function GripCompass() {
             .attr('font-weight', '700')
             .text(c.label)
 
-          tooltipG
-            .append('text')
-            .attr('y', tooltipY + lineHeight)
-            .attr('text-anchor', 'middle')
-            .attr('fill', c.color)
-            .attr('font-size', '11px')
-            .attr('font-weight', '600')
-            .text(c.pattern)
+          // Pattern text (wrap if long)
+          const maxChars = 40
+          const patternLines: string[] = []
+          const patternWords = c.pattern.split(' ')
+          let patternLine = ''
+          patternWords.forEach((word) => {
+            if ((patternLine + ' ' + word).trim().length > maxChars) {
+              patternLines.push(patternLine.trim())
+              patternLine = word
+            } else {
+              patternLine = (patternLine + ' ' + word).trim()
+            }
+          })
+          if (patternLine) patternLines.push(patternLine.trim())
+
+          const patternTextEls: d3.Selection<SVGTextElement, unknown, null, undefined>[] = []
+          patternLines.forEach((line, li) => {
+            const el = tooltipG
+              .append('text')
+              .attr('y', tooltipY + lineHeight + li * 14)
+              .attr('text-anchor', 'middle')
+              .attr('fill', c.color)
+              .attr('font-size', '11px')
+              .attr('font-weight', '600')
+              .text(line)
+            patternTextEls.push(el as unknown as d3.Selection<SVGTextElement, unknown, null, undefined>)
+          })
 
           // One-liner (wrap if long)
-          const maxChars = 45
           const oneLinerLines: string[] = []
           const words = c.oneLiner.split(' ')
           let currentLine = ''
@@ -1079,10 +1136,11 @@ export function GripCompass() {
           })
           if (currentLine) oneLinerLines.push(currentLine.trim())
 
+          const patternHeight = patternLines.length * 14
           oneLinerLines.forEach((line, li) => {
             tooltipG
               .append('text')
-              .attr('y', tooltipY + lineHeight * 2 + 4 + li * 13)
+              .attr('y', tooltipY + lineHeight + patternHeight + 4 + li * 13)
               .attr('text-anchor', 'middle')
               .attr('fill', COLORS.textSecondary)
               .attr('font-size', '10px')
@@ -1090,11 +1148,16 @@ export function GripCompass() {
               .text(line)
           })
 
-          // Size background rect
+          // Size background rect — measure all text widths
           const nameBox = (nameText.node() as SVGTextElement).getBBox()
+          let maxTextWidth = nameBox.width
+          patternTextEls.forEach((el) => {
+            const w = (el.node() as SVGTextElement).getBBox().width
+            if (w > maxTextWidth) maxTextWidth = w
+          })
           const totalHeight =
-            lineHeight * 2 + 4 + oneLinerLines.length * 13 + padding
-          const tooltipWidth = Math.max(nameBox.width + padding * 2, 200)
+            lineHeight + patternHeight + 4 + oneLinerLines.length * 13 + padding
+          const tooltipWidth = Math.max(maxTextWidth + padding * 2, 200)
 
           tooltipBg
             .attr('x', -tooltipWidth / 2)
