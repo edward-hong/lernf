@@ -752,6 +752,7 @@ export function GripCompass() {
     kangxiDotGroup
       .on('mouseenter', function () {
         if (recoveryDimmed) return
+        g.selectAll('.tooltip-group').remove()
         d3.select(this).raise()
         d3.select(this)
           .select('.glow-ring')
@@ -850,11 +851,7 @@ export function GripCompass() {
           .transition()
           .duration(200)
           .attr('r', 10)
-        g.selectAll('.tooltip-group')
-          .transition()
-          .duration(200)
-          .attr('opacity', 0)
-          .remove()
+        g.selectAll('.tooltip-group').remove()
       })
       .on('click', () => {
         if (!recoveryDimmed)
@@ -912,6 +909,7 @@ export function GripCompass() {
       dotGroup
         .on('mouseenter', function () {
           if (dimmed) return
+          g.selectAll('.tooltip-group').remove()
           d3.select(this).raise()
           d3.select(this)
             .select('.glow-ring')
@@ -1014,11 +1012,7 @@ export function GripCompass() {
             .transition()
             .duration(200)
             .attr('r', 10)
-          g.selectAll('.tooltip-group')
-            .transition()
-            .duration(200)
-            .attr('opacity', 0)
-            .remove()
+          g.selectAll('.tooltip-group').remove()
         })
         .on('click', () => {
           if (!dimmed) setSelectedCase((prev) => (prev?.id === c.id ? null : c))
