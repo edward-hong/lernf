@@ -39,7 +39,7 @@ function CodeComparison() {
       })
 
       // Strip markdown code blocks if present
-      let outputString = response.content
+      const outputString = response.content
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
 
@@ -75,7 +75,12 @@ function CodeComparison() {
 
     try {
       const response = await callAI({
-        messages: [{ role: 'user', content: evaluateOptions(scenario, reasoning, selectedOption) }],
+        messages: [
+          {
+            role: 'user',
+            content: evaluateOptions(scenario, reasoning, selectedOption),
+          },
+        ],
         temperature: 0,
         maxTokens: 1500,
       })
