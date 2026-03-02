@@ -9,6 +9,7 @@ import { buildGripEvaluationPrompt } from './prompts/gripEvaluationPrompt'
 import { buildConsequenceGenerationPrompt } from './prompts/consequencePrompt'
 import { buildComparisonPrompt } from './prompts/comparisonPrompt'
 import { buildEvaluateComparisonPrompt } from './prompts/evaluateComparisonPrompt'
+import { buildAdvocatePrompt, type CriticalLens } from './prompts/advocatePrompt'
 import { detectFrontendPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
@@ -762,6 +763,84 @@ export const analyzeIntent = api(
     const output = cleanJsonOutput(rawOutput)
 
     return { success: true, output }
+  }
+)
+
+// ---- Devil's Advocates ----------------------------------------------------
+
+interface Advocate {
+  id: string
+  provider: 'claude' | 'openai' | 'gemini' | 'deepseek'
+  model: string
+  lens: CriticalLens
+}
+
+interface StartAdvocateSessionRequest {
+  proposal: string
+  advocates: Advocate[]
+}
+
+interface AdvocateCritique {
+  advocateId: string
+  content: string
+}
+
+interface StartAdvocateSessionResponse {
+  success: boolean
+  sessionId: string
+  critiques: AdvocateCritique[]
+}
+
+export const startAdvocateSession = api(
+  { method: 'POST', path: '/api/advocates/start', expose: true },
+  async (req: StartAdvocateSessionRequest): Promise<StartAdvocateSessionResponse> => {
+    if (!req.proposal || req.proposal.length < 100) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        'Proposal must be at least 100 characters'
+      )
+    }
+
+    if (!req.advocates || req.advocates.length < 3 || req.advocates.length > 5) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        'Must select 3-5 advocates'
+      )
+    }
+
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+    console.log(`[Advocate] Starting session with ${req.advocates.length} advocates`)
+
+    const critiquePromises = req.advocates.map(async (advocate) => {
+      const prompt = buildAdvocatePrompt(advocate.lens, req.proposal)
+
+      console.log(`[Advocate] Generating critique: ${advocate.id}`)
+
+      // Phase 1: Use DeepSeek for all providers
+      // Other providers will work when user configures API keys
+      const content = await callDeepseek(
+        [{ role: 'user', content: prompt }],
+        0.8,
+        500,
+        false
+      )
+
+      return {
+        advocateId: advocate.id,
+        content: content.trim()
+      }
+    })
+
+    const critiques = await Promise.all(critiquePromises)
+
+    console.log(`[Advocate] Session ${sessionId} created`)
+
+    return {
+      success: true,
+      sessionId,
+      critiques
+    }
   }
 )
 

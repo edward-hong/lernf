@@ -35,6 +35,7 @@ const AobaiKangxi = lazy(() => import('./pages/mindset/case-studies/AobaiKangxi'
 const AiMisconceptions = lazy(() => import('./pages/mindset/AiMisconceptions').then(m => ({ default: m.AiMisconceptions })))
 const GripCompass = lazy(() => import('./pages/mindset/GripCompass').then(m => ({ default: m.GripCompass })))
 const GripLimitations = lazy(() => import('./pages/mindset/GripLimitations').then(m => ({ default: m.GripLimitations })))
+const DevilsAdvocate = lazy(() => import('./pages/tools/DevilsAdvocate'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 
 /** Suspense fallback for lazy-loaded routes. */
@@ -106,6 +107,10 @@ export const router = createBrowserRouter([
       {
         path: 'practice/ai-coding',
         element: <div>AI Assisted Coding - Coming Soon</div>,
+      },
+      {
+        path: 'tools/devils-advocate',
+        element: <Lazy><DevilsAdvocate /></Lazy>,
       },
       // Scenario routes (canonical paths)
       {
