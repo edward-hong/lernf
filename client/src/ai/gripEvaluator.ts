@@ -2,11 +2,12 @@
 // GRIP Evaluation Engine
 // ---------------------------------------------------------------------------
 // Evaluates a completed scenario session across all four GRIP dimensions by
-// calling the AI evaluator with a comprehensive scoring prompt. Produces a
-// structured GripEvaluation matching the Phase 1 type definitions.
+// calling the backend /api/evaluate-grip endpoint, which builds the scoring
+// prompt internally. Produces a structured GripEvaluation matching the
+// Phase 1 type definitions.
 // ---------------------------------------------------------------------------
 
-import { callAI } from '../api/aiClient'
+import { getApiUrl } from '../api/config'
 import type {
   ScenarioDefinition,
   ScenarioMessage,
@@ -17,7 +18,6 @@ import type {
   PatternMatch,
 } from '../types/scenario'
 import type { DimensionEvaluationGuidance } from '../data/scenarios/prod-incident-001'
-import { buildEvaluationPrompt } from '../prompts/gripEvaluationPrompt'
 
 // ---- Types ----------------------------------------------------------------
 
@@ -209,9 +209,6 @@ ${g.critical.map((c) => `- ${c}`).join('\n')}
     .join('\n')
 }
 
-// ---- System Prompt Builder ------------------------------------------------
-// buildEvaluationPrompt is imported from ../prompts/gripEvaluationPrompt
-
 // ---- Response Validation --------------------------------------------------
 
 const VALID_DIMENSIONS: GripDimension[] = ['G', 'R', 'I', 'P']
@@ -346,21 +343,48 @@ function scoresAreConsistent(
 // ---- API Call with Retry --------------------------------------------------
 
 /**
- * Calls the unified AI client with the GRIP evaluation prompt.
- * The callAI() client handles provider fallback and retries internally.
- * Returns the parsed raw evaluation or null on failure.
+ * Calls the backend /api/evaluate-grip endpoint which builds the GRIP
+ * evaluation prompt internally. Frontend sends structured data (scenario info,
+ * formatted strings) and receives the raw evaluation result.
  */
-async function callGripAPI(prompt: string): Promise<RawAIEvaluation | null> {
+async function callGripAPI(
+  scenarioTitle: string,
+  scenarioCategory: string,
+  scenarioEngineBriefing: string,
+  conversationHistory: string,
+  signalsSummary: string,
+  hiddenFactorStatus: string,
+  evaluationGuidance: string,
+  userTurnCount: number,
+  minTurnsForFullEvaluation: number,
+): Promise<RawAIEvaluation | null> {
   try {
-    const response = await callAI({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0, // Deterministic evaluation
-      maxTokens: 2000,
+    const response = await fetch(getApiUrl('/api/evaluate-grip'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenarioTitle,
+        scenarioCategory,
+        scenarioEngineBriefing,
+        conversationHistory,
+        signalsSummary,
+        hiddenFactorStatus,
+        evaluationGuidance,
+        userTurnCount,
+        minTurnsForFullEvaluation,
+      }),
     })
 
-    // Parse JSON response (strip markdown fences if present)
-    const cleaned = response.content.replace(/```json|```/g, '').trim()
-    return JSON.parse(cleaned) as RawAIEvaluation
+    if (!response.ok) {
+      throw new Error(`GRIP evaluation API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    if (!data.success || !data.result) {
+      throw new Error('GRIP evaluation response failed')
+    }
+
+    return data.result as RawAIEvaluation
   } catch (error) {
     console.error('[gripEvaluator] AI evaluation call failed:', error)
     return null
@@ -442,14 +466,17 @@ export async function evaluateScenario(
     return buildShortConversationEvaluation(evaluationSignals, userTurnCount)
   }
 
-  // Build all prompt components
+  // Format data for the backend endpoint (backend builds the prompt)
   const formattedHistory = formatConversationForEvaluation(conversationHistory)
   const signalsSummary = formatSignalsSummary(evaluationSignals)
   const hiddenFactorStatus = formatHiddenFactorStatus(scenario, discoveredFactorIds)
   const guidanceText = formatEvaluationGuidance(evaluationGuidance)
 
-  const prompt = buildEvaluationPrompt(
-    scenario,
+  // Helper to call the backend with the same structured data
+  const callBackendGrip = () => callGripAPI(
+    scenario.title,
+    scenario.category,
+    scenario.engineBriefing,
     formattedHistory,
     signalsSummary,
     hiddenFactorStatus,
@@ -459,7 +486,7 @@ export async function evaluateScenario(
   )
 
   // First attempt
-  let rawResult = await callGripAPI(prompt)
+  let rawResult = await callBackendGrip()
 
   if (!rawResult) {
     // AI evaluation timed out or failed — return a degraded evaluation
@@ -472,7 +499,7 @@ export async function evaluateScenario(
     evaluation = validateAndNormalise(rawResult, evaluationSignals)
   } catch {
     // Validation failed — try once more
-    rawResult = await callGripAPI(prompt)
+    rawResult = await callBackendGrip()
     if (!rawResult) {
       return buildSignalBasedFallback(evaluationSignals, discoveredFactorIds, scenario)
     }
@@ -486,7 +513,7 @@ export async function evaluateScenario(
   // Check for score consistency against signals
   if (!scoresAreConsistent(evaluation, evaluationSignals)) {
     // Re-evaluate once with a nudge for consistency
-    const retryResult = await callGripAPI(prompt)
+    const retryResult = await callBackendGrip()
     if (retryResult) {
       try {
         const retryEvaluation = validateAndNormalise(retryResult, evaluationSignals)

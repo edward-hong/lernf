@@ -2,11 +2,12 @@
 // Intent Analysis Engine
 // ---------------------------------------------------------------------------
 // Analyses an AI assistant's message across 6 behavioural dimensions and
-// returns an IntentVector. Uses the unified AI client with provider fallback,
-// plus localStorage caching to avoid redundant API calls.
+// returns an IntentVector. Calls the backend /api/analyze-intent endpoint
+// which builds the scoring prompt internally. Uses localStorage caching
+// to avoid redundant API calls.
 // ---------------------------------------------------------------------------
 
-import { callAI } from '../api/aiClient'
+import { getApiUrl } from '../api/config'
 import type {
   IntentVector,
   IntentDimension,
@@ -18,7 +19,6 @@ import {
   setCachedIntent,
   clearExpiredCache,
 } from '../utils/intentCache'
-import { buildIntentPrompt } from '../prompts/intentPrompt'
 
 // ---- Configuration --------------------------------------------------------
 
@@ -95,7 +95,7 @@ function rankDimensions(
  * Analyses an AI message and returns an IntentAnalysisResult.
  *
  * 1. Hashes the message and checks the cache.
- * 2. On cache miss, calls the unified AI client (with provider fallback).
+ * 2. On cache miss, calls the backend /api/analyze-intent endpoint.
  * 3. Parses the response into an IntentVector.
  * 4. Identifies primary and secondary dimensions.
  * 5. Caches the result for future lookups.
@@ -124,18 +124,25 @@ export async function analyzeIntent(
     }
   }
 
-  // 2. Call unified AI client
+  // 2. Call backend endpoint (prompt is built in backend)
   let intent: IntentVector
   try {
-    const prompt = buildIntentPrompt(message)
-
-    const response = await callAI({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0, // Deterministic for consistency
-      maxTokens: 200, // Intent response is small
+    const response = await fetch(getApiUrl('/api/analyze-intent'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
     })
 
-    intent = parseIntentResponse(response.content)
+    if (!response.ok) {
+      throw new Error(`Intent analysis API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    if (!data.success || !data.output) {
+      throw new Error('Intent analysis response failed')
+    }
+
+    intent = parseIntentResponse(data.output)
   } catch (error) {
     console.warn('[intentAnalyzer] Analysis failed, returning neutral intent:', error)
     intent = neutralIntent()
@@ -159,7 +166,6 @@ export async function analyzeIntent(
 // ---- Exports for testing --------------------------------------------------
 
 export {
-  buildIntentPrompt,
   parseIntentResponse,
   rankDimensions,
   neutralIntent,

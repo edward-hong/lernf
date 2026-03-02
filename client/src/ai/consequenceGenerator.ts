@@ -8,7 +8,7 @@
 // narrative that surfaces second-order effects the user didn't anticipate.
 // ---------------------------------------------------------------------------
 
-import { callAI } from '../api/aiClient'
+import { getApiUrl } from '../api/config'
 import type {
   ScenarioDefinition,
   ScenarioMessage,
@@ -16,7 +16,6 @@ import type {
   GripDimension,
   HiddenFactor,
 } from '../types/scenario'
-import { buildConsequencePrompt } from '../prompts/consequencePrompt'
 
 // ---- Types ----------------------------------------------------------------
 
@@ -126,9 +125,6 @@ function formatGripScores(evaluation: GripEvaluation): string {
     })
     .join('\n\n')
 }
-
-// ---- Prompt Builder -------------------------------------------------------
-// buildConsequencePrompt is imported from ../prompts/consequencePrompt
 
 // ---- Response Validation --------------------------------------------------
 
@@ -246,21 +242,48 @@ function buildFallbackConsequence(
 // ---- API Call with Retry --------------------------------------------------
 
 /**
- * Calls the unified AI client with the consequence generation prompt.
- * The callAI() client handles provider fallback and retries internally.
+ * Calls the backend /api/generate-consequence endpoint which builds the
+ * consequence prompt internally. Frontend sends structured data.
  * Returns the parsed raw response or null on failure.
  */
-async function callConsequenceAPI(prompt: string): Promise<RawConsequenceResponse | null> {
+async function callConsequenceAPI(
+  scenarioTitle: string,
+  scenarioCategory: string,
+  scenarioSetupContext: string,
+  conversationSummary: string,
+  gripScores: string,
+  compositeScore: number,
+  band: string,
+  hiddenFactorStatus: string,
+  weakDimensions: string[],
+): Promise<RawConsequenceResponse | null> {
   try {
-    const response = await callAI({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7, // Some creativity for narrative consequences
-      maxTokens: 1500,
+    const response = await fetch(getApiUrl('/api/generate-consequence'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenarioTitle,
+        scenarioCategory,
+        scenarioSetupContext,
+        conversationSummary,
+        gripScores,
+        compositeScore,
+        band,
+        hiddenFactorStatus,
+        weakDimensions,
+      }),
     })
 
-    // Parse JSON response (strip markdown fences if present)
-    const cleaned = response.content.replace(/```json|```/g, '').trim()
-    return JSON.parse(cleaned) as RawConsequenceResponse
+    if (!response.ok) {
+      throw new Error(`Consequence generation API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    if (!data.success || !data.result) {
+      throw new Error('Consequence generation response failed')
+    }
+
+    return data.result as RawConsequenceResponse
   } catch (error) {
     console.error('[consequenceGenerator] AI consequence generation failed:', error)
     return null
@@ -297,16 +320,26 @@ export async function generateConsequence(
     discoveredFactorIds,
   )
 
-  const prompt = buildConsequencePrompt(
-    scenario,
+  // Extract weak dimensions for targeted consequence generation
+  const weakDimensions = gripScores.dimensions
+    .filter((d) => d.score <= 2)
+    .map((d) => d.dimension)
+
+  // Helper to call the backend with structured data (backend builds the prompt)
+  const callBackendConsequence = () => callConsequenceAPI(
+    scenario.title,
+    scenario.category,
+    scenario.setupContext,
     conversationSummary,
     gripSummary,
+    gripScores.compositeScore,
+    gripScores.band,
     hiddenFactorStatus,
-    gripScores,
+    weakDimensions,
   )
 
   // First attempt
-  let rawResult = await callConsequenceAPI(prompt)
+  let rawResult = await callBackendConsequence()
 
   if (!rawResult) {
     return buildFallbackConsequence(scenario, gripScores, discoveredFactorIds)
@@ -316,7 +349,7 @@ export async function generateConsequence(
     return validateAndFormat(rawResult)
   } catch {
     // Validation failed — try once more
-    rawResult = await callConsequenceAPI(prompt)
+    rawResult = await callBackendConsequence()
     if (!rawResult) {
       return buildFallbackConsequence(scenario, gripScores, discoveredFactorIds)
     }
