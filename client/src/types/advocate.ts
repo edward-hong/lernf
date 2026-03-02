@@ -21,10 +21,26 @@ export interface Critique {
   content: string
 }
 
+export interface UserIntent {
+  cooperative: number
+  defensive: number
+  epistemic: number
+  persuasive: number
+  interpretation: string
+}
+
+export interface Round {
+  roundNumber: number
+  userMessage?: string
+  userIntent?: UserIntent  // Stored but not shown during session
+  critiques: Critique[]
+}
+
 export interface AdvocateSession {
   id: string
   proposal: string
   selectedAdvocates: Advocate[]
-  critiques: Critique[]
+  rounds: Round[]
   status: 'setup' | 'proposing' | 'deliberating' | 'complete'
+  currentRound: number
 }
