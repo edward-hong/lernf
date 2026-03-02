@@ -1,9 +1,23 @@
-import type { CodeScenario, SelectedOption } from '../types/comparison'
+interface CodeOption {
+  code: string
+  approach: string
+}
 
-export function evaluateOptions(
-  scenario: CodeScenario,
+interface ComparisonScenario {
+  context: string
+  optionA: CodeOption
+  optionB: CodeOption
+  correctAnswer: string
+  reason: string
+}
+
+/**
+ * Builds the prompt for evaluating a user's code comparison answer.
+ */
+export function buildEvaluateComparisonPrompt(
+  scenario: ComparisonScenario,
   reasoning: string,
-  selectedOption: SelectedOption
+  selectedOption: string
 ): string {
   return `Context: ${scenario.context}
 

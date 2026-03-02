@@ -1,29 +1,13 @@
-export interface Language {
-  value: string
-  label: string
-  icon: string
-}
-
-export const LANGUAGES: Language[] = [
-  { value: 'javascript', label: 'JavaScript', icon: '🟨' },
-  { value: 'typescript', label: 'TypeScript', icon: '🔷' },
-  { value: 'python', label: 'Python', icon: '🐍' },
-  { value: 'java', label: 'Java', icon: '☕' },
-  { value: 'go', label: 'Go', icon: '🐹' },
-  { value: 'rust', label: 'Rust', icon: '🦀' },
-  { value: 'ruby', label: 'Ruby', icon: '💎' },
-  { value: 'csharp', label: 'C#', icon: '🎵' },
-  { value: 'cpp', label: 'C++', icon: '⚡' },
-  { value: 'swift', label: 'Swift', icon: '🍎' },
-]
-
 interface LanguageGuidance {
   name: string
   focus: string
   avoid: string
 }
 
-export function generateComparisonPrompt(language: string): string {
+/**
+ * Builds the prompt for generating a code comparison exercise.
+ */
+export function buildComparisonPrompt(language: string): string {
   const languageGuidance: Record<string, LanguageGuidance> = {
     javascript: {
       name: 'JavaScript',
@@ -71,7 +55,7 @@ Format your response as JSON:
     "approach": "Brief description of approach"
   },
   "optionB": {
-    "code": "function code here", 
+    "code": "function code here",
     "approach": "Brief description of approach"
   },
   "correctAnswer": "A or B",
