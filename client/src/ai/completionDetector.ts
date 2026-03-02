@@ -8,6 +8,7 @@
 
 import { callAI } from '../api/aiClient'
 import type { ScenarioDefinition, ScenarioMessage } from '../types/scenario'
+import { buildCompletionPrompt } from '../prompts/completionPrompt'
 
 // ---- Types ----------------------------------------------------------------
 
@@ -121,24 +122,7 @@ async function callCompletionAPI(
   completionSignals: string,
 ): Promise<CompletionEvaluation | null> {
   try {
-    const prompt = `You are evaluating whether a workplace training scenario has reached a natural completion point.
-
-## SCENARIO
-${scenarioDescription}
-
-## COMPLETION SIGNALS
-${completionSignals}
-
-## CONVERSATION HISTORY
-${conversationHistory}
-
-## YOUR TASK
-Determine if this scenario has reached a natural conclusion. Return ONLY valid JSON:
-{
-  "scenarioComplete": true/false,
-  "reasoning": "Brief explanation of why the scenario is or isn't complete",
-  "suggestedPrompt": "If not complete, suggest what the user should explore next"
-}`
+    const prompt = buildCompletionPrompt(scenarioDescription, conversationHistory, completionSignals)
 
     const response = await callAI({
       messages: [{ role: 'user', content: prompt }],
