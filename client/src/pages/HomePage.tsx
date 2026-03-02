@@ -117,6 +117,13 @@ export function HomePage() {
       status: 'ready',
       icon: '💼',
     },
+    {
+      title: "Devil's Advocate",
+      description: 'Challenge your ideas with multi-AI critique and intent analysis',
+      path: '/tools/devils-advocate',
+      status: 'ready',
+      icon: '😈',
+    },
   ]
 
   return (
