@@ -10,7 +10,7 @@ import { buildConsequenceGenerationPrompt } from './prompts/consequencePrompt'
 import { buildComparisonPrompt } from './prompts/comparisonPrompt'
 import { buildEvaluateComparisonPrompt } from './prompts/evaluateComparisonPrompt'
 import { buildAdvocatePrompt, type CriticalLens } from './prompts/advocatePrompt'
-import { buildUserIntentAnalysisPrompt, type UserIntentScores } from './prompts/userIntentPrompt'
+import { buildUserIntentAnalysisPrompt, buildSessionPatternAnalysisPrompt, type UserIntentScores, type SessionPatternAnalysis } from './prompts/userIntentPrompt'
 import { detectFrontendPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
@@ -1008,6 +1008,110 @@ export const getSession = api(
     return {
       success: true,
       session
+    }
+  }
+)
+
+// End session with analysis
+interface EndSessionRequest {
+  sessionId: string
+}
+
+interface EndSessionResponse {
+  success: boolean
+  analysis: SessionPatternAnalysis
+  intentHistory: Array<{
+    roundNumber: number
+    intent: UserIntentScores & { interpretation: string }
+  }>
+}
+
+export const endAdvocateSession = api(
+  { method: 'POST', path: '/api/advocates/end', expose: true },
+  async (req: EndSessionRequest): Promise<EndSessionResponse> => {
+    if (!req.sessionId) {
+      throw new APIError(ErrCode.InvalidArgument, 'sessionId required')
+    }
+
+    const session = sessions.get(req.sessionId)
+    if (!session) {
+      throw new APIError(ErrCode.NotFound, 'Session not found')
+    }
+
+    const { proposal, rounds } = session
+
+    // Collect intent history from all rounds
+    const intentHistory = rounds
+      .filter(r => r.userIntent)
+      .map(r => ({
+        roundNumber: r.roundNumber,
+        intent: r.userIntent!
+      }))
+
+    // Need at least 1 round with user response for analysis
+    const roundsWithResponses = rounds.filter(r => r.userMessage)
+    if (roundsWithResponses.length === 0) {
+      return {
+        success: true,
+        analysis: {
+          overallTrajectory: 'consistent',
+          trajectoryDescription: 'No user responses to analyze. The session ended before any deliberation occurred.',
+          defensivenessTrend: 'stable',
+          opennessTrend: 'stable',
+          keyDismissals: [],
+          strongestMoment: 'No responses were provided.',
+          blindSpots: [],
+          weiZhengReflection: 'A mirror can only reflect what stands before it. You must first face it.',
+          selfReflectionPrompts: [
+            'What made you hesitate to respond to the criticism?',
+            'Were the critiques harder to face than you expected?',
+            'What would you say if you had no ego to protect?'
+          ]
+        },
+        intentHistory
+      }
+    }
+
+    console.log(`[Advocates] Ending session ${req.sessionId} - analyzing ${roundsWithResponses.length} rounds`)
+
+    // Run pattern analysis via LLM
+    const analysisPrompt = buildSessionPatternAnalysisPrompt(proposal, rounds)
+    const analysisRaw = await callDeepseek(
+      [{ role: 'user', content: analysisPrompt }],
+      0,
+      2000,
+      true
+    )
+
+    let analysis: SessionPatternAnalysis
+    try {
+      const cleaned = cleanJsonOutput(analysisRaw)
+      analysis = JSON.parse(cleaned)
+    } catch {
+      console.warn('[Advocates] Failed to parse session analysis, using defaults')
+      analysis = {
+        overallTrajectory: 'mixed',
+        trajectoryDescription: 'Unable to fully analyze response patterns. Review your individual round scores below.',
+        defensivenessTrend: 'stable',
+        opennessTrend: 'stable',
+        keyDismissals: [],
+        strongestMoment: 'Review individual rounds for highlights.',
+        blindSpots: [],
+        weiZhengReflection: 'The value of a mirror depends on your willingness to look.',
+        selfReflectionPrompts: [
+          'Which criticism was hardest to hear? Why?',
+          'Did your position change at all through this process?',
+          'What would you tell a friend facing the same criticism?'
+        ]
+      }
+    }
+
+    console.log(`[Advocates] Session analysis complete - trajectory: ${analysis.overallTrajectory}`)
+
+    return {
+      success: true,
+      analysis,
+      intentHistory
     }
   }
 )

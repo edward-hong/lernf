@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Advocate, AdvocateSession } from '../types/advocate'
+import type { Advocate, AdvocateSession, SessionAnalysisResult } from '../types/advocate'
 
 interface AdvocateState {
   currentSession: AdvocateSession | null
@@ -16,6 +16,7 @@ interface AdvocateState {
   setUserResponse: (text: string) => void
   startSession: (proposal: string, advocates: Advocate[]) => Promise<void>
   continueSession: (response: string) => Promise<void>
+  endSession: () => Promise<void>
   resetSession: () => void
 }
 
@@ -143,6 +144,48 @@ export const useAdvocateStore = create<AdvocateState>()(
               currentRound: data.roundNumber
             },
             userResponseText: '',
+            loading: false
+          })
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Unknown error',
+            loading: false
+          })
+        }
+      },
+
+      endSession: async () => {
+        const session = get().currentSession
+        if (!session) {
+          throw new Error('No active session')
+        }
+
+        set({ loading: true, error: null })
+
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
+          const response = await fetch(`${API_URL}/api/advocates/end`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: session.id })
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to end session')
+          }
+
+          const data: { success: boolean } & SessionAnalysisResult = await response.json()
+
+          set({
+            currentSession: {
+              ...session,
+              status: 'analysis',
+              analysisResult: {
+                analysis: data.analysis,
+                intentHistory: data.intentHistory
+              }
+            },
             loading: false
           })
         } catch (error) {

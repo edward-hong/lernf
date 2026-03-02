@@ -2,6 +2,7 @@
  * Analyzes how users respond to criticism.
  * Used to detect defensiveness, openness, etc.
  * Results are stored but NOT shown to user during session.
+ * Pattern analysis runs at session end to summarize trajectory.
  */
 
 export interface UserIntentScores {
@@ -9,6 +10,18 @@ export interface UserIntentScores {
   defensive: number        // 0-1: Defensive vs. open
   epistemic: number        // 0-1: Reconsidering vs. closed mind
   persuasive: number       // 0-1: Trying to convince vs. listening
+}
+
+export interface SessionPatternAnalysis {
+  overallTrajectory: 'growth' | 'entrenchment' | 'mixed' | 'consistent'
+  trajectoryDescription: string
+  defensivenessTrend: 'increasing' | 'decreasing' | 'stable' | 'fluctuating'
+  opennessTrend: 'increasing' | 'decreasing' | 'stable' | 'fluctuating'
+  keyDismissals: string[]
+  strongestMoment: string
+  blindSpots: string[]
+  weiZhengReflection: string
+  selfReflectionPrompts: string[]
 }
 
 export function buildUserIntentAnalysisPrompt(
@@ -54,5 +67,62 @@ Return ONLY valid JSON:
   "epistemic": 0.0-1.0,
   "persuasive": 0.0-1.0,
   "interpretation": "One sentence interpretation"
+}`
+}
+
+export function buildSessionPatternAnalysisPrompt(
+  proposal: string,
+  rounds: Array<{
+    roundNumber: number
+    userMessage?: string
+    userIntent?: UserIntentScores & { interpretation: string }
+    critiques: Array<{ advocateId: string; content: string }>
+  }>
+): string {
+  const roundSummaries = rounds
+    .filter(r => r.userMessage)
+    .map(r => {
+      const intentStr = r.userIntent
+        ? `Intent scores: cooperative=${r.userIntent.cooperative.toFixed(2)}, defensive=${r.userIntent.defensive.toFixed(2)}, epistemic=${r.userIntent.epistemic.toFixed(2)}, persuasive=${r.userIntent.persuasive.toFixed(2)}. ${r.userIntent.interpretation}`
+        : 'No intent data.'
+      return `ROUND ${r.roundNumber}:
+Critiques received: ${r.critiques.map(c => c.content).join(' | ')}
+User response: "${r.userMessage}"
+${intentStr}`
+    })
+    .join('\n\n')
+
+  return `Analyze the OVERALL PATTERN of how this person responded to sustained criticism across multiple rounds.
+
+ORIGINAL PROPOSAL:
+"${proposal}"
+
+SESSION HISTORY:
+${roundSummaries}
+
+Analyze the trajectory of their responses. Look for:
+- Did defensiveness increase or decrease over rounds?
+- Did epistemic openness grow or shrink?
+- Were there specific critiques they consistently dismissed?
+- What was their strongest moment of genuine engagement?
+- What blind spots persisted despite repeated criticism?
+
+Also provide a Wei Zheng reflection - Emperor Taizong valued Wei Zheng as his "mirror" because Wei Zheng showed him what he couldn't see about himself. What would Wei Zheng say to this person about their pattern of responding to criticism?
+
+Return ONLY valid JSON:
+{
+  "overallTrajectory": "growth" | "entrenchment" | "mixed" | "consistent",
+  "trajectoryDescription": "2-3 sentence summary of how they evolved across rounds",
+  "defensivenessTrend": "increasing" | "decreasing" | "stable" | "fluctuating",
+  "opennessTrend": "increasing" | "decreasing" | "stable" | "fluctuating",
+  "keyDismissals": ["critique they brushed off #1", "critique they brushed off #2"],
+  "strongestMoment": "Description of their best moment of genuine engagement",
+  "blindSpots": ["persistent blind spot #1", "persistent blind spot #2"],
+  "weiZhengReflection": "What Wei Zheng would say to this person (2-3 sentences, written as direct address)",
+  "selfReflectionPrompts": [
+    "Thought-provoking question #1 for the user to consider",
+    "Thought-provoking question #2",
+    "Thought-provoking question #3"
+  ]
 }`
 }

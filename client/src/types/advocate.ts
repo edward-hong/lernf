@@ -36,11 +36,34 @@ export interface Round {
   critiques: Critique[]
 }
 
+export interface SessionPatternAnalysis {
+  overallTrajectory: 'growth' | 'entrenchment' | 'mixed' | 'consistent'
+  trajectoryDescription: string
+  defensivenessTrend: 'increasing' | 'decreasing' | 'stable' | 'fluctuating'
+  opennessTrend: 'increasing' | 'decreasing' | 'stable' | 'fluctuating'
+  keyDismissals: string[]
+  strongestMoment: string
+  blindSpots: string[]
+  weiZhengReflection: string
+  selfReflectionPrompts: string[]
+}
+
+export interface IntentHistoryEntry {
+  roundNumber: number
+  intent: UserIntent
+}
+
+export interface SessionAnalysisResult {
+  analysis: SessionPatternAnalysis
+  intentHistory: IntentHistoryEntry[]
+}
+
 export interface AdvocateSession {
   id: string
   proposal: string
   selectedAdvocates: Advocate[]
   rounds: Round[]
-  status: 'setup' | 'proposing' | 'deliberating' | 'complete'
+  status: 'setup' | 'proposing' | 'deliberating' | 'complete' | 'analysis'
   currentRound: number
+  analysisResult?: SessionAnalysisResult
 }

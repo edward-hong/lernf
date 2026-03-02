@@ -4,9 +4,14 @@ import CritiqueCard from './CritiqueCard'
 import UserResponseInput from './UserResponseInput'
 import RoundIndicator from './RoundIndicator'
 
-const Deliberation: React.FC = () => {
-  const { currentSession, resetSession } = useAdvocateStore()
+interface DeliberationProps {
+  onEndSession: () => void
+}
+
+const Deliberation: React.FC<DeliberationProps> = ({ onEndSession }) => {
+  const { currentSession, endSession, loading } = useAdvocateStore()
   const [expandedProposal, setExpandedProposal] = useState(false)
+  const [ending, setEnding] = useState(false)
 
   if (!currentSession) {
     return <div>No active session</div>
@@ -14,6 +19,12 @@ const Deliberation: React.FC = () => {
 
   const { proposal, selectedAdvocates, rounds, currentRound } = currentSession
   const currentRoundData = rounds[rounds.length - 1]
+
+  const handleEndSession = async () => {
+    setEnding(true)
+    await endSession()
+    onEndSession()
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -94,14 +105,15 @@ const Deliberation: React.FC = () => {
       {/* End session option */}
       <div className="mt-6 pt-6 border-t border-gray-200">
         <button
-          onClick={resetSession}
+          onClick={handleEndSession}
+          disabled={ending || loading}
           className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold
-                     hover:bg-gray-700 transition-colors"
+                     hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          End Deliberation
+          {ending ? 'Analyzing Your Responses...' : 'End Deliberation & See Analysis'}
         </button>
         <p className="text-sm text-gray-500 mt-2">
-          When you end the session, you'll see how you responded to criticism (Phase 4)
+          End the session to see how you responded to criticism - defensiveness trends, blind spots, and more.
         </p>
       </div>
     </div>

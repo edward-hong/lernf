@@ -3,19 +3,27 @@ import { useAdvocateStore } from '../../state/advocateState'
 import AdvocateSetup from '../../components/DevilsAdvocate/AdvocateSetup'
 import ProposalInput from '../../components/DevilsAdvocate/ProposalInput'
 import Deliberation from '../../components/DevilsAdvocate/Deliberation'
+import SessionAnalysis from '../../components/DevilsAdvocate/SessionAnalysis'
 
-type Step = 'setup' | 'proposal' | 'deliberation'
+type Step = 'setup' | 'proposal' | 'deliberation' | 'analysis'
 
 const DevilsAdvocate: React.FC = () => {
   const [step, setStep] = useState<Step>('setup')
-  const { currentSession } = useAdvocateStore()
+  const { currentSession, resetSession } = useAdvocateStore()
 
-  // If we have an active session, go straight to deliberation
+  // Restore to the correct step based on session status
   React.useEffect(() => {
-    if (currentSession?.status === 'deliberating') {
+    if (currentSession?.status === 'analysis') {
+      setStep('analysis')
+    } else if (currentSession?.status === 'deliberating') {
       setStep('deliberation')
     }
   }, [currentSession])
+
+  const handleReset = () => {
+    resetSession()
+    setStep('setup')
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -37,7 +45,14 @@ const DevilsAdvocate: React.FC = () => {
       )}
 
       {step === 'deliberation' && (
-        <Deliberation />
+        <Deliberation onEndSession={() => setStep('analysis')} />
+      )}
+
+      {step === 'analysis' && currentSession?.analysisResult && (
+        <SessionAnalysis
+          result={currentSession.analysisResult}
+          onReset={handleReset}
+        />
       )}
     </div>
   )
