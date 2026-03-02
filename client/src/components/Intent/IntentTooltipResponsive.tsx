@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react'
 import { IntentTooltip } from './IntentTooltip'
 import { IntentTooltipMobile } from './IntentTooltipMobile'
-import type { IntentVector } from '../types/intent'
+import type { IntentVector } from '../../types/intent'
 
 interface IntentTooltipResponsiveProps {
   intent: IntentVector

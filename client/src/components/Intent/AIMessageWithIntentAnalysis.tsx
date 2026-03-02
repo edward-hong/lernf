@@ -7,11 +7,11 @@
 // ---------------------------------------------------------------------------
 
 import { useEffect, useCallback, useRef } from 'react'
-import { useIntentAnalysis } from '../hooks/useIntentAnalysis'
+import { useIntentAnalysis } from '../../hooks/useIntentAnalysis'
 import { AIMessageWithIntent } from './AIMessageWithIntent'
-import type { ScenarioMessage, ScenarioColorConfig } from '../types/scenario'
-import type { IntentVector, IntentAnalysisResult } from '../types/intent'
-import type { IntentVisualizationSettings } from '../types/message'
+import type { ScenarioMessage, ScenarioColorConfig } from '../../types/scenario'
+import type { IntentVector, IntentAnalysisResult } from '../../types/intent'
+import type { IntentVisualizationSettings } from '../../types/message'
 
 interface AIMessageWithIntentAnalysisProps {
   /** The scenario message to render. */

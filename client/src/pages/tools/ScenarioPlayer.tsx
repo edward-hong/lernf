@@ -14,7 +14,7 @@ import {
 } from '../../components/tools/Scenario/LoadingStates'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ErrorBoundary } from '../../components/ErrorBoundary'
+import { ErrorBoundary } from '../../components/ErrorHandling/ErrorBoundary'
 import {
   evaluateCompletion,
   createUserInitiatedResult,

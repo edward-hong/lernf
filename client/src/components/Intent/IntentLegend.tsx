@@ -7,9 +7,9 @@
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
-import { INTENT_COLOR_ANCHORS } from '../constants/intentColors'
-import { intentToColor } from '../utils/colorBlending'
-import type { IntentVector } from '../types/intent'
+import { INTENT_COLOR_ANCHORS } from '../../constants/intentColors'
+import { intentToColor } from '../../utils/colorBlending'
+import type { IntentVector } from '../../types/intent'
 
 interface ColorExample {
   label: string

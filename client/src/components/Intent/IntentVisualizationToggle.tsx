@@ -5,7 +5,7 @@
 // smoothing and tooltip settings.
 // ---------------------------------------------------------------------------
 
-import type { IntentVisualizationSettings } from '../types/message'
+import type { IntentVisualizationSettings } from '../../types/message'
 
 interface IntentVisualizationToggleProps {
   settings: IntentVisualizationSettings

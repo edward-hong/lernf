@@ -5,8 +5,8 @@
 // one colour bar per AI turn representing the blended intent colour.
 // ---------------------------------------------------------------------------
 
-import type { ChatMessage } from '../state/liveChatState'
-import { intentToColor } from '../utils/colorBlending'
+import type { ChatMessage } from '../../state/liveChatState'
+import { intentToColor } from '../../utils/colorBlending'
 
 interface ConversationTimelineProps {
   messages: ChatMessage[]

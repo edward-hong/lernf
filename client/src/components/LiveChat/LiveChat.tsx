@@ -8,15 +8,15 @@
 
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { useLiveChat } from '../hooks/useLiveChat'
+import { useLiveChat } from '../../hooks/useLiveChat'
 import { ConversationTimeline } from './ConversationTimeline'
 import { PatternAlerts } from './PatternAlerts'
-import { IntentTooltip } from './IntentTooltip'
-import { ProviderIndicator } from './ProviderIndicator'
-import { intentToColor, getIntentLabel } from '../utils/colorBlending'
-import { smoothIntent } from '../utils/intentSmoothing'
-import { INTENT_COLOR_ANCHORS } from '../constants/intentColors'
-import type { IntentVector } from '../types/intent'
+import { IntentTooltip } from '../Intent/IntentTooltip'
+import { ProviderIndicator } from '../Provider/ProviderIndicator'
+import { intentToColor, getIntentLabel } from '../../utils/colorBlending'
+import { smoothIntent } from '../../utils/intentSmoothing'
+import { INTENT_COLOR_ANCHORS } from '../../constants/intentColors'
+import type { IntentVector } from '../../types/intent'
 
 export function LiveChat() {
   const {
