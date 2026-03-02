@@ -10,7 +10,13 @@ import { buildConsequenceGenerationPrompt } from './prompts/consequencePrompt'
 import { buildComparisonPrompt } from './prompts/comparisonPrompt'
 import { buildEvaluateComparisonPrompt } from './prompts/evaluateComparisonPrompt'
 import { buildAdvocatePrompt, type CriticalLens } from './prompts/advocatePrompt'
-import { buildUserIntentAnalysisPrompt, type UserIntentScores } from './prompts/userIntentPrompt'
+import {
+  buildUserIntentAnalysisPrompt,
+  buildPatternAnalysisPrompt,
+  buildDismissalDetectionPrompt,
+  type UserIntentScores,
+  type PatternAnalysis
+} from './prompts/userIntentPrompt'
 import { detectFrontendPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
@@ -1008,6 +1014,164 @@ export const getSession = api(
     return {
       success: true,
       session
+    }
+  }
+)
+
+// ---- End Advocate Session ---------------------------------------------------
+
+interface EndSessionRequest {
+  sessionId: string
+}
+
+interface KeyDismissal {
+  criticism: string
+  advocateId: string
+  howDismissed: string
+}
+
+interface SessionAnalysis {
+  roundByRound: Array<{
+    roundNumber: number
+    userMessage: string
+    intent: UserIntentScores & { interpretation: string }
+  }>
+  trends: {
+    defensiveness: number[]
+    epistemicOpenness: number[]
+    cooperation: number[]
+    persuasive: number[]
+  }
+  pattern: PatternAnalysis
+  keyDismissals: KeyDismissal[]
+}
+
+interface EndSessionResponse {
+  success: boolean
+  analysis: SessionAnalysis
+  transcript: string
+}
+
+export const endAdvocateSession = api(
+  { method: 'POST', path: '/api/advocates/end', expose: true },
+  async (req: EndSessionRequest): Promise<EndSessionResponse> => {
+    const session = sessions.get(req.sessionId)
+
+    if (!session) {
+      throw new APIError(ErrCode.NotFound, 'Session not found')
+    }
+
+    const { proposal, advocates, rounds } = session
+
+    console.log(`[Advocates] Ending session ${req.sessionId} with ${rounds.length} rounds`)
+
+    // Collect all user responses with their intent
+    const roundByRound = rounds
+      .filter(r => r.userMessage && r.userIntent)
+      .map(r => ({
+        roundNumber: r.roundNumber,
+        userMessage: r.userMessage!,
+        intent: r.userIntent!
+      }))
+
+    // Build trend arrays
+    const trends = {
+      defensiveness: roundByRound.map(r => r.intent.defensive),
+      epistemicOpenness: roundByRound.map(r => r.intent.epistemic),
+      cooperation: roundByRound.map(r => r.intent.cooperative),
+      persuasive: roundByRound.map(r => r.intent.persuasive)
+    }
+
+    // Generate pattern analysis
+    let pattern: PatternAnalysis
+    try {
+      const patternPrompt = buildPatternAnalysisPrompt(roundByRound)
+      const patternRaw = await callDeepseek(
+        [{ role: 'user', content: patternPrompt }],
+        0.3,
+        800,
+        true
+      )
+      const cleaned = patternRaw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      pattern = JSON.parse(cleaned)
+    } catch (error) {
+      console.warn('[Advocates] Failed to generate pattern analysis')
+      pattern = {
+        overallPattern: 'Unable to analyze pattern',
+        turningPoint: null,
+        taizongParallel: 'Analysis unavailable',
+        trajectory: 'stable'
+      }
+    }
+
+    // Detect key dismissals
+    let keyDismissals: KeyDismissal[] = []
+    try {
+      const allCritiques = rounds.flatMap(r =>
+        r.critiques.map(c => ({ content: c.content, advocateId: c.advocateId }))
+      )
+      const userResponses = roundByRound.map(r => r.userMessage)
+
+      const dismissalPrompt = buildDismissalDetectionPrompt(allCritiques, userResponses)
+      const dismissalRaw = await callDeepseek(
+        [{ role: 'user', content: dismissalPrompt }],
+        0.3,
+        800,
+        true
+      )
+      const cleaned = dismissalRaw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      const parsed = JSON.parse(cleaned)
+      keyDismissals = parsed.dismissals || []
+    } catch (error) {
+      console.warn('[Advocates] Failed to detect dismissals')
+    }
+
+    // Build transcript
+    let transcript = `DEVIL'S ADVOCATES SESSION
+Session ID: ${req.sessionId}
+Date: ${new Date().toISOString()}
+
+PROPOSAL:
+${proposal}
+
+ADVOCATES:
+${advocates.map(a => `- ${a.id} (${a.lens})`).join('\n')}
+
+---
+
+`
+
+    rounds.forEach(round => {
+      transcript += `ROUND ${round.roundNumber}:\n\n`
+
+      round.critiques.forEach(critique => {
+        transcript += `${critique.advocateId}:\n${critique.content}\n\n`
+      })
+
+      if (round.userMessage) {
+        transcript += `YOUR RESPONSE:\n${round.userMessage}\n\n`
+      }
+
+      transcript += '---\n\n'
+    })
+
+    transcript += `ANALYSIS:\n\n${pattern.overallPattern}\n\n`
+    transcript += `Trajectory: ${pattern.trajectory}\n`
+    if (pattern.turningPoint) {
+      transcript += `Turning point: Round ${pattern.turningPoint}\n`
+    }
+
+    console.log(`[Advocates] Session analysis complete - Trajectory: ${pattern.trajectory}`)
+
+    return {
+      success: true,
+      analysis: {
+        roundByRound,
+        trends,
+        pattern,
+        keyDismissals
+      },
+      transcript
     }
   }
 )

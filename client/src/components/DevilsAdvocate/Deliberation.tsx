@@ -5,7 +5,7 @@ import UserResponseInput from './UserResponseInput'
 import RoundIndicator from './RoundIndicator'
 
 const Deliberation: React.FC = () => {
-  const { currentSession, resetSession } = useAdvocateStore()
+  const { currentSession, endSession, loading } = useAdvocateStore()
   const [expandedProposal, setExpandedProposal] = useState(false)
 
   if (!currentSession) {
@@ -14,6 +14,12 @@ const Deliberation: React.FC = () => {
 
   const { proposal, selectedAdvocates, rounds, currentRound } = currentSession
   const currentRoundData = rounds[rounds.length - 1]
+
+  const handleEndSession = async () => {
+    if (confirm('End this session and see your analysis? You won\'t be able to add more rounds.')) {
+      await endSession()
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -91,17 +97,18 @@ const Deliberation: React.FC = () => {
       {/* User response input */}
       <UserResponseInput />
 
-      {/* End session option */}
+      {/* End session */}
       <div className="mt-6 pt-6 border-t border-gray-200">
         <button
-          onClick={resetSession}
-          className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold
-                     hover:bg-gray-700 transition-colors"
+          onClick={handleEndSession}
+          disabled={loading}
+          className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold
+                     hover:bg-red-700 transition-colors disabled:bg-gray-300"
         >
-          End Deliberation
+          {loading ? 'Analyzing...' : 'End Deliberation & See Analysis'}
         </button>
         <p className="text-sm text-gray-500 mt-2">
-          When you end the session, you'll see how you responded to criticism (Phase 4)
+          You'll see how you responded to criticism across all rounds
         </p>
       </div>
     </div>
