@@ -1,17 +1,17 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useScenarioStore } from '../../state/scenarioState'
-import { ScenarioHeader } from '../../components/tools/Scenario/ScenarioHeader'
-import { MessageBubble } from '../../components/tools/Scenario/MessageBubble'
-import { MessageInput } from '../../components/tools/Scenario/MessageInput'
-import { CompletionDialog } from '../../components/tools/Scenario/CompletionDialog'
-import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
+import { ScenarioHeader } from '../../components/Scenario/ScenarioHeader'
+import { MessageBubble } from '../../components/Scenario/MessageBubble'
+import { MessageInput } from '../../components/Scenario/MessageInput'
+import { CompletionDialog } from '../../components/Scenario/CompletionDialog'
+import { ScenarioResults } from '../../components/Scenario/ScenarioResults'
 import {
   ScenarioSkeleton,
   ThinkingIndicator,
   EvaluationSpinner,
   InlineError,
-} from '../../components/tools/Scenario/LoadingStates'
+} from '../../components/Scenario/LoadingStates'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ErrorBoundary } from '../../components/ErrorHandling/ErrorBoundary'

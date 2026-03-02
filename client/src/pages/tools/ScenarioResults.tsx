@@ -8,7 +8,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useCallback } from 'react'
 import { useScenarioStore } from '../../state/scenarioState'
-import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
+import { ScenarioResults } from '../../components/Scenario/ScenarioResults'
 import { resetCompletionDetector } from '../../ai/completionDetector'
 
 interface ScenarioResultsRouteProps {

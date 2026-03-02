@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { getApiUrl } from '../../api/config'
-import CodeBlock from '../../components/tools/CodeComparison/CodeBlock'
-import Evaluation from '../../components/tools/CodeComparison/Evaluation'
-import LanguageSelector from '../../components/tools/CodeComparison/LanguageSelector'
+import CodeBlock from '../../components/CodeComparison/CodeBlock'
+import Evaluation from '../../components/CodeComparison/Evaluation'
+import LanguageSelector from '../../components/CodeComparison/LanguageSelector'
 import { LANGUAGES } from '../../constants/languages'
 import type { CodeScenario, SelectedOption } from '../../types/comparison'
 
