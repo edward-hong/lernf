@@ -2,6 +2,13 @@ import { api, APIError, ErrCode } from 'encore.dev/api'
 import { secret } from 'encore.dev/config'
 import { buildGeneratePrPrompt, GENERATE_PR_SYSTEM_PROMPT } from './prompts/generatePrPrompt'
 import { buildEvaluateCompletionPrompt } from './prompts/evaluateCompletionPrompt'
+import {
+  categorizeNPCResponse,
+  isProblematicResponse,
+  AUTO_SOLVING_PATTERNS,
+  AUTO_SOLVE_CORRECTION,
+  FALLBACK_PROBE,
+} from './utils/npcResponseAnalysis'
 
 // ---- Secrets ----------------------------------------------------------------
 
@@ -267,7 +274,36 @@ export const npcDialogue = api(
       ...req.messages.map((m) => ({ role: m.role, content: m.content })),
     ]
 
-    const output = await callDeepseek(apiMessages, 0.8, 300)
+    let output = await callDeepseek(apiMessages, 0.8, 300)
+
+    // Categorize and detect problematic NPC responses
+    const responseType = categorizeNPCResponse(output)
+    console.log('[NPC Dialogue] Response type:', responseType)
+
+    const isSolving = AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(output))
+
+    if (isSolving || isProblematicResponse(responseType)) {
+      console.warn('[NPC Dialogue] AUTO-SOLVING DETECTED')
+      console.warn('[NPC Dialogue] User message:', req.messages[req.messages.length - 1]?.content.substring(0, 100))
+      console.warn('[NPC Dialogue] Bad response:', output.substring(0, 200))
+      console.warn('[NPC Dialogue] Matched pattern:', AUTO_SOLVING_PATTERNS.find(p => p.test(output)))
+      console.warn('[NPC Dialogue] Response category:', responseType)
+
+      // Add strong corrective message and regenerate
+      apiMessages.push({
+        role: 'system',
+        content: AUTO_SOLVE_CORRECTION,
+      })
+
+      output = await callDeepseek(apiMessages, 0.95, 200)
+
+      // If STILL auto-solving after retry, force a question
+      const stillSolving = AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(output))
+      if (stillSolving) {
+        console.error('[NPC Dialogue] Still auto-solving after retry, using fallback')
+        output = FALLBACK_PROBE
+      }
+    }
 
     return { success: true, output: output.trim() }
   }

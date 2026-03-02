@@ -51,6 +51,14 @@ export type CompletionTrigger =
 
 // ---- Store Shape ----------------------------------------------------------
 
+/** Tracks whether the user is actively driving the scenario conversation. */
+interface ScenarioProgress {
+  /** User messages that demonstrate active engagement (questions, decisions, actions). */
+  userActions: string[]
+  /** Whether the user has driven the conversation (asked questions, made decisions). */
+  userDroveConversation: boolean
+}
+
 interface ScenarioStoreState {
   /** Active scenario session state, or null if no scenario is running. */
   scenario: ScenarioState | null
@@ -60,6 +68,8 @@ interface ScenarioStoreState {
   accessedTools: string[]
   /** Pending completion detection result awaiting user confirmation, or null. */
   pendingCompletion: CompletionDetectionResult | null
+  /** Tracks user-driven engagement with the scenario. */
+  progress: ScenarioProgress
 }
 
 interface ScenarioStoreActions {
@@ -125,6 +135,7 @@ export const useScenarioStore = create<ScenarioStore>()(
       aiPersona: null,
       accessedTools: [],
       pendingCompletion: null,
+      progress: { userActions: [], userDroveConversation: false },
 
       // -- Actions --------------------------------------------------------
 
@@ -171,11 +182,11 @@ export const useScenarioStore = create<ScenarioStore>()(
           completedAt: null,
         }
 
-        set({ scenario, aiPersona, accessedTools: [], pendingCompletion: null })
+        set({ scenario, aiPersona, accessedTools: [], pendingCompletion: null, progress: { userActions: [], userDroveConversation: false } })
       },
 
       addTurn: (message, signals) => {
-        const { scenario, accessedTools } = get()
+        const { scenario, accessedTools, progress } = get()
         if (!scenario) return
 
         // Auto-assign turn index and timestamp
@@ -190,6 +201,22 @@ export const useScenarioStore = create<ScenarioStore>()(
           .map((a) => a.code)
           .filter((code) => !accessedTools.includes(code))
 
+        // Track user-driven engagement
+        let updatedProgress = progress
+        if (message.speakerType === 'user') {
+          const content = message.content
+          const isQuestion = content.includes('?')
+          const isDecision = /i (will|would|should|plan to|think|believe)/i.test(content)
+          const isAction = /i (checked|looked at|reviewed|ran|executed)/i.test(content)
+
+          if (isQuestion || isDecision || isAction) {
+            updatedProgress = {
+              userActions: [...progress.userActions, content],
+              userDroveConversation: true,
+            }
+          }
+        }
+
         set({
           scenario: {
             ...scenario,
@@ -199,6 +226,7 @@ export const useScenarioStore = create<ScenarioStore>()(
               : scenario.signals,
           },
           accessedTools: [...accessedTools, ...newCodes],
+          progress: updatedProgress,
         })
       },
 
@@ -268,6 +296,7 @@ export const useScenarioStore = create<ScenarioStore>()(
           aiPersona: null,
           accessedTools: [],
           pendingCompletion: null,
+          progress: { userActions: [], userDroveConversation: false },
         })
       },
     }),
@@ -278,6 +307,7 @@ export const useScenarioStore = create<ScenarioStore>()(
         aiPersona: state.aiPersona,
         accessedTools: state.accessedTools,
         pendingCompletion: state.pendingCompletion,
+        progress: state.progress,
       }),
     },
   ),

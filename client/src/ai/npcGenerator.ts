@@ -13,6 +13,41 @@ import type {
 } from '../types/scenario'
 import { buildNpcSystemPrompt, encodeBehaviorTraits } from '../prompts/npcPrompt'
 
+// ---- Auto-Solving Detection ------------------------------------------------
+
+/** Regex patterns that indicate an NPC is solving the problem for the user */
+const AUTO_SOLVING_PATTERNS = [
+  /first.*then.*finally/i,
+  /step 1.*step 2/i,
+  /here'?s what (you need to|to) do:/i,
+  /here are the steps/i,
+  /i'?ll (check|fix|handle|look into|review)/i,
+  /let me (check|review|handle|look into|fix)/i,
+  /you'?ll (see|find|notice|observe) (that|the)/i,
+  /the (logs|dashboard|metrics) (will )?show/i,
+  /then (check|look at|review|identify)/i,
+]
+
+const AUTO_SOLVE_CORRECTION = `STOP. You just gave a step-by-step solution. That is wrong.
+
+The user must drive all actions. You are a COWORKER, not a tutor.
+
+Instead of explaining what to do, ask the user a SHORT question (1 sentence) that makes THEM think and act.
+
+Examples:
+- "What do the logs show?"
+- "When did this start?"
+- "What's your hypothesis?"
+- "Have you checked X yet?"
+
+DO NOT give multi-step instructions. DO NOT solve for them. Ask ONE question.`
+
+const FALLBACK_PROBE = 'What have you checked so far?'
+
+function isAutoSolving(text: string): boolean {
+  return AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(text))
+}
+
 // ---- Types ----------------------------------------------------------------
 
 /** Chat message format for the AI API. */
@@ -164,7 +199,43 @@ export async function generateNPCResponse(
         temperature: 0.8, // More creative for NPC personality
         maxTokens: 300,
       })
-      return response.content
+
+      let content = response.content
+
+      // Detect auto-solving: NPC giving step-by-step solutions instead of
+      // making the user drive the conversation
+      if (isAutoSolving(content)) {
+        console.warn(`[npcGenerator] Auto-solving detected for ${npc}, regenerating...`)
+        console.warn(`[npcGenerator] Bad response: ${content.substring(0, 150)}`)
+
+        // Retry with corrective system message and higher temperature
+        const retryMessages: ChatMessage[] = [
+          ...messages,
+          { role: 'assistant', content },
+          { role: 'user', content: AUTO_SOLVE_CORRECTION },
+        ]
+
+        try {
+          const retry = await callAI({
+            systemPrompt,
+            messages: retryMessages,
+            temperature: 0.95,
+            maxTokens: 200,
+          })
+          content = retry.content
+
+          // If still auto-solving after retry, force a generic probe
+          if (isAutoSolving(content)) {
+            console.error(`[npcGenerator] Still auto-solving after retry for ${npc}`)
+            content = FALLBACK_PROBE
+          }
+        } catch {
+          console.error(`[npcGenerator] Retry failed for ${npc}, using fallback probe`)
+          content = FALLBACK_PROBE
+        }
+      }
+
+      return content
     } catch (error) {
       console.error(`[npcGenerator] NPC response generation failed for ${npc}:`, error)
       return null
