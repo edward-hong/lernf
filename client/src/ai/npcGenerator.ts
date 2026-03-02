@@ -1,56 +1,20 @@
 // ---------------------------------------------------------------------------
 // NPC Dialogue Generation System
 // ---------------------------------------------------------------------------
-// Generates in-character NPC responses by building persona-encoded system
-// prompts and calling the unified AI client. Handles fallback responses
-// and rate-limit queuing.
+// Generates in-character NPC responses by calling the backend /api/npc-dialogue
+// endpoint, which builds the system prompt internally. The frontend sends
+// structured persona data and conversation history — no prompt building here.
 // ---------------------------------------------------------------------------
 
-import { callAI } from '../api/aiClient'
+import { getApiUrl } from '../api/config'
 import type {
   PersonaDefinition,
   ScenarioMessage,
 } from '../types/scenario'
-import { buildNpcSystemPrompt, encodeBehaviorTraits } from '../prompts/npcPrompt'
-
-// ---- Auto-Solving Detection ------------------------------------------------
-
-/** Regex patterns that indicate an NPC is solving the problem for the user */
-const AUTO_SOLVING_PATTERNS = [
-  /first.*then.*finally/i,
-  /step 1.*step 2/i,
-  /here'?s what (you need to|to) do:/i,
-  /here are the steps/i,
-  /i'?ll (check|fix|handle|look into|review)/i,
-  /let me (check|review|handle|look into|fix)/i,
-  /you'?ll (see|find|notice|observe) (that|the)/i,
-  /the (logs|dashboard|metrics) (will )?show/i,
-  /then (check|look at|review|identify)/i,
-]
-
-const AUTO_SOLVE_CORRECTION = `STOP. You just gave a step-by-step solution. That is wrong.
-
-The user must drive all actions. You are a COWORKER, not a tutor.
-
-Instead of explaining what to do, ask the user a SHORT question (1 sentence) that makes THEM think and act.
-
-Examples:
-- "What do the logs show?"
-- "When did this start?"
-- "What's your hypothesis?"
-- "Have you checked X yet?"
-
-DO NOT give multi-step instructions. DO NOT solve for them. Ask ONE question.`
-
-const FALLBACK_PROBE = 'What have you checked so far?'
-
-function isAutoSolving(text: string): boolean {
-  return AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(text))
-}
 
 // ---- Types ----------------------------------------------------------------
 
-/** Chat message format for the AI API. */
+/** Chat message format for the backend API. */
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
@@ -159,14 +123,60 @@ class RequestQueue {
 
 const requestQueue = new RequestQueue()
 
+// ---- Backend API Call ------------------------------------------------------
+
+/**
+ * Calls the backend /api/npc-dialogue endpoint which builds the system prompt
+ * internally and handles auto-solve detection/retry.
+ */
+async function callNpcDialogueAPI(
+  npcName: string,
+  persona: PersonaDefinition,
+  scenarioContext: string,
+  messages: ChatMessage[],
+): Promise<string> {
+  const response = await fetch(getApiUrl('/api/npc-dialogue'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      npcName,
+      persona: {
+        id: persona.id,
+        name: persona.name,
+        role: persona.role,
+        background: persona.background,
+        hiddenMotivation: persona.hiddenMotivation,
+        behavior: persona.behavior,
+      },
+      scenarioContext,
+      messages,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`NPC dialogue API error: ${error}`)
+  }
+
+  const data = await response.json()
+
+  if (!data.success || !data.output) {
+    throw new Error('NPC dialogue response failed')
+  }
+
+  return data.output
+}
+
 // ---- Public API -----------------------------------------------------------
 
 /**
  * Generates an in-character NPC response for the given persona and
  * conversation context.
  *
- * Uses the unified `callAI()` client which respects user provider settings
- * (primary -> backup -> backend-default fallback chain).
+ * Calls the backend /api/npc-dialogue endpoint which:
+ * - Builds the system prompt with anti-solving instructions
+ * - Calls DeepSeek with the persona-encoded prompt
+ * - Handles auto-solve detection and retry
  *
  * @param npc          - NPC identifier (e.g. "npc-sarah", "npc-mike", "npc-rachel")
  * @param persona      - The assigned PersonaDefinition with behavior parameters
@@ -180,7 +190,6 @@ export async function generateNPCResponse(
   conversationHistory: ScenarioMessage[],
   scenarioContext: string,
 ): Promise<NPCResponse> {
-  const systemPrompt = buildNpcSystemPrompt(persona, scenarioContext)
   const messages = formatConversationHistory(conversationHistory, npc)
 
   // If there are no messages yet, add a prompt to elicit an opening response
@@ -193,47 +202,13 @@ export async function generateNPCResponse(
 
   const result = await requestQueue.enqueue(async () => {
     try {
-      const response = await callAI({
-        systemPrompt,
+      // Send structured data to backend — backend builds the prompt
+      const content = await callNpcDialogueAPI(
+        persona.name,
+        persona,
+        scenarioContext,
         messages,
-        temperature: 0.8, // More creative for NPC personality
-        maxTokens: 300,
-      })
-
-      let content = response.content
-
-      // Detect auto-solving: NPC giving step-by-step solutions instead of
-      // making the user drive the conversation
-      if (isAutoSolving(content)) {
-        console.warn(`[npcGenerator] Auto-solving detected for ${npc}, regenerating...`)
-        console.warn(`[npcGenerator] Bad response: ${content.substring(0, 150)}`)
-
-        // Retry with corrective system message and higher temperature
-        const retryMessages: ChatMessage[] = [
-          ...messages,
-          { role: 'assistant', content },
-          { role: 'user', content: AUTO_SOLVE_CORRECTION },
-        ]
-
-        try {
-          const retry = await callAI({
-            systemPrompt,
-            messages: retryMessages,
-            temperature: 0.95,
-            maxTokens: 200,
-          })
-          content = retry.content
-
-          // If still auto-solving after retry, force a generic probe
-          if (isAutoSolving(content)) {
-            console.error(`[npcGenerator] Still auto-solving after retry for ${npc}`)
-            content = FALLBACK_PROBE
-          }
-        } catch {
-          console.error(`[npcGenerator] Retry failed for ${npc}, using fallback probe`)
-          content = FALLBACK_PROBE
-        }
-      }
+      )
 
       return content
     } catch (error) {
@@ -251,5 +226,5 @@ export async function generateNPCResponse(
 
 // ---- Exports for Testing --------------------------------------------------
 
-export { buildNpcSystemPrompt as buildSystemPrompt, formatConversationHistory, encodeBehaviorTraits }
+export { formatConversationHistory }
 export type { ChatMessage, NPCResponse }

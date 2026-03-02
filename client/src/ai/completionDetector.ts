@@ -1,14 +1,14 @@
 // ---------------------------------------------------------------------------
 // Scenario Completion Detection — AI Evaluator
 // ---------------------------------------------------------------------------
-// After each user turn, calls the DeepSeek API to determine whether the
-// scenario has reached a natural completion point. Manages evaluation state,
-// turn counting for the long-running-scenario nudge, and request deduplication.
+// After each user turn, calls the backend /api/evaluate-completion endpoint
+// to determine whether the scenario has reached a natural completion point.
+// The backend builds the evaluation prompt internally. Manages evaluation
+// state, turn counting, and request deduplication.
 // ---------------------------------------------------------------------------
 
-import { callAI } from '../api/aiClient'
+import { getApiUrl } from '../api/config'
 import type { ScenarioDefinition, ScenarioMessage } from '../types/scenario'
-import { buildCompletionPrompt } from '../prompts/completionPrompt'
 
 // ---- Types ----------------------------------------------------------------
 
@@ -113,7 +113,8 @@ function buildCompletionSignals(definition: ScenarioDefinition): string {
 // ---- API Call -------------------------------------------------------------
 
 /**
- * Calls the unified AI client to evaluate scenario completion.
+ * Calls the backend /api/evaluate-completion endpoint which builds the
+ * completion prompt internally. Frontend sends structured scenario data.
  * Returns null on failure (the caller should treat this as "not complete").
  */
 async function callCompletionAPI(
@@ -122,17 +123,26 @@ async function callCompletionAPI(
   completionSignals: string,
 ): Promise<CompletionEvaluation | null> {
   try {
-    const prompt = buildCompletionPrompt(scenarioDescription, conversationHistory, completionSignals)
-
-    const response = await callAI({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0, // Deterministic evaluation
-      maxTokens: 300,
+    const response = await fetch(getApiUrl('/api/evaluate-completion'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenarioDescription,
+        conversationHistory,
+        completionSignals,
+      }),
     })
 
-    // Parse JSON response (strip markdown fences if present)
-    const cleaned = response.content.replace(/```json|```/g, '').trim()
-    return JSON.parse(cleaned) as CompletionEvaluation
+    if (!response.ok) {
+      throw new Error(`Completion evaluation API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    if (!data.success || !data.result) {
+      throw new Error('Completion evaluation response failed')
+    }
+
+    return data.result as CompletionEvaluation
   } catch (error) {
     console.error('[completionDetector] Completion evaluation failed:', error)
     return null

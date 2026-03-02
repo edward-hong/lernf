@@ -2,6 +2,12 @@ import { api, APIError, ErrCode } from 'encore.dev/api'
 import { secret } from 'encore.dev/config'
 import { buildGeneratePrPrompt, GENERATE_PR_SYSTEM_PROMPT } from './prompts/generatePrPrompt'
 import { buildEvaluateCompletionPrompt } from './prompts/evaluateCompletionPrompt'
+import { buildNpcSystemPrompt } from './prompts/npcPrompt'
+import type { PersonaDefinition } from './prompts/npcPrompt'
+import { buildIntentAnalysisPrompt } from './prompts/intentPrompt'
+import { buildGripEvaluationPrompt } from './prompts/gripEvaluationPrompt'
+import { buildConsequenceGenerationPrompt } from './prompts/consequencePrompt'
+import { detectFrontendPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
   isProblematicResponse,
@@ -250,7 +256,9 @@ export const deepseek = api(
 // ---- NPC Dialogue -----------------------------------------------------------
 
 interface NpcDialogueRequest {
-  systemPrompt: string
+  npcName: string
+  persona: PersonaDefinition
+  scenarioContext: string
   messages: { role: string; content: string }[]
 }
 
@@ -262,15 +270,26 @@ interface NpcDialogueResponse {
 export const npcDialogue = api(
   { method: 'POST', path: '/api/npc-dialogue', expose: true },
   async (req: NpcDialogueRequest): Promise<NpcDialogueResponse> => {
-    if (!req.systemPrompt || !req.messages || !Array.isArray(req.messages)) {
+    // Detect if frontend sent a pre-built prompt (old behavior)
+    detectFrontendPrompts('npcDialogue', req as unknown as Record<string, unknown>)
+
+    if (!req.npcName || !req.persona || !req.scenarioContext || !req.messages || !Array.isArray(req.messages)) {
       throw new APIError(
         ErrCode.InvalidArgument,
-        'systemPrompt and messages array are required'
+        'npcName, persona, scenarioContext, and messages array are required'
       )
     }
 
+    // Build prompt in backend using the engineered prompt
+    const systemPrompt = buildNpcSystemPrompt(req.persona, req.scenarioContext)
+
+    console.log('[NPC Dialogue] Using backend-built system prompt')
+    console.log('[NPC Dialogue] NPC:', req.npcName)
+    console.log('[NPC Dialogue] Prompt length:', systemPrompt.length)
+    console.log('[NPC Dialogue] Has anti-solving rules:', systemPrompt.includes('DO NOT'))
+
     const apiMessages: DeepseekMessage[] = [
-      { role: 'system', content: req.systemPrompt },
+      { role: 'system', content: systemPrompt },
       ...req.messages.map((m) => ({ role: m.role, content: m.content })),
     ]
 
@@ -465,7 +484,15 @@ export const evaluateCompletion = api(
 // ---- Evaluate GRIP ----------------------------------------------------------
 
 interface EvaluateGripRequest {
-  prompt: string
+  scenarioTitle: string
+  scenarioCategory: string
+  scenarioEngineBriefing: string
+  conversationHistory: string
+  signalsSummary: string
+  hiddenFactorStatus: string
+  evaluationGuidance: string
+  userTurnCount: number
+  minTurnsForFullEvaluation: number
 }
 
 interface EvaluateGripResponse {
@@ -476,12 +503,33 @@ interface EvaluateGripResponse {
 export const evaluateGrip = api(
   { method: 'POST', path: '/api/evaluate-grip', expose: true },
   async (req: EvaluateGripRequest): Promise<EvaluateGripResponse> => {
-    if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, 'prompt is required')
+    if (!req.scenarioTitle || !req.conversationHistory) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        'scenarioTitle and conversationHistory are required'
+      )
     }
 
+    // Build prompt in backend
+    const prompt = buildGripEvaluationPrompt(
+      req.scenarioTitle,
+      req.scenarioCategory,
+      req.scenarioEngineBriefing,
+      req.conversationHistory,
+      req.signalsSummary,
+      req.hiddenFactorStatus,
+      req.evaluationGuidance,
+      req.userTurnCount,
+      req.minTurnsForFullEvaluation,
+    )
+
+    console.log('[Evaluate GRIP] Using backend-built prompt')
+    console.log('[Evaluate GRIP] Scenario:', req.scenarioTitle)
+    console.log('[Evaluate GRIP] Prompt length:', prompt.length)
+    console.log('[Evaluate GRIP] User turns:', req.userTurnCount)
+
     const rawOutput = await callDeepseek(
-      [{ role: 'user', content: req.prompt }],
+      [{ role: 'user', content: prompt }],
       0,
       4000,
       true
@@ -497,7 +545,15 @@ export const evaluateGrip = api(
 // ---- Generate Consequence ---------------------------------------------------
 
 interface GenerateConsequenceRequest {
-  prompt: string
+  scenarioTitle: string
+  scenarioCategory: string
+  scenarioSetupContext: string
+  conversationSummary: string
+  gripScores: string
+  compositeScore: number
+  band: string
+  hiddenFactorStatus: string
+  weakDimensions: string[]
 }
 
 interface GenerateConsequenceResponse {
@@ -510,12 +566,32 @@ export const generateConsequence = api(
   async (
     req: GenerateConsequenceRequest
   ): Promise<GenerateConsequenceResponse> => {
-    if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, 'prompt is required')
+    if (!req.scenarioTitle || !req.conversationSummary) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        'scenarioTitle and conversationSummary are required'
+      )
     }
 
+    // Build prompt in backend
+    const prompt = buildConsequenceGenerationPrompt(
+      req.scenarioTitle,
+      req.scenarioCategory,
+      req.scenarioSetupContext,
+      req.conversationSummary,
+      req.gripScores,
+      req.compositeScore,
+      req.band,
+      req.hiddenFactorStatus,
+      req.weakDimensions,
+    )
+
+    console.log('[Generate Consequence] Using backend-built prompt')
+    console.log('[Generate Consequence] Scenario:', req.scenarioTitle)
+    console.log('[Generate Consequence] Prompt length:', prompt.length)
+
     const rawOutput = await callDeepseek(
-      [{ role: 'user', content: req.prompt }],
+      [{ role: 'user', content: prompt }],
       0.7,
       2000,
       true
@@ -567,7 +643,7 @@ export const chat = api(
 // ---- Analyze Intent -------------------------------------------------------
 
 interface AnalyzeIntentRequest {
-  prompt: string
+  message: string
 }
 
 interface AnalyzeIntentResponse {
@@ -578,12 +654,18 @@ interface AnalyzeIntentResponse {
 export const analyzeIntent = api(
   { method: 'POST', path: '/api/analyze-intent', expose: true },
   async (req: AnalyzeIntentRequest): Promise<AnalyzeIntentResponse> => {
-    if (!req.prompt) {
-      throw new APIError(ErrCode.InvalidArgument, 'prompt is required')
+    if (!req.message) {
+      throw new APIError(ErrCode.InvalidArgument, 'message is required')
     }
 
+    // Build prompt in backend
+    const prompt = buildIntentAnalysisPrompt(req.message)
+
+    console.log('[Analyze Intent] Using backend-built prompt')
+    console.log('[Analyze Intent] Message length:', req.message.length)
+
     const rawOutput = await callDeepseek(
-      [{ role: 'user', content: req.prompt }],
+      [{ role: 'user', content: prompt }],
       0,
       500,
       true
