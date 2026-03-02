@@ -1,5 +1,7 @@
 import { api, APIError, ErrCode } from 'encore.dev/api'
 import { secret } from 'encore.dev/config'
+import { buildGeneratePrPrompt, GENERATE_PR_SYSTEM_PROMPT } from './prompts/generatePrPrompt'
+import { buildEvaluateCompletionPrompt } from './prompts/evaluateCompletionPrompt'
 
 // ---- Secrets ----------------------------------------------------------------
 
@@ -287,34 +289,13 @@ export const generatePr = api(
   async (req: GeneratePrRequest): Promise<GeneratePrResponse> => {
     const language = req.language || 'react'
 
-    // Much simpler prompt that requests minimal output
-    const prompt = `Create a ${language} code review exercise with exactly 5 bugs.
-
-    REQUIRED FORMAT:
-    {
-      "title": "string",
-      "description": "string",
-      "language": "${language}",
-      "code": "string with \\n for newlines",
-      "bugs": [{"id": "1", "line": 5, "severity": "high", "title": "x", "why": "y", "fix": "z"}]
-    }
-    
-    FORBIDDEN FORMATS (DO NOT USE):
-    - NO "diff" array ❌
-    - NO "lineNumber" fields ❌  
-    - NO "type" field ❌
-    - NO "content" field ❌
-    - NO "hasIssue" field ❌
-    
-    Return 15-20 lines of ${language} code as a SINGLE STRING in the "code" field.
-    Include exactly 5 bugs. Keep all text brief.`
+    const prompt = buildGeneratePrPrompt(language)
 
     const rawContent = await callDeepseek(
       [
         {
           role: 'system',
-          content:
-            'You are a code review trainer. Return ONLY compact JSON with no markdown. Keep all text brief.',
+          content: GENERATE_PR_SYSTEM_PROMPT,
         },
         { role: 'user', content: prompt },
       ],
@@ -418,31 +399,11 @@ export const evaluateCompletion = api(
       )
     }
 
-    const prompt = `You are an evaluator for a workplace scenario role-play training exercise.
-
-SCENARIO DESCRIPTION:
-${req.scenarioDescription}
-
-COMPLETION SIGNALS (indicators that the scenario has reached a natural conclusion):
-${req.completionSignals}
-
-CONVERSATION HISTORY:
-${req.conversationHistory}
-
-Analyze the conversation and determine if the scenario has reached a natural completion point. A scenario is complete when the user has meaningfully engaged with the core challenge and either:
-- Reached a decision or resolution on the main issue
-- Discovered and addressed the key hidden dynamics
-- Exhausted the productive avenues of exploration
-- Arrived at a clear action plan or conclusion
-
-If the scenario is NOT complete, suggest what the user should explore next (without revealing hidden information).
-
-Return ONLY valid JSON in this exact format:
-{
-  "scenarioComplete": true or false,
-  "reasoning": "Brief explanation of why the scenario is or isn't complete",
-  "suggestedPrompt": "If not complete, a natural next question or action for the user. Empty string if complete."
-}`
+    const prompt = buildEvaluateCompletionPrompt(
+      req.scenarioDescription,
+      req.conversationHistory,
+      req.completionSignals,
+    )
 
     const rawOutput = await callDeepseek(
       [{ role: 'user', content: prompt }],
