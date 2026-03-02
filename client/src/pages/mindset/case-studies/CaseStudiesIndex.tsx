@@ -80,17 +80,30 @@ const caseStudies = [
     tag: 'Structural Dependency',
   },
   {
-    id: '07',
+    id: '07a',
     path: '/mindset/case-studies/zhou-mao',
-    title: 'Zhou Enlai & Mao Zedong',
-    period: "People's Republic of China, 1949–1976",
-    pattern: 'Deteriorating Partnership',
-    gripPosition: 'Position 7 — P collapsing to I',
+    title: 'Early Mao (1949–1966)',
+    period: "People's Republic of China, 1949–1966",
+    pattern: 'Sycophancy Equilibrium (Pre-Cultural Revolution)',
+    gripPosition: 'Ring 3 — P quadrant',
     summary:
-      "Initially productive partnership degrades through the principal's insecurity when the subordinate receives recognition; the subordinate adopts survival-through-deference that enables the principal's worst impulses.",
+      'Limited but real debate within the CCP. The Hundred Flowers Campaign (1956) invited intellectual criticism. At the 1959 Lushan Conference, Peng Dehuai directly criticized Mao\'s Great Leap Forward policies — high-level dissent was still possible, though increasingly risky.',
     lesson:
       'The AI that always agrees with you is not serving you — it is surviving you.',
-    tag: 'Sycophancy Equilibrium',
+    tag: 'Deterioration Arc',
+  },
+  {
+    id: '07b',
+    path: '/mindset/case-studies/zhou-mao',
+    title: 'Late Mao (1966–1976)',
+    period: "People's Republic of China, 1966–1976",
+    pattern: 'Institutional Collapse',
+    gripPosition: 'Ring 2 — I quadrant (deteriorated from Ring 3)',
+    summary:
+      'The Cultural Revolution dismantled institutional checks entirely. Red Guards enforced ideological purity through struggle sessions. Even Lin Biao, Mao\'s designated successor, was purged for suspected dissent. A one-ring deterioration in 17 years.',
+    lesson:
+      'Systems don\'t collapse overnight — the GRIP framework helps identify early warning signs before institutional collapse becomes inevitable.',
+    tag: 'Deterioration Arc',
   },
   {
     id: '08',
