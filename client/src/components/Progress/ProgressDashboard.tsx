@@ -9,15 +9,15 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
-import type { GripDimension } from '../types/scenario'
-import { GRIP_LABELS } from '../types/scenario'
+import type { GripDimension } from '../../types/scenario'
+import { GRIP_LABELS } from '../../types/scenario'
 import {
   getProgressSummary,
   downloadProgressData,
   clearProgressData,
   formatDuration,
-} from '../utils/progress'
-import type { ProgressSummary } from '../utils/progress'
+} from '../../utils/progress'
+import type { ProgressSummary } from '../../utils/progress'
 
 // ---- Score Color Helpers --------------------------------------------------
 

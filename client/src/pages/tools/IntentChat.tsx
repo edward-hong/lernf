@@ -5,7 +5,7 @@
 // interface with real-time intent visualization.
 // ---------------------------------------------------------------------------
 
-import { LiveChat } from '../../components/LiveChat'
+import { LiveChat } from '../../components/LiveChat/LiveChat'
 
 export default function IntentChat() {
   return <LiveChat />

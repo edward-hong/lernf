@@ -6,9 +6,9 @@
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
-import type { IntentVector } from '../types/intent'
-import { getDominantDimensions } from '../utils/intentSmoothing'
-import { INTENT_COLOR_ANCHORS } from '../constants/intentColors'
+import type { IntentVector } from '../../types/intent'
+import { getDominantDimensions } from '../../utils/intentSmoothing'
+import { INTENT_COLOR_ANCHORS } from '../../constants/intentColors'
 
 interface IntentTooltipMobileProps {
   intent: IntentVector

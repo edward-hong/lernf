@@ -2,8 +2,8 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, useParams, Navigate } from 'react-router-dom'
 import { HomePage } from './pages/HomePage'
-import { Layout } from './components/Layout'
-import { ProgressDashboard } from './components/ProgressDashboard'
+import { Layout } from './components/Layout/Layout'
+import { ProgressDashboard } from './components/Progress/ProgressDashboard'
 
 // Lazy-loaded routes for non-critical pages (code-split)
 const CodeComparison = lazy(() => import('./pages/tools/CodeComparison'))

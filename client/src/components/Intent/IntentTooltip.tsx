@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
-import type { IntentVector } from '../types/intent'
-import { INTENT_COLOR_ANCHORS } from '../constants/intentColors'
+import type { IntentVector } from '../../types/intent'
+import { INTENT_COLOR_ANCHORS } from '../../constants/intentColors'
 
 interface IntentTooltipProps {
   intent: IntentVector

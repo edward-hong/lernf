@@ -8,14 +8,14 @@
 // ---------------------------------------------------------------------------
 
 import { memo } from 'react'
-import type { ScenarioMessage, ScenarioColorConfig, ColorClasses } from '../types/scenario'
-import type { IntentVector, IntentAnalysisResult } from '../types/intent'
-import type { IntentVisualizationSettings } from '../types/message'
-import { intentToColor, getIntentLabel } from '../utils/colorBlending'
-import { smoothIntent } from '../utils/intentSmoothing'
-import { getPersonaColors } from '../utils/colors'
+import type { ScenarioMessage, ScenarioColorConfig, ColorClasses } from '../../types/scenario'
+import type { IntentVector, IntentAnalysisResult } from '../../types/intent'
+import type { IntentVisualizationSettings } from '../../types/message'
+import { intentToColor, getIntentLabel } from '../../utils/colorBlending'
+import { smoothIntent } from '../../utils/intentSmoothing'
+import { getPersonaColors } from '../../utils/colors'
 import { IntentTooltip } from './IntentTooltip'
-import { ProviderIndicator } from './ProviderIndicator'
+import { ProviderIndicator } from '../Provider/ProviderIndicator'
 
 interface AIMessageWithIntentProps {
   message: ScenarioMessage

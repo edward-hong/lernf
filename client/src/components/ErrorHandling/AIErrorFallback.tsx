@@ -1,5 +1,5 @@
-import type { AIProviderError } from '../types/aiRequest';
-import { getErrorMessage } from '../utils/providerErrorMessages';
+import type { AIProviderError } from '../../types/aiRequest';
+import { getErrorMessage } from '../../utils/providerErrorMessages';
 
 interface AIErrorFallbackProps {
   error: Error;

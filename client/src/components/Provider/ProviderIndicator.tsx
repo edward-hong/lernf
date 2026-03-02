@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadProviderSettings } from '../utils/providerStorage'
+import { loadProviderSettings } from '../../utils/providerStorage'
 
 interface ProviderIndicatorProps {
   /** Provider ID from the AI response. */

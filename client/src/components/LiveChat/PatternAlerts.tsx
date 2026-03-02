@@ -7,7 +7,7 @@
 // ---------------------------------------------------------------------------
 
 import { useEffect, useState } from 'react'
-import type { ChatMessage } from '../state/liveChatState'
+import type { ChatMessage } from '../../state/liveChatState'
 
 interface Pattern {
   type: 'sycophancy' | 'steering' | 'resistance' | 'uncertainty_spike'
