@@ -1,4 +1,4 @@
-import type { Language } from '../../../prompts/promptComparison'
+import type { Language } from '../../../constants/languages'
 
 interface LanguageSelectorProps {
   value: string

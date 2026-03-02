@@ -1,13 +1,9 @@
 import { useState } from 'react'
-import { callAI } from '../../api/aiClient'
+import { getApiUrl } from '../../api/config'
 import CodeBlock from '../../components/tools/CodeComparison/CodeBlock'
 import Evaluation from '../../components/tools/CodeComparison/Evaluation'
 import LanguageSelector from '../../components/tools/CodeComparison/LanguageSelector'
-import {
-  generateComparisonPrompt,
-  LANGUAGES,
-} from '../../prompts/promptComparison'
-import { evaluateOptions } from '../../prompts/evaluateOptions'
+import { LANGUAGES } from '../../constants/languages'
 import type { CodeScenario, SelectedOption } from '../../types/comparison'
 
 function CodeComparison() {
@@ -30,21 +26,23 @@ function CodeComparison() {
     setEvaluation(null)
 
     try {
-      const prompt = generateComparisonPrompt(language)
-
-      const response = await callAI({
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        maxTokens: 2000,
+      const response = await fetch(getApiUrl('/api/generate-comparison'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language }),
       })
 
-      // Strip markdown code blocks if present
-      const outputString = response.content
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
+      if (!response.ok) {
+        throw new Error('Backend request failed')
+      }
 
-      // Parse the JSON string
-      const scenarioData = JSON.parse(outputString)
+      const data = await response.json()
+
+      if (!data.success || !data.scenario) {
+        throw new Error('Invalid response from backend')
+      }
+
+      const scenarioData = data.scenario as CodeScenario
 
       // Validate it has the expected structure
       if (
@@ -74,18 +72,31 @@ function CodeComparison() {
     setEvaluating(true)
 
     try {
-      const response = await callAI({
-        messages: [
-          {
-            role: 'user',
-            content: evaluateOptions(scenario, reasoning, selectedOption),
-          },
-        ],
-        temperature: 0,
-        maxTokens: 1500,
+      const response = await fetch(getApiUrl('/api/evaluate-comparison'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          context: scenario.context,
+          optionA: scenario.optionA,
+          optionB: scenario.optionB,
+          correctAnswer: scenario.correctAnswer,
+          reason: scenario.reason,
+          selectedOption,
+          reasoning,
+        }),
       })
 
-      setEvaluation(response.content)
+      if (!response.ok) {
+        throw new Error('Backend request failed')
+      }
+
+      const data = await response.json()
+
+      if (!data.success || !data.evaluation) {
+        throw new Error('Invalid response from backend')
+      }
+
+      setEvaluation(data.evaluation)
     } catch (error) {
       console.error('Error evaluating answer:', error)
       alert('Failed to evaluate answer. Please try again.')

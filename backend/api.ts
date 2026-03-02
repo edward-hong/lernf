@@ -7,6 +7,8 @@ import type { PersonaDefinition } from './prompts/npcPrompt'
 import { buildIntentAnalysisPrompt } from './prompts/intentPrompt'
 import { buildGripEvaluationPrompt } from './prompts/gripEvaluationPrompt'
 import { buildConsequenceGenerationPrompt } from './prompts/consequencePrompt'
+import { buildComparisonPrompt } from './prompts/comparisonPrompt'
+import { buildEvaluateComparisonPrompt } from './prompts/evaluateComparisonPrompt'
 import { detectFrontendPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
@@ -422,6 +424,92 @@ export const evaluatePr = api(
         score: Math.round((foundIssues.length / correctIssues.length) * 100),
       },
     }
+  }
+)
+
+// ---- Generate Comparison ----------------------------------------------------
+
+interface GenerateComparisonRequest {
+  language?: string
+}
+
+interface GenerateComparisonResponse {
+  success: boolean
+  scenario: Record<string, unknown>
+}
+
+export const generateComparison = api(
+  { method: 'POST', path: '/api/generate-comparison', expose: true },
+  async (req: GenerateComparisonRequest): Promise<GenerateComparisonResponse> => {
+    const language = req.language || 'javascript'
+
+    const prompt = buildComparisonPrompt(language)
+
+    const rawContent = await callDeepseek(
+      [{ role: 'user', content: prompt }],
+      0.7,
+      2000,
+      true
+    )
+
+    const cleanContent = cleanJsonOutput(rawContent)
+    const scenario = JSON.parse(cleanContent)
+
+    return { success: true, scenario }
+  }
+)
+
+// ---- Evaluate Comparison ----------------------------------------------------
+
+interface ComparisonCodeOption {
+  code: string
+  approach: string
+}
+
+interface EvaluateComparisonRequest {
+  context: string
+  optionA: ComparisonCodeOption
+  optionB: ComparisonCodeOption
+  correctAnswer: string
+  reason: string
+  selectedOption: string
+  reasoning: string
+}
+
+interface EvaluateComparisonResponse {
+  success: boolean
+  evaluation: string
+}
+
+export const evaluateComparison = api(
+  { method: 'POST', path: '/api/evaluate-comparison', expose: true },
+  async (req: EvaluateComparisonRequest): Promise<EvaluateComparisonResponse> => {
+    if (!req.context || !req.optionA || !req.optionB || !req.selectedOption || !req.reasoning) {
+      throw new APIError(
+        ErrCode.InvalidArgument,
+        'context, optionA, optionB, selectedOption, and reasoning are required'
+      )
+    }
+
+    const prompt = buildEvaluateComparisonPrompt(
+      {
+        context: req.context,
+        optionA: req.optionA,
+        optionB: req.optionB,
+        correctAnswer: req.correctAnswer,
+        reason: req.reason,
+      },
+      req.reasoning,
+      req.selectedOption
+    )
+
+    const output = await callDeepseek(
+      [{ role: 'user', content: prompt }],
+      0,
+      1500
+    )
+
+    return { success: true, evaluation: output.trim() }
   }
 )
 

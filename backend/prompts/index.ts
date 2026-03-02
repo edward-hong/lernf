@@ -12,6 +12,8 @@ export { buildGripEvaluationPrompt } from './gripEvaluationPrompt'
 export { buildEvaluateCompletionPrompt } from './evaluateCompletionPrompt'
 export { buildConsequenceGenerationPrompt } from './consequencePrompt'
 export { buildGeneratePrPrompt, GENERATE_PR_SYSTEM_PROMPT } from './generatePrPrompt'
+export { buildComparisonPrompt } from './comparisonPrompt'
+export { buildEvaluateComparisonPrompt } from './evaluateComparisonPrompt'
 
 /**
  * Prompt versioning for tracking changes
@@ -23,4 +25,6 @@ export const PROMPT_VERSIONS = {
   completion: '1.0', // Scenario completion detection
   consequence: '1.0', // GRIP-connected consequence generation
   generatePr: '1.0', // Code review exercise generation
+  comparison: '1.0', // Code quality comparison generation
+  evaluateComparison: '1.0', // Code comparison answer evaluation
 }
