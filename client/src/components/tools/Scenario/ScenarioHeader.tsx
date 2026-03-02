@@ -7,16 +7,19 @@ interface ScenarioHeaderProps {
   onEndScenario: () => void
 }
 
-export function ScenarioHeader({ scenario, onEndScenario }: ScenarioHeaderProps) {
+export function ScenarioHeader({
+  scenario,
+  onEndScenario,
+}: ScenarioHeaderProps) {
   const [toolsExpanded, setToolsExpanded] = useState(false)
   const { definition, phase, assignedPersonas } = scenario
 
   const personaNames = Object.values(assignedPersonas).map(
-    (p) => p.definition.name,
+    (p) => p.definition.name
   )
 
   return (
-    <header className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3">
+    <header className="bg-gray-50 border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3">
       {/* Top row: title + end button */}
       <div className="flex items-start justify-between gap-2 sm:gap-4">
         <div className="min-w-0 flex-1">
@@ -41,21 +44,47 @@ export function ScenarioHeader({ scenario, onEndScenario }: ScenarioHeaderProps)
       {/* Meta row */}
       <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
         <span className="inline-flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
           <span className="hidden sm:inline">{personaNames.join(', ')}</span>
           <span className="sm:hidden">{personaNames.length} participants</span>
         </span>
 
         <span className="inline-flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           ~{definition.estimatedTurns} turns
         </span>
 
-        <div className="flex items-center gap-1" role="list" aria-label="GRIP focus areas">
+        <div
+          className="flex items-center gap-1"
+          role="list"
+          aria-label="GRIP focus areas"
+        >
           {definition.gripFocus.map((dim) => (
             <span
               key={dim}
@@ -78,24 +107,39 @@ export function ScenarioHeader({ scenario, onEndScenario }: ScenarioHeaderProps)
           aria-controls="scenario-participants"
         >
           <svg
-            className={`w-3.5 h-3.5 transition-transform ${toolsExpanded ? 'rotate-90' : ''}`}
+            className={`w-3.5 h-3.5 transition-transform ${
+              toolsExpanded ? 'rotate-90' : ''
+            }`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
             aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
           Available tools ({personaNames.length} participants)
         </button>
 
         {toolsExpanded && (
-          <div id="scenario-participants" className="mt-2 pl-5 space-y-1" role="list" aria-label="Available participants">
+          <div
+            id="scenario-participants"
+            className="mt-2 pl-5 space-y-1"
+            role="list"
+            aria-label="Available participants"
+          >
             {Object.values(assignedPersonas).map((assigned) => {
               const colors = scenario.colors.npcColors[assigned.colorSlot]
               return (
-                <div key={assigned.definition.id} className="flex items-center gap-2 text-xs" role="listitem">
+                <div
+                  key={assigned.definition.id}
+                  className="flex items-center gap-2 text-xs"
+                  role="listitem"
+                >
                   <span
                     className={`inline-block w-2.5 h-2.5 rounded-full ${colors.bg} border ${colors.border}`}
                     aria-hidden="true"
@@ -110,7 +154,10 @@ export function ScenarioHeader({ scenario, onEndScenario }: ScenarioHeaderProps)
               )
             })}
             <div className="flex items-center gap-2 text-xs" role="listitem">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-50 border border-indigo-300" aria-hidden="true" />
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-50 border border-indigo-300"
+                aria-hidden="true"
+              />
               <span className="font-medium text-indigo-700">AI Assistant</span>
               <span className="text-gray-400">advisor</span>
             </div>

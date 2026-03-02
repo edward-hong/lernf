@@ -6,7 +6,12 @@ import { MessageBubble } from '../../components/tools/Scenario/MessageBubble'
 import { MessageInput } from '../../components/tools/Scenario/MessageInput'
 import { CompletionDialog } from '../../components/tools/Scenario/CompletionDialog'
 import { ScenarioResults } from '../../components/tools/Scenario/ScenarioResults'
-import { ScenarioSkeleton, ThinkingIndicator, EvaluationSpinner, InlineError } from '../../components/tools/Scenario/LoadingStates'
+import {
+  ScenarioSkeleton,
+  ThinkingIndicator,
+  EvaluationSpinner,
+  InlineError,
+} from '../../components/tools/Scenario/LoadingStates'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
@@ -58,7 +63,9 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
         resetCompletionDetector()
         initializeScenario(scenarioId)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to initialize scenario')
+        setError(
+          err instanceof Error ? err.message : 'Failed to initialize scenario'
+        )
       } finally {
         setIsInitializing(false)
       }
@@ -90,12 +97,13 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
       setIsNpcThinking(true)
       setThinkingNpc(assigned.definition.name)
       try {
-        const currentMessages = useScenarioStore.getState().scenario?.messages ?? []
+        const currentMessages =
+          useScenarioStore.getState().scenario?.messages ?? []
         const response = await generateNPCResponse(
           assigned.definition.id,
           assigned.definition,
           currentMessages,
-          scenario.definition.engineBriefing,
+          scenario.definition.engineBriefing
         )
         addTurn({
           speakerType: 'npc',
@@ -132,7 +140,8 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
       }
 
       // Pick responding NPC (round-robin)
-      const currentMessages = useScenarioStore.getState().scenario?.messages ?? []
+      const currentMessages =
+        useScenarioStore.getState().scenario?.messages ?? []
       const npcMessages = currentMessages.filter((m) => m.speakerType === 'npc')
       const respondingIndex = npcMessages.length % assignedPersonas.length
       const respondingPersona = assignedPersonas[respondingIndex]
@@ -142,12 +151,13 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
         setThinkingNpc(respondingPersona.definition.name)
 
         try {
-          const latestMessages = useScenarioStore.getState().scenario?.messages ?? []
+          const latestMessages =
+            useScenarioStore.getState().scenario?.messages ?? []
           const response = await generateNPCResponse(
             respondingPersona.definition.id,
             respondingPersona.definition,
             latestMessages,
-            scenario.definition.engineBriefing,
+            scenario.definition.engineBriefing
           )
           addTurn({
             speakerType: 'npc',
@@ -157,7 +167,9 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
             actions: [],
           })
         } catch {
-          setError('Failed to get a response. You can try sending another message.')
+          setError(
+            'Failed to get a response. You can try sending another message.'
+          )
         } finally {
           setIsNpcThinking(false)
           setThinkingNpc(null)
@@ -173,24 +185,33 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
       ) {
         evaluateCompletion(
           currentState.scenario.definition,
-          currentState.scenario.messages,
-        ).then((result) => {
-          if (result) {
-            const latestState = useScenarioStore.getState()
-            if (
-              latestState.scenario &&
-              latestState.scenario.phase !== 'completed' &&
-              !latestState.pendingCompletion
-            ) {
-              setPendingCompletion(result)
+          currentState.scenario.messages
+        )
+          .then((result) => {
+            if (result) {
+              const latestState = useScenarioStore.getState()
+              if (
+                latestState.scenario &&
+                latestState.scenario.phase !== 'completed' &&
+                !latestState.pendingCompletion
+              ) {
+                setPendingCompletion(result)
+              }
             }
-          }
-        }).catch(() => {
-          // Completion detection failure is non-critical
-        })
+          })
+          .catch(() => {
+            // Completion detection failure is non-critical
+          })
       }
     },
-    [scenario, assignedPersonas, addTurn, checkCompletion, setPhase, setPendingCompletion],
+    [
+      scenario,
+      assignedPersonas,
+      addTurn,
+      checkCompletion,
+      setPhase,
+      setPendingCompletion,
+    ]
   )
 
   // User clicked "End Scenario"
@@ -213,7 +234,7 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
         scenario.messages,
         scenario.signals,
         scenario.discoveredFactorIds,
-        EVALUATION_GUIDANCE,
+        EVALUATION_GUIDANCE
       )
       const store = useScenarioStore.getState()
       if (store.scenario) {
@@ -222,7 +243,9 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
         })
       }
     } catch {
-      setError('Evaluation failed. Your scenario data is preserved — try refreshing the page.')
+      setError(
+        'Evaluation failed. Your scenario data is preserved — try refreshing the page.'
+      )
     } finally {
       setIsEvaluating(false)
     }
@@ -291,7 +314,8 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
             Scenario Briefing
           </h2>
-          <div className="prose prose-sm max-w-none text-gray-700
+          <div
+            className="prose prose-sm max-w-none text-gray-700
             [&_p]:mb-3 [&_p]:leading-relaxed
             [&_strong]:font-semibold [&_strong]:text-gray-900
             [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
@@ -300,7 +324,8 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
             [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-3
             [&_code]:bg-gray-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
             [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-4 [&_h3]:mb-2
-          ">
+          "
+          >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {scenario.definition.setupContext}
             </ReactMarkdown>
@@ -311,11 +336,19 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
             Participants
           </h2>
-          <div className="space-y-3" role="list" aria-label="Scenario participants">
+          <div
+            className="space-y-3"
+            role="list"
+            aria-label="Scenario participants"
+          >
             {assignedPersonas.map((assigned) => {
               const colors = scenario.colors.npcColors[assigned.colorSlot]
               return (
-                <div key={assigned.definition.id} className="flex items-start gap-3" role="listitem">
+                <div
+                  key={assigned.definition.id}
+                  className="flex items-start gap-3"
+                  role="listitem"
+                >
                   <span
                     className={`mt-1 inline-block w-3 h-3 rounded-full ${colors.bg} border-2 ${colors.border}`}
                     aria-hidden="true"
@@ -379,7 +412,7 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
     isNpcThinking
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-4rem)]">
       <ScenarioHeader scenario={scenario} onEndScenario={handleEndScenario} />
 
       <div
@@ -422,22 +455,37 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
           {scenario.phase === 'wrapping-up' && !pendingCompletion && (
             <div className="text-center py-3">
               <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 Scenario is wrapping up — you can continue or end the scenario
               </span>
             </div>
           )}
 
-          {scenario.phase === 'completed' && !scenario.evaluation && !isEvaluating && (
-            <div className="text-center py-6 space-y-3">
-              <span className="inline-flex items-center gap-1.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-full px-4 py-1.5">
-                Scenario completed
-              </span>
-              <p className="text-sm text-gray-500">Generating evaluation...</p>
-            </div>
-          )}
+          {scenario.phase === 'completed' &&
+            !scenario.evaluation &&
+            !isEvaluating && (
+              <div className="text-center py-6 space-y-3">
+                <span className="inline-flex items-center gap-1.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-full px-4 py-1.5">
+                  Scenario completed
+                </span>
+                <p className="text-sm text-gray-500">
+                  Generating evaluation...
+                </p>
+              </div>
+            )}
 
           <div ref={messagesEndRef} />
         </div>
@@ -450,10 +498,10 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
           isNpcThinking
             ? `${thinkingNpc ?? 'NPC'} is responding...`
             : scenario.phase === 'completed'
-              ? 'Scenario has ended'
-              : pendingCompletion
-                ? 'Respond to the prompt above to continue...'
-                : 'Type your response...'
+            ? 'Scenario has ended'
+            : pendingCompletion
+            ? 'Respond to the prompt above to continue...'
+            : 'Type your response...'
         }
       />
     </div>

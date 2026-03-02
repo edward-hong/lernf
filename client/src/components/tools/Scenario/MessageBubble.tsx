@@ -1,5 +1,10 @@
 import { memo } from 'react'
-import type { ScenarioMessage, ScenarioColorConfig, ColorClasses } from '../../../types/scenario'
+import ReactMarkdown from 'react-markdown'
+import type {
+  ScenarioMessage,
+  ScenarioColorConfig,
+  ColorClasses,
+} from '../../../types/scenario'
 import { getPersonaColors } from '../../../utils/colors'
 
 interface MessageBubbleProps {
@@ -9,7 +14,7 @@ interface MessageBubbleProps {
 
 function getColorsForMessage(
   message: ScenarioMessage,
-  config: ScenarioColorConfig,
+  config: ScenarioColorConfig
 ): ColorClasses {
   switch (message.speakerType) {
     case 'user':
@@ -55,7 +60,9 @@ function MessageBubbleInner({ message, colors }: MessageBubbleProps) {
           className={`w-full rounded-lg px-3 sm:px-4 py-3 text-sm ${messageColors.bg} ${messageColors.label}`}
         >
           <span className="sr-only">System message: </span>
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <p className="whitespace-pre-wrap">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </p>
         </div>
       </div>
     )
@@ -63,7 +70,9 @@ function MessageBubbleInner({ message, colors }: MessageBubbleProps) {
 
   return (
     <div
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} px-3 sm:px-4 py-1.5`}
+      className={`flex ${
+        isUser ? 'justify-end' : 'justify-start'
+      } px-3 sm:px-4 py-1.5`}
       role="listitem"
     >
       <div className={`max-w-[90%] sm:max-w-[80%] md:max-w-[75%]`}>
