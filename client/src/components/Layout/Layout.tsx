@@ -75,6 +75,10 @@ export function Layout() {
           label: 'Scenario Library',
         },
         {
+          path: '/tools/devils-advocate',
+          label: "Devil's Advocate",
+        },
+        {
           path: '/practice/progress',
           label: 'Progress Dashboard',
         },
