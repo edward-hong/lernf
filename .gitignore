@@ -9,3 +9,4 @@ encore.gen.cue
 /.encore
 /encore.gen
 dist/
+*.tsbuildinfo
