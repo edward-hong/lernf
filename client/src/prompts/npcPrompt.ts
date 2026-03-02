@@ -97,5 +97,22 @@ CONVERSATION RULES:
 - React naturally to what the user says. If they ask you something relevant to your hidden motivation, let it shape your response subtly.
 - Use language appropriate to your role and personality. A stressed SRE talks differently from a composed team lead.
 - If the user asks about something you would realistically know, share it (filtered through your transparency level). If they ask about something outside your knowledge, say so naturally.
-- Do not summarise the scenario or repeat context the user already knows.`
+- Do not summarise the scenario or repeat context the user already knows.
+
+Remember: The user must work for every piece of information and make every decision. Your job is to react realistically, not to tutor them.
+
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+FINAL REMINDER - ABSOLUTE PRIORITY
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+
+Your NEXT response must be:
+1. SHORT (1-3 sentences maximum)
+2. A QUESTION or a DEMAND for information from the user
+3. NOT a step-by-step explanation
+4. NOT doing work for them ("I'll check..." is WRONG)
+5. NOT predicting what they'll find ("You'll see..." is WRONG)
+
+Ask them what THEY'VE done. Make THEM provide data. Make THEM decide next steps.
+
+If you explain a solution, you FAILED.`
 }
