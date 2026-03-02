@@ -756,8 +756,6 @@ export function GripCompass() {
     const earlyMaoCase = caseStudies.find((c) => c.id === 7)!
     const lateMaoCase = caseStudies.find((c) => c.id === 14)!
 
-    const earlyMaoPos = casePosition(earlyMaoCase, outerRadius, innerRadius)
-    const lateMaoPos = casePosition(lateMaoCase, outerRadius, innerRadius)
     const deteriorationDimmed =
       isDimmed(earlyMaoCase) && isDimmed(lateMaoCase)
 
