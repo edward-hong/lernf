@@ -122,7 +122,7 @@ const caseStudies: CaseStudy[] = [
     label: 'Elizabeth / Cecil',
     shortLabel: 'Elizabeth-Cecil',
     ring: 5,
-    quadrant: 'ALL',
+    quadrant: 'G',
     pattern: 'Gold Standard',
     type: 'generative',
     oneLiner:
