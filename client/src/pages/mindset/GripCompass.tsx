@@ -4,6 +4,7 @@
 // a model of human-AI power dynamics built from 13 historical case studies.
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 
 // ─── Case Study Data ───────────────────────────────────────────────
@@ -119,7 +120,7 @@ const caseStudies: CaseStudy[] = [
       'Limited but real debate within the CCP — Peng Dehuai could challenge Mao at the 1959 Lushan Conference.',
     color: '#ca8a04',
     description:
-      'Early People\'s Republic (1949-1966) featured limited but real debate within the CCP. The Hundred Flowers Campaign (1956) invited intellectual criticism. At the 1959 Lushan Conference, Defense Minister Peng Dehuai directly criticized Mao\'s Great Leap Forward policies, demonstrating that high-level dissent was still possible within party structures, though increasingly risky.',
+      "Early People's Republic (1949-1966) featured limited but real debate within the CCP. The Hundred Flowers Campaign (1956) invited intellectual criticism. At the 1959 Lushan Conference, Defense Minister Peng Dehuai directly criticized Mao's Great Leap Forward policies, demonstrating that high-level dissent was still possible within party structures, though increasingly risky.",
     arrowTo: 14,
     arrowLabel: 'Cultural Revolution (1966)',
     arrowType: 'deterioration',
@@ -217,10 +218,10 @@ const caseStudies: CaseStudy[] = [
     pattern: 'Institutional Collapse',
     type: 'parasitic',
     oneLiner:
-      'Even Lin Biao, Mao\'s designated successor, was purged for suspected dissent — any questioning meant political death.',
+      "Even Lin Biao, Mao's designated successor, was purged for suspected dissent — any questioning meant political death.",
     color: '#ea580c',
     description:
-      'The Cultural Revolution (1966-76) dismantled institutional checks entirely. Red Guards enforced ideological purity through struggle sessions. Even Lin Biao, Mao\'s designated successor, was purged when suspected of questioning the Chairman. Information flow collapsed — famine deaths were hidden, ideology trumped reality, and any form of dissent became politically fatal. A one-ring deterioration from Early Mao-Zhou in 17 years.',
+      "The Cultural Revolution (1966-76) dismantled institutional checks entirely. Red Guards enforced ideological purity through struggle sessions. Even Lin Biao, Mao's designated successor, was purged when suspected of questioning the Chairman. Information flow collapsed — famine deaths were hidden, ideology trumped reality, and any form of dissent became politically fatal. A one-ring deterioration from Early Mao-Zhou in 17 years.",
     arrowFrom: 7,
   },
 ]
@@ -756,17 +757,14 @@ export function GripCompass() {
     const earlyMaoCase = caseStudies.find((c) => c.id === 7)!
     const lateMaoCase = caseStudies.find((c) => c.id === 14)!
 
-    const deteriorationDimmed =
-      isDimmed(earlyMaoCase) && isDimmed(lateMaoCase)
+    const deteriorationDimmed = isDimmed(earlyMaoCase) && isDimmed(lateMaoCase)
 
     // Create curved path from Early Mao-Zhou (P, 315°) to Late Mao-Zhou (I, 225°)
     // sweeping through the bottom of the compass (270°)
     const detPoints: [number, number][] = []
     const detSteps = 30
-    const earlyAngleRad =
-      (quadrantAngle(earlyMaoCase.quadrant) * Math.PI) / 180
-    const lateAngleRad =
-      (quadrantAngle(lateMaoCase.quadrant) * Math.PI) / 180
+    const earlyAngleRad = (quadrantAngle(earlyMaoCase.quadrant) * Math.PI) / 180
+    const lateAngleRad = (quadrantAngle(lateMaoCase.quadrant) * Math.PI) / 180
     const earlyRingRadius = outerRadius - 2.5 * ringWidth // Ring 3
     const lateRingRadius = outerRadius - 1.5 * ringWidth // Ring 2
 
@@ -775,8 +773,7 @@ export function GripCompass() {
       // Interpolate angle from Early Mao-Zhou to Late Mao-Zhou
       const angle = earlyAngleRad + (lateAngleRad - earlyAngleRad) * t
       // Interpolate radius from ring 3 to ring 2 (outward)
-      const radius =
-        earlyRingRadius + (lateRingRadius - earlyRingRadius) * t
+      const radius = earlyRingRadius + (lateRingRadius - earlyRingRadius) * t
       // Add slight outward curve for visual distinction
       const curveOffset = Math.sin(t * Math.PI) * ringWidth * 0.3
       const r = radius + curveOffset
@@ -1109,7 +1106,12 @@ export function GripCompass() {
           })
           if (patternLine) patternLines.push(patternLine.trim())
 
-          const patternTextEls: d3.Selection<SVGTextElement, unknown, null, undefined>[] = []
+          const patternTextEls: d3.Selection<
+            SVGTextElement,
+            unknown,
+            null,
+            undefined
+          >[] = []
           patternLines.forEach((line, li) => {
             const el = tooltipG
               .append('text')
@@ -1119,7 +1121,14 @@ export function GripCompass() {
               .attr('font-size', '11px')
               .attr('font-weight', '600')
               .text(line)
-            patternTextEls.push(el as unknown as d3.Selection<SVGTextElement, unknown, null, undefined>)
+            patternTextEls.push(
+              el as unknown as d3.Selection<
+                SVGTextElement,
+                unknown,
+                null,
+                undefined
+              >
+            )
           })
 
           // One-liner (wrap if long)
@@ -1415,8 +1424,14 @@ export function GripCompass() {
               }}
             >
               {selectedCase.arrowType === 'deterioration'
-                ? `\u2192 Deteriorates to ${caseStudies.find((c) => c.id === selectedCase.arrowTo)?.label} \u2014 ${selectedCase.arrowLabel}`
-                : `\u2192 Recovers to ${caseStudies.find((c) => c.id === selectedCase.arrowTo)?.label}`}
+                ? `\u2192 Deteriorates to ${
+                    caseStudies.find((c) => c.id === selectedCase.arrowTo)
+                      ?.label
+                  } \u2014 ${selectedCase.arrowLabel}`
+                : `\u2192 Recovers to ${
+                    caseStudies.find((c) => c.id === selectedCase.arrowTo)
+                      ?.label
+                  }`}
             </div>
           )}
           {selectedCase.arrowFrom && (
@@ -1432,14 +1447,16 @@ export function GripCompass() {
                 fontWeight: 600,
               }}
             >
-              {`\u2190 Deteriorated from ${caseStudies.find((c) => c.id === selectedCase.arrowFrom)?.label} (17 years)`}
+              {`\u2190 Deteriorated from ${
+                caseStudies.find((c) => c.id === selectedCase.arrowFrom)?.label
+              } (17 years)`}
             </div>
           )}
 
           {/* Link to full case study */}
           {getCaseStudyPath(selectedCase.id) && (
-            <a
-              href={getCaseStudyPath(selectedCase.id)!}
+            <Link
+              to={getCaseStudyPath(selectedCase.id)!}
               style={{
                 display: 'inline-block',
                 marginTop: '20px',
@@ -1454,7 +1471,7 @@ export function GripCompass() {
               }}
             >
               Read Full Case Study
-            </a>
+            </Link>
           )}
         </div>
       )}
