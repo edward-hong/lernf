@@ -58,6 +58,13 @@ const tools: Tool[] = [
     status: 'ready',
     icon: '😈',
   },
+  {
+    title: 'GRIP Compass',
+    description: 'Map your AI relationship against historical case studies using the GRIP framework',
+    path: '/tools/grip-compass',
+    status: 'ready',
+    icon: '🧭',
+  },
 ]
 
 export function Dashboard() {
