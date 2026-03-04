@@ -1,6 +1,7 @@
 // src/components/Layout.tsx
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 
 interface DropdownItem {
   path: string
@@ -256,6 +257,17 @@ export function Layout() {
               >
                 Settings
               </Link>
+
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
             </nav>
           </div>
         </div>
@@ -312,6 +324,19 @@ export function Layout() {
             >
               Settings
             </Link>
+
+            <div className="px-4 py-3 border-t border-gray-100">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </div>
           </nav>
         )}
       </header>

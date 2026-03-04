@@ -1,6 +1,7 @@
 // src/routes.tsx — React Router configuration with lazy-loaded routes
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, useParams, Navigate } from 'react-router-dom'
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 import { HomePage } from './pages/HomePage'
 import { Layout } from './components/Layout/Layout'
 import { ProgressDashboard } from './components/Progress/ProgressDashboard'
@@ -127,7 +128,16 @@ export const router = createBrowserRouter([
       },
       {
         path: 'practice/progress',
-        element: <ProgressDashboard />,
+        element: (
+          <>
+            <SignedIn>
+              <ProgressDashboard />
+            </SignedIn>
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
+        ),
       },
       // /scenarios aliases — redirect to canonical paths
       {
