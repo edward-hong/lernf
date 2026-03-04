@@ -158,7 +158,7 @@ export const router = createBrowserRouter([
         path: 'settings',
         element: <Lazy><SettingsPage /></Lazy>,
       },
-      // Mindset index route
+      // About index route (formerly Mindset)
       {
         path: 'mindset',
         element: <MindsetPage />,
@@ -189,8 +189,12 @@ export const router = createBrowserRouter([
         element: <Lazy><AiMisconceptions /></Lazy>,
       },
       {
-        path: 'mindset/grip-compass',
+        path: 'tools/grip-compass',
         element: <Lazy><GripCompass /></Lazy>,
+      },
+      {
+        path: 'mindset/grip-compass',
+        element: <Navigate to="/tools/grip-compass" replace />,
       },
       {
         path: 'mindset/grip-limitations',

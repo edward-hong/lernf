@@ -20,72 +20,71 @@ export function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
 
-  const navSections: NavSection[] = [
-    {
-      label: 'Mindset',
-      items: [
-        {
-          path: '/mindset/historical-mapping',
-          label: 'Historical Context',
-        },
-        { path: '/mindset/ai-mapping', label: 'AI Mapping' },
-        {
-          path: '/mindset/grip-framework',
-          label: 'GRIP Framework',
-        },
-        {
-          path: '/mindset/individual-audit',
-          label: 'Individual Audit',
-        },
-        {
-          path: '/mindset/organisational-audit',
-          label: 'Organisational Audit',
-        },
-        {
-          path: '/mindset/ai-misconceptions',
-          label: 'AI Misconceptions',
-        },
-        {
-          path: '/mindset/grip-compass',
-          label: 'GRIP Compass',
-        },
-        {
-          path: '/mindset/grip-limitations',
-          label: 'GRIP Limitations',
-        },
-        {
-          path: '/mindset/case-studies',
-          label: 'Case Studies',
-        },
-      ],
-    },
-    {
-      label: 'Tools',
-      items: [
-        { path: '/practice/code-comparison', label: 'Code Comparison' },
-        { path: '/practice/pr-review', label: 'PR Review' },
-        { path: '/practice/ai-intent', label: 'AI Intent Analysis' },
-        { path: '/practice/intent-chat', label: 'Live Intent Chat' },
-        {
-          path: '/practice/ai-coding',
-          label: 'AI Assisted Coding',
-          placeholder: true,
-        },
-        {
-          path: '/practice/workplace-scenarios',
-          label: 'Scenario Library',
-        },
-        {
-          path: '/tools/devils-advocate',
-          label: "Devil's Advocate",
-        },
-        {
-          path: '/practice/progress',
-          label: 'Progress Dashboard',
-        },
-      ],
-    },
-  ]
+  const aboutSection: NavSection = {
+    label: 'About',
+    items: [
+      {
+        path: '/mindset/historical-mapping',
+        label: 'Historical Context',
+      },
+      { path: '/mindset/ai-mapping', label: 'AI Mapping' },
+      {
+        path: '/mindset/grip-framework',
+        label: 'GRIP Framework',
+      },
+      {
+        path: '/mindset/individual-audit',
+        label: 'Individual Audit',
+      },
+      {
+        path: '/mindset/organisational-audit',
+        label: 'Organisational Audit',
+      },
+      {
+        path: '/mindset/ai-misconceptions',
+        label: 'AI Misconceptions',
+      },
+      {
+        path: '/mindset/grip-limitations',
+        label: 'GRIP Limitations',
+      },
+      {
+        path: '/mindset/case-studies',
+        label: 'Case Studies',
+      },
+    ],
+  }
+
+  const toolsSection: NavSection = {
+    label: 'Tools',
+    items: [
+      { path: '/practice/code-comparison', label: 'Code Comparison' },
+      { path: '/practice/pr-review', label: 'PR Review' },
+      { path: '/practice/ai-intent', label: 'AI Intent Analysis' },
+      { path: '/practice/intent-chat', label: 'Live Intent Chat' },
+      {
+        path: '/practice/ai-coding',
+        label: 'AI Assisted Coding',
+        placeholder: true,
+      },
+      {
+        path: '/practice/workplace-scenarios',
+        label: 'Scenario Library',
+      },
+      {
+        path: '/tools/devils-advocate',
+        label: "Devil's Advocate",
+      },
+      {
+        path: '/tools/grip-compass',
+        label: 'GRIP Compass',
+      },
+      {
+        path: '/practice/progress',
+        label: 'Progress Dashboard',
+      },
+    ],
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -118,6 +117,95 @@ export function Layout() {
         location.pathname === item.path ||
         location.pathname.startsWith(item.path + '/')
     )
+
+  const renderDesktopDropdown = (section: NavSection) => (
+    <div key={section.label} className="relative">
+      <button
+        onClick={() =>
+          setOpenDropdown(
+            openDropdown === section.label ? null : section.label
+          )
+        }
+        aria-expanded={openDropdown === section.label}
+        aria-haspopup="true"
+        className={`flex items-center gap-1 text-sm font-medium transition-colors ${
+          isSectionActive(section.items)
+            ? 'text-blue-600'
+            : 'text-gray-600 hover:text-gray-900'
+        }`}
+      >
+        {section.label}
+        <svg
+          className={`w-4 h-4 transition-transform ${
+            openDropdown === section.label ? 'rotate-180' : ''
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {openDropdown === section.label && (
+        <div
+          className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1"
+          role="menu"
+        >
+          {section.items.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => setOpenDropdown(null)}
+              role="menuitem"
+              className={`flex items-center justify-between px-4 py-2 text-sm transition-colors ${
+                location.pathname === item.path
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              {item.label}
+              {item.placeholder && (
+                <span className="text-xs text-gray-400 ml-2">
+                  Soon
+                </span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  const renderMobileSection = (section: NavSection) => (
+    <div key={section.label}>
+      <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+        {section.label}
+      </p>
+      {section.items.map((item) => (
+        <Link
+          key={item.path}
+          to={item.path}
+          className={`flex items-center justify-between px-6 py-2.5 text-sm ${
+            location.pathname === item.path
+              ? 'text-blue-600 bg-blue-50'
+              : 'text-gray-700'
+          }`}
+        >
+          {item.label}
+          {item.placeholder && (
+            <span className="text-xs text-gray-400 ml-2">Soon</span>
+          )}
+        </Link>
+      ))}
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -182,70 +270,10 @@ export function Layout() {
                 Home
               </Link>
 
-              {navSections.map((section) => (
-                <div key={section.label} className="relative">
-                  <button
-                    onClick={() =>
-                      setOpenDropdown(
-                        openDropdown === section.label ? null : section.label
-                      )
-                    }
-                    aria-expanded={openDropdown === section.label}
-                    aria-haspopup="true"
-                    className={`flex items-center gap-1 text-sm font-medium transition-colors ${
-                      isSectionActive(section.items)
-                        ? 'text-blue-600'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    {section.label}
-                    <svg
-                      className={`w-4 h-4 transition-transform ${
-                        openDropdown === section.label ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {openDropdown === section.label && (
-                    <div
-                      className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1"
-                      role="menu"
-                    >
-                      {section.items.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => setOpenDropdown(null)}
-                          role="menuitem"
-                          className={`flex items-center justify-between px-4 py-2 text-sm transition-colors ${
-                            location.pathname === item.path
-                              ? 'text-blue-600 bg-blue-50'
-                              : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
-                        >
-                          {item.label}
-                          {item.placeholder && (
-                            <span className="text-xs text-gray-400 ml-2">
-                              Soon
-                            </span>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {renderDesktopDropdown(aboutSection)}
+              <SignedIn>
+                {renderDesktopDropdown(toolsSection)}
+              </SignedIn>
 
               <Link
                 to="/settings"
@@ -290,29 +318,10 @@ export function Layout() {
               Home
             </Link>
 
-            {navSections.map((section) => (
-              <div key={section.label}>
-                <p className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                  {section.label}
-                </p>
-                {section.items.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center justify-between px-6 py-2.5 text-sm ${
-                      location.pathname === item.path
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700'
-                    }`}
-                  >
-                    {item.label}
-                    {item.placeholder && (
-                      <span className="text-xs text-gray-400 ml-2">Soon</span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            ))}
+            {renderMobileSection(aboutSection)}
+            <SignedIn>
+              {renderMobileSection(toolsSection)}
+            </SignedIn>
 
             <Link
               to="/settings"
