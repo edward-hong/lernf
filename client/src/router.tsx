@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, useParams, Navigate } from 'react-router-dom'
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 import { HomePage } from './pages/HomePage'
+import { MindsetPage } from './pages/MindsetPage'
 import { Layout } from './components/Layout/Layout'
 import { ProgressDashboard } from './components/Progress/ProgressDashboard'
 
@@ -156,6 +157,11 @@ export const router = createBrowserRouter([
       {
         path: 'settings',
         element: <Lazy><SettingsPage /></Lazy>,
+      },
+      // Mindset index route
+      {
+        path: 'mindset',
+        element: <MindsetPage />,
       },
       // Mindset routes (lazy-loaded)
       {
