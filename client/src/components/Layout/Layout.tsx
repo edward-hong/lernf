@@ -166,7 +166,7 @@ export function Layout() {
 
             {/* Desktop nav */}
             <nav
-              className="hidden sm:flex gap-6"
+              className="hidden sm:flex items-center gap-6"
               ref={navRef}
               onKeyDown={handleKeyDown}
               aria-label="Main navigation"

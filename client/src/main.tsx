@@ -25,9 +25,35 @@ if (import.meta.env.DEV) {
   })
 }
 
+const clerkAppearance = {
+  variables: {
+    colorPrimary: '#2563eb',
+    colorText: '#111827',
+    colorTextSecondary: '#4b5563',
+    colorBackground: '#ffffff',
+    colorInputBackground: '#f9fafb',
+    colorInputText: '#111827',
+    borderRadius: '0.5rem',
+    fontFamily:
+      'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontSize: '0.875rem',
+  },
+  elements: {
+    userButtonAvatarBox: {
+      width: '1.75rem',
+      height: '1.75rem',
+    },
+    card: {
+      border: '1px solid #e5e7eb',
+      boxShadow:
+        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+    },
+  },
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} appearance={clerkAppearance}>
       <RouterProvider router={router} />
       <SpeedInsights />
       <Analytics />
