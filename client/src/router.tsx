@@ -163,34 +163,38 @@ export const router = createBrowserRouter([
         path: 'about',
         element: <AboutPage />,
       },
-      // Legacy /mindset redirect
+      // Legacy /mindset redirects
       {
         path: 'mindset',
         element: <Navigate to="/about" replace />,
       },
-      // Mindset routes (lazy-loaded)
       {
-        path: 'mindset/historical-mapping',
+        path: 'mindset/*',
+        element: <Navigate to="/about" replace />,
+      },
+      // About routes (lazy-loaded)
+      {
+        path: 'about/historical-mapping',
         element: <Lazy><HistoricalContext /></Lazy>,
       },
       {
-        path: 'mindset/ai-mapping',
+        path: 'about/ai-mapping',
         element: <Lazy><AiMapping /></Lazy>,
       },
       {
-        path: 'mindset/grip-framework',
+        path: 'about/grip-framework',
         element: <Lazy><GripFramework /></Lazy>,
       },
       {
-        path: 'mindset/individual-audit',
+        path: 'about/individual-audit',
         element: <Lazy><IndividualAudit /></Lazy>,
       },
       {
-        path: 'mindset/organisational-audit',
+        path: 'about/organisational-audit',
         element: <Lazy><OrganisationalAudit /></Lazy>,
       },
       {
-        path: 'mindset/ai-misconceptions',
+        path: 'about/ai-misconceptions',
         element: <Lazy><AiMisconceptions /></Lazy>,
       },
       {
@@ -198,68 +202,68 @@ export const router = createBrowserRouter([
         element: <Lazy><GripCompass /></Lazy>,
       },
       {
-        path: 'mindset/grip-compass',
+        path: 'about/grip-compass',
         element: <Navigate to="/tools/grip-compass" replace />,
       },
       {
-        path: 'mindset/grip-limitations',
+        path: 'about/grip-limitations',
         element: <Lazy><GripLimitations /></Lazy>,
       },
       // Case Studies routes
       {
-        path: 'mindset/case-studies',
+        path: 'about/case-studies',
         element: <Lazy><CaseStudiesIndex /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/wei-zhongxian-tianqi',
+        path: 'about/case-studies/wei-zhongxian-tianqi',
         element: <Lazy><WeiZhongxianTianqi /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/sejanus-tiberius',
+        path: 'about/case-studies/sejanus-tiberius',
         element: <Lazy><SejanustTiberius /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/qin-hui-gaozong',
+        path: 'about/case-studies/qin-hui-gaozong',
         element: <Lazy><QinHuiGaozong /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/rasputin-romanovs',
+        path: 'about/case-studies/rasputin-romanovs',
         element: <Lazy><RasputinRomanovs /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/al-mansur-hisham',
+        path: 'about/case-studies/al-mansur-hisham',
         element: <Lazy><AlMansurHisham /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/fouche-napoleon',
+        path: 'about/case-studies/fouche-napoleon',
         element: <Lazy><FoucheNapoleon /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/zhou-mao',
+        path: 'about/case-studies/zhou-mao',
         element: <Lazy><ZhouMao /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/cecil-elizabeth',
+        path: 'about/case-studies/cecil-elizabeth',
         element: <Lazy><CecilElizabeth /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/wei-zheng-taizong',
+        path: 'about/case-studies/wei-zheng-taizong',
         element: <Lazy><WeiZhengTaizong /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/seward-lincoln',
+        path: 'about/case-studies/seward-lincoln',
         element: <Lazy><SewardLincoln /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/lennon-mccartney',
+        path: 'about/case-studies/lennon-mccartney',
         element: <Lazy><LennonMcCartney /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/wozniak-jobs',
+        path: 'about/case-studies/wozniak-jobs',
         element: <Lazy><WozniakJobs /></Lazy>,
       },
       {
-        path: 'mindset/case-studies/aobai-kangxi',
+        path: 'about/case-studies/aobai-kangxi',
         element: <Lazy><AobaiKangxi /></Lazy>,
       },
     ],

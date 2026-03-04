@@ -11,50 +11,50 @@ const mindsetItems: MindsetItem[] = [
   {
     title: 'Historical Context',
     description: 'Twelve historical cases of power asymmetry — generative or parasitic',
-    path: '/mindset/historical-mapping',
+    path: '/about/historical-mapping',
     icon: '🏛️',
   },
   {
     title: 'AI Mapping',
     description: 'Historical patterns mapped onto modern AI collaboration risks',
-    path: '/mindset/ai-mapping',
+    path: '/about/ai-mapping',
     icon: '🗺️',
   },
   {
     title: 'GRIP Framework',
     description: 'Governance, Resilience, Information integrity, Productive friction',
-    path: '/mindset/grip-framework',
+    path: '/about/grip-framework',
     icon: '🧩',
   },
   {
     title: 'Individual Audit',
     description: 'Personal assessment tool for your AI collaboration habits',
-    path: '/mindset/individual-audit',
+    path: '/about/individual-audit',
     icon: '👤',
   },
   {
     title: 'Organisational Audit',
     description: 'Team and organisational assessment for AI integration',
-    path: '/mindset/organisational-audit',
+    path: '/about/organisational-audit',
     icon: '🏢',
   },
   {
     title: 'AI Misconceptions',
     description: 'Common misconceptions about AI in the modern workplace',
-    path: '/mindset/ai-misconceptions',
+    path: '/about/ai-misconceptions',
     icon: '💡',
   },
   {
     title: 'GRIP Limitations',
     description:
       'Known limits, cross-domain analysis, and future research directions for the GRIP framework',
-    path: '/mindset/grip-limitations',
+    path: '/about/grip-limitations',
     icon: '🔬',
   },
   {
     title: 'Case Studies',
     description: '13 historical case studies analysed through the GRIP framework',
-    path: '/mindset/case-studies',
+    path: '/about/case-studies',
     icon: '📚',
   },
 ]

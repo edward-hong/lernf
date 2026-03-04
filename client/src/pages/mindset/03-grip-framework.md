@@ -182,7 +182,7 @@ The following indicators should trigger immediate reassessment, even if your GRI
 
 ---
 
-### The GRIP [organisational audit](http://localhost:5173/mindset/individual-audit)
+### The GRIP [organisational audit](http://localhost:5173/about/individual-audit)
 
 This audit is designed for teams and organisations. It should be completed by a cross-functional group including leadership, operational staff, and IT — not by a single person. Use evidence where possible (documented policies, test results, actual incident data) rather than aspirational self-assessment. Each item is scored on a **5-level maturity scale**.
 
