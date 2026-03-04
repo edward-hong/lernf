@@ -1,12 +1,11 @@
 import { useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth, SignInButton } from '@clerk/clerk-react'
 import { useAuthFetch } from '../hooks/useAuthFetch'
 
 export function PricingPage() {
   const { isSignedIn } = useAuth()
   const { authFetch } = useAuthFetch()
-  const navigate = useNavigate()
   const [seats, setSeats] = useState(5)
   const [loading, setLoading] = useState<string | null>(null)
 
@@ -18,8 +17,7 @@ export function PricingPage() {
           plan === 'individual'
             ? '/stripe/checkout/individual'
             : '/stripe/checkout/team'
-        const body =
-          plan === 'team' ? JSON.stringify({ seats }) : undefined
+        const body = plan === 'team' ? JSON.stringify({ seats }) : undefined
         const response = await authFetch(url, {
           method: 'POST',
           body,
@@ -228,11 +226,7 @@ function Feature({ children }: { children: React.ReactNode }) {
         strokeWidth={2}
         aria-hidden="true"
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M5 13l4 4L19 7"
-        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
       </svg>
       {children}
     </li>
