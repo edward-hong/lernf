@@ -1,4 +1,6 @@
+import { useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuthFetch } from '../hooks/useAuthFetch'
 
 interface Tool {
   title: string
@@ -68,13 +70,38 @@ const tools: Tool[] = [
 ]
 
 export function Dashboard() {
+  const { authFetch } = useAuthFetch()
+  const [portalLoading, setPortalLoading] = useState(false)
+
+  const handleManageSubscription = useCallback(async () => {
+    setPortalLoading(true)
+    try {
+      const response = await authFetch('/stripe/portal', { method: 'POST' })
+      if (!response.ok) throw new Error('Failed to create portal session')
+      const data = await response.json()
+      window.location.href = data.url
+    } catch (err) {
+      console.error('Portal error:', err)
+      setPortalLoading(false)
+    }
+  }, [authFetch])
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-lg text-gray-600">
-          Hands-on practice exercises for AI-era development
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+          <p className="text-lg text-gray-600">
+            Hands-on practice exercises for AI-era development
+          </p>
+        </div>
+        <button
+          onClick={handleManageSubscription}
+          disabled={portalLoading}
+          className="self-start px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60 transition-colors"
+        >
+          {portalLoading ? 'Loading...' : 'Manage Subscription'}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

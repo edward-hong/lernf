@@ -260,6 +260,17 @@ export function Layout() {
                 Settings
               </Link>
 
+              <Link
+                to="/pricing"
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === '/pricing'
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Pricing
+              </Link>
+
               <SignedOut>
                 <SignInButton mode="modal">
                   <button className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
@@ -315,6 +326,17 @@ export function Layout() {
               }`}
             >
               Settings
+            </Link>
+
+            <Link
+              to="/pricing"
+              className={`block px-4 py-3 text-sm font-medium ${
+                location.pathname === '/pricing'
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700'
+              }`}
+            >
+              Pricing
             </Link>
 
             <div className="px-4 py-3 border-t border-gray-100">

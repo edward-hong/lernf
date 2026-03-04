@@ -39,6 +39,9 @@ const GripCompass = lazy(() => import('./pages/mindset/GripCompass').then(m => (
 const GripLimitations = lazy(() => import('./pages/mindset/GripLimitations').then(m => ({ default: m.GripLimitations })))
 const DevilsAdvocate = lazy(() => import('./pages/tools/DevilsAdvocate'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })))
+const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })))
+const CheckoutCancel = lazy(() => import('./pages/CheckoutCancel').then(m => ({ default: m.CheckoutCancel })))
 
 /** Suspense fallback for lazy-loaded routes. */
 function LazyFallback() {
@@ -152,6 +155,19 @@ export const router = createBrowserRouter([
       {
         path: 'scenarios/:scenarioId/results',
         element: <ScenarioRedirect suffix="results" />,
+      },
+      // Pricing & Checkout
+      {
+        path: 'pricing',
+        element: <Lazy><PricingPage /></Lazy>,
+      },
+      {
+        path: 'checkout/success',
+        element: <Lazy><CheckoutSuccess /></Lazy>,
+      },
+      {
+        path: 'checkout/cancel',
+        element: <Lazy><CheckoutCancel /></Lazy>,
       },
       // Settings
       {
