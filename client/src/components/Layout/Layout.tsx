@@ -20,41 +20,6 @@ export function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
 
-  const aboutSection: NavSection = {
-    label: 'About',
-    items: [
-      {
-        path: '/mindset/historical-mapping',
-        label: 'Historical Context',
-      },
-      { path: '/mindset/ai-mapping', label: 'AI Mapping' },
-      {
-        path: '/mindset/grip-framework',
-        label: 'GRIP Framework',
-      },
-      {
-        path: '/mindset/individual-audit',
-        label: 'Individual Audit',
-      },
-      {
-        path: '/mindset/organisational-audit',
-        label: 'Organisational Audit',
-      },
-      {
-        path: '/mindset/ai-misconceptions',
-        label: 'AI Misconceptions',
-      },
-      {
-        path: '/mindset/grip-limitations',
-        label: 'GRIP Limitations',
-      },
-      {
-        path: '/mindset/case-studies',
-        label: 'Case Studies',
-      },
-    ],
-  }
-
   const toolsSection: NavSection = {
     label: 'Tools',
     items: [
@@ -270,7 +235,16 @@ export function Layout() {
                 Home
               </Link>
 
-              {renderDesktopDropdown(aboutSection)}
+              <Link
+                to="/about"
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === '/about' || location.pathname.startsWith('/mindset')
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                About
+              </Link>
               <SignedIn>
                 {renderDesktopDropdown(toolsSection)}
               </SignedIn>
@@ -318,7 +292,16 @@ export function Layout() {
               Home
             </Link>
 
-            {renderMobileSection(aboutSection)}
+            <Link
+              to="/about"
+              className={`block px-4 py-3 text-sm font-medium ${
+                location.pathname === '/about' || location.pathname.startsWith('/mindset')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700'
+              }`}
+            >
+              About
+            </Link>
             <SignedIn>
               {renderMobileSection(toolsSection)}
             </SignedIn>
