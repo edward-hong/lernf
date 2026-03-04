@@ -3,7 +3,7 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, useParams, Navigate } from 'react-router-dom'
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 import { HomePage } from './pages/HomePage'
-import { MindsetPage } from './pages/MindsetPage'
+import { AboutPage } from './pages/AboutPage'
 import { Layout } from './components/Layout/Layout'
 import { ProgressDashboard } from './components/Progress/ProgressDashboard'
 
@@ -158,10 +158,15 @@ export const router = createBrowserRouter([
         path: 'settings',
         element: <Lazy><SettingsPage /></Lazy>,
       },
-      // About index route (formerly Mindset)
+      // About index route
+      {
+        path: 'about',
+        element: <AboutPage />,
+      },
+      // Legacy /mindset redirect
       {
         path: 'mindset',
-        element: <MindsetPage />,
+        element: <Navigate to="/about" replace />,
       },
       // Mindset routes (lazy-loaded)
       {
