@@ -15,7 +15,8 @@
   "description": "",
   "dependencies": {
     "@clerk/backend": "^3.0.1",
-    "encore.dev": "^1.54.2"
+    "encore.dev": "^1.54.2",
+    "stripe": "^20.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.5.7",
