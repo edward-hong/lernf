@@ -238,7 +238,7 @@ export function Layout() {
               <Link
                 to="/about"
                 className={`text-sm font-medium transition-colors ${
-                  location.pathname === '/about' || location.pathname.startsWith('/mindset')
+                  location.pathname.startsWith('/about')
                     ? 'text-blue-600'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
@@ -295,7 +295,7 @@ export function Layout() {
             <Link
               to="/about"
               className={`block px-4 py-3 text-sm font-medium ${
-                location.pathname === '/about' || location.pathname.startsWith('/mindset')
+                location.pathname.startsWith('/about')
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-700'
               }`}

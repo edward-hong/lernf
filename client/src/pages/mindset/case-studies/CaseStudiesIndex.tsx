@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 const caseStudies = [
   {
     id: '01',
-    path: '/mindset/case-studies/wei-zhongxian-tianqi',
+    path: '/about/case-studies/wei-zhongxian-tianqi',
     title: 'Wei Zhongxian & the Tianqi Emperor',
     period: 'Ming Dynasty, 1620–1627',
     pattern: 'Total Displacement',
@@ -16,7 +16,7 @@ const caseStudies = [
   },
   {
     id: '02',
-    path: '/mindset/case-studies/sejanus-tiberius',
+    path: '/about/case-studies/sejanus-tiberius',
     title: 'Sejanus & Tiberius',
     period: 'Roman Empire, 14–31 AD',
     pattern: 'Information Filter',
@@ -29,7 +29,7 @@ const caseStudies = [
   },
   {
     id: '03',
-    path: '/mindset/case-studies/qin-hui-gaozong',
+    path: '/about/case-studies/qin-hui-gaozong',
     title: 'Qin Hui & Emperor Gaozong',
     period: 'Southern Song Dynasty, 1127–1155',
     pattern: 'Insecurity Weaponised',
@@ -42,7 +42,7 @@ const caseStudies = [
   },
   {
     id: '04',
-    path: '/mindset/case-studies/rasputin-romanovs',
+    path: '/about/case-studies/rasputin-romanovs',
     title: 'Rasputin & the Romanovs',
     period: 'Imperial Russia, 1905–1916',
     pattern: 'Emotional Dependency',
@@ -55,7 +55,7 @@ const caseStudies = [
   },
   {
     id: '05',
-    path: '/mindset/case-studies/al-mansur-hisham',
+    path: '/about/case-studies/al-mansur-hisham',
     title: 'Al-Mansur & Caliph Hisham II',
     period: 'Umayyad Caliphate of Córdoba, 976–1002',
     pattern: 'Competent Replacement',
@@ -68,7 +68,7 @@ const caseStudies = [
   },
   {
     id: '06',
-    path: '/mindset/case-studies/fouche-napoleon',
+    path: '/about/case-studies/fouche-napoleon',
     title: 'Fouché & Napoleon',
     period: 'Napoleonic France, 1799–1815',
     pattern: 'Information Monopoly',
@@ -81,7 +81,7 @@ const caseStudies = [
   },
   {
     id: '07a',
-    path: '/mindset/case-studies/zhou-mao',
+    path: '/about/case-studies/zhou-mao',
     title: 'Early Mao-Zhou (1949–1966)',
     period: "People's Republic of China, 1949–1966",
     pattern: 'Sycophancy Equilibrium (Pre-Cultural Revolution)',
@@ -94,7 +94,7 @@ const caseStudies = [
   },
   {
     id: '07b',
-    path: '/mindset/case-studies/zhou-mao',
+    path: '/about/case-studies/zhou-mao',
     title: 'Late Mao-Zhou (1966–1976)',
     period: "People's Republic of China, 1966–1976",
     pattern: 'Institutional Collapse',
@@ -107,7 +107,7 @@ const caseStudies = [
   },
   {
     id: '08',
-    path: '/mindset/case-studies/cecil-elizabeth',
+    path: '/about/case-studies/cecil-elizabeth',
     title: 'Elizabeth I & William Cecil',
     period: 'Elizabethan England, 1558–1598',
     pattern: 'Managed Friction Over Decades',
@@ -120,7 +120,7 @@ const caseStudies = [
   },
   {
     id: '09',
-    path: '/mindset/case-studies/wei-zheng-taizong',
+    path: '/about/case-studies/wei-zheng-taizong',
     title: 'Tang Taizong & Wei Zheng',
     period: 'Tang Dynasty, 626–643',
     pattern: 'Institutionalised Productive Friction',
@@ -133,7 +133,7 @@ const caseStudies = [
   },
   {
     id: '10',
-    path: '/mindset/case-studies/seward-lincoln',
+    path: '/about/case-studies/seward-lincoln',
     title: 'Abraham Lincoln & William Seward',
     period: 'United States, 1861–1865',
     pattern: 'Rivals Converted to Partners',
@@ -146,7 +146,7 @@ const caseStudies = [
   },
   {
     id: '11',
-    path: '/mindset/case-studies/lennon-mccartney',
+    path: '/about/case-studies/lennon-mccartney',
     title: 'John Lennon & Paul McCartney',
     period: 'The Beatles, 1960–1970',
     pattern: 'Lateral Creative Tension',
@@ -159,7 +159,7 @@ const caseStudies = [
   },
   {
     id: '12',
-    path: '/mindset/case-studies/wozniak-jobs',
+    path: '/about/case-studies/wozniak-jobs',
     title: 'Steve Wozniak & Steve Jobs',
     period: 'Apple Inc., 1975–1985',
     pattern: 'Complementary Fusion Deteriorating',
@@ -172,7 +172,7 @@ const caseStudies = [
   },
   {
     id: '13',
-    path: '/mindset/case-studies/aobai-kangxi',
+    path: '/about/case-studies/aobai-kangxi',
     title: 'Kangxi Emperor & Aobai',
     period: 'Qing Dynasty, 1661–1669',
     pattern: 'Recovery from Dependency',

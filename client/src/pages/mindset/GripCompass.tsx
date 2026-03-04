@@ -1490,20 +1490,20 @@ export function GripCompass() {
 // Map case study IDs to their route paths
 function getCaseStudyPath(id: number): string | null {
   const paths: Record<number, string> = {
-    1: '/mindset/case-studies/wei-zhongxian-tianqi',
-    2: '/mindset/case-studies/sejanus-tiberius',
-    3: '/mindset/case-studies/qin-hui-gaozong',
-    4: '/mindset/case-studies/rasputin-romanovs',
-    5: '/mindset/case-studies/al-mansur-hisham',
-    6: '/mindset/case-studies/fouche-napoleon',
-    7: '/mindset/case-studies/zhou-mao',
-    14: '/mindset/case-studies/zhou-mao',
-    8: '/mindset/case-studies/cecil-elizabeth',
-    9: '/mindset/case-studies/wei-zheng-taizong',
-    10: '/mindset/case-studies/seward-lincoln',
-    11: '/mindset/case-studies/lennon-mccartney',
-    12: '/mindset/case-studies/wozniak-jobs',
-    13: '/mindset/case-studies/aobai-kangxi',
+    1: '/about/case-studies/wei-zhongxian-tianqi',
+    2: '/about/case-studies/sejanus-tiberius',
+    3: '/about/case-studies/qin-hui-gaozong',
+    4: '/about/case-studies/rasputin-romanovs',
+    5: '/about/case-studies/al-mansur-hisham',
+    6: '/about/case-studies/fouche-napoleon',
+    7: '/about/case-studies/zhou-mao',
+    14: '/about/case-studies/zhou-mao',
+    8: '/about/case-studies/cecil-elizabeth',
+    9: '/about/case-studies/wei-zheng-taizong',
+    10: '/about/case-studies/seward-lincoln',
+    11: '/about/case-studies/lennon-mccartney',
+    12: '/about/case-studies/wozniak-jobs',
+    13: '/about/case-studies/aobai-kangxi',
   }
   return paths[id] ?? null
 }

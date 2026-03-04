@@ -2,79 +2,79 @@ import { Link } from 'react-router-dom'
 
 const caseStudies = [
   {
-    path: '/mindset/case-studies/wei-zhongxian-tianqi',
+    path: '/about/case-studies/wei-zhongxian-tianqi',
     title: 'Wei Zhongxian & the Tianqi Emperor',
     pattern: 'Total Displacement',
     tag: 'Cognitive Atrophy',
   },
   {
-    path: '/mindset/case-studies/sejanus-tiberius',
+    path: '/about/case-studies/sejanus-tiberius',
     title: 'Sejanus & Tiberius',
     pattern: 'Information Filter',
     tag: 'Information Filtering',
   },
   {
-    path: '/mindset/case-studies/qin-hui-gaozong',
+    path: '/about/case-studies/qin-hui-gaozong',
     title: 'Qin Hui & Emperor Gaozong',
     pattern: 'Insecurity Weaponised',
     tag: 'Fear Exploitation',
   },
   {
-    path: '/mindset/case-studies/rasputin-romanovs',
+    path: '/about/case-studies/rasputin-romanovs',
     title: 'Rasputin & the Romanovs',
     pattern: 'Emotional Dependency',
     tag: 'Emotional Capture',
   },
   {
-    path: '/mindset/case-studies/al-mansur-hisham',
+    path: '/about/case-studies/al-mansur-hisham',
     title: 'Al-Mansur & Caliph Hisham II',
     pattern: 'Competent Replacement',
     tag: 'Capability Atrophy',
   },
   {
-    path: '/mindset/case-studies/fouche-napoleon',
+    path: '/about/case-studies/fouche-napoleon',
     title: 'Fouché & Napoleon',
     pattern: 'Information Monopoly',
     tag: 'Structural Dependency',
   },
   {
-    path: '/mindset/case-studies/zhou-mao',
+    path: '/about/case-studies/zhou-mao',
     title: 'Mao & Zhou Enlai',
     pattern: 'Sycophancy to Collapse',
     tag: 'Deterioration Arc',
   },
   {
-    path: '/mindset/case-studies/cecil-elizabeth',
+    path: '/about/case-studies/cecil-elizabeth',
     title: 'Elizabeth I & William Cecil',
     pattern: 'Managed Friction Over Decades',
     tag: 'Gold Standard',
   },
   {
-    path: '/mindset/case-studies/wei-zheng-taizong',
+    path: '/about/case-studies/wei-zheng-taizong',
     title: 'Tang Taizong & Wei Zheng',
     pattern: 'Institutionalised Productive Friction',
     tag: 'Institutionalised Dissent',
   },
   {
-    path: '/mindset/case-studies/seward-lincoln',
+    path: '/about/case-studies/seward-lincoln',
     title: 'Abraham Lincoln & William Seward',
     pattern: 'Rivals Converted to Partners',
     tag: 'Productive Onboarding',
   },
   {
-    path: '/mindset/case-studies/lennon-mccartney',
+    path: '/about/case-studies/lennon-mccartney',
     title: 'John Lennon & Paul McCartney',
     pattern: 'Lateral Creative Tension',
     tag: 'Creative Complementarity',
   },
   {
-    path: '/mindset/case-studies/wozniak-jobs',
+    path: '/about/case-studies/wozniak-jobs',
     title: 'Steve Wozniak & Steve Jobs',
     pattern: 'Complementary Fusion Deteriorating',
     tag: 'Structural Extraction',
   },
   {
-    path: '/mindset/case-studies/aobai-kangxi',
+    path: '/about/case-studies/aobai-kangxi',
     title: 'Kangxi Emperor & Aobai',
     pattern: 'Recovery from Dependency',
     tag: 'Recovery Arc',
@@ -151,7 +151,7 @@ export function AboutPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Link
-            to="/mindset/historical-mapping"
+            to="/about/historical-mapping"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="flex-1">
@@ -167,7 +167,7 @@ export function AboutPage() {
           </Link>
 
           <Link
-            to="/mindset/ai-mapping"
+            to="/about/ai-mapping"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="flex-1">
@@ -183,7 +183,7 @@ export function AboutPage() {
           </Link>
 
           <Link
-            to="/mindset/grip-framework"
+            to="/about/grip-framework"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="flex-1">
@@ -199,7 +199,7 @@ export function AboutPage() {
           </Link>
 
           <Link
-            to="/mindset/grip-limitations"
+            to="/about/grip-limitations"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="flex-1">
@@ -223,7 +223,7 @@ export function AboutPage() {
             Case Studies
           </h2>
           <Link
-            to="/mindset/case-studies"
+            to="/about/case-studies"
             className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
             View all with full summaries &rarr;
@@ -260,7 +260,7 @@ export function AboutPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Link
-            to="/mindset/individual-audit"
+            to="/about/individual-audit"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
@@ -281,7 +281,7 @@ export function AboutPage() {
           </Link>
 
           <Link
-            to="/mindset/organisational-audit"
+            to="/about/organisational-audit"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
@@ -310,7 +310,7 @@ export function AboutPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Link
-            to="/mindset/ai-misconceptions"
+            to="/about/ai-misconceptions"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="flex-1">
@@ -326,7 +326,7 @@ export function AboutPage() {
           </Link>
 
           <Link
-            to="/mindset/case-studies"
+            to="/about/case-studies"
             className="group flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
           >
             <div className="flex-1">
