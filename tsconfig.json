@@ -16,6 +16,12 @@
       "~encore/*": ["./encore.gen/*"]
     }
   },
-  "include": ["auth/**/*.ts", "backend/**/*.ts", "user/**/*.ts", "stripe/**/*.ts", "encore.gen/**/*.ts"],
-  "exclude": ["node_modules", "client"]
+  "include": [
+    "auth/**/*.ts",
+    "backend/**/*.ts",
+    "user/**/*.ts",
+    "stripe/**/*.ts",
+    "encore.gen/**/*.ts"
+  ],
+  "exclude": ["node_modules", "frontend"]
 }
