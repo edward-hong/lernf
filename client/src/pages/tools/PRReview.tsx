@@ -43,7 +43,7 @@ const PRReview: React.FC = () => {
 
       const scenario = response.data.scenario
 
-      // Convert new backend format to expected frontend format
+      // Convert new backend format to expected client format
       if (scenario.code && !scenario.diff) {
         console.log('Converting new format to old format...')
 

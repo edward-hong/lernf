@@ -5,7 +5,7 @@
 // source — encodes the full scoring rubric, historical spectrum, and all
 // the AI instructions needed to produce a structured evaluation.
 //
-// The frontend sends pre-formatted data strings (conversation history,
+// The client sends pre-formatted data strings (conversation history,
 // signals summary, etc.) and the backend wraps them in the GRIP template.
 // ---------------------------------------------------------------------------
 

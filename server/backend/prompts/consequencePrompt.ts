@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 // Builds the consequence generation prompt that instructs the AI to generate
 // realistic, GRIP-connected downstream consequences. This is the authoritative
-// source — the frontend sends pre-formatted data and the backend constructs
+// source — the client sends pre-formatted data and the backend constructs
 // the full prompt with tone/style guidance and GRIP score connections.
 // ---------------------------------------------------------------------------
 

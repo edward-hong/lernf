@@ -17,7 +17,7 @@ import {
   type UserIntentScores,
   type PatternAnalysis
 } from './prompts/userIntentPrompt'
-import { detectFrontendPrompts } from './middleware/promptValidation'
+import { detectClientPrompts } from './middleware/promptValidation'
 import {
   categorizeNPCResponse,
   isProblematicResponse,
@@ -280,8 +280,8 @@ interface NpcDialogueResponse {
 export const npcDialogue = api(
   { method: 'POST', path: '/api/npc-dialogue', expose: true },
   async (req: NpcDialogueRequest): Promise<NpcDialogueResponse> => {
-    // Detect if frontend sent a pre-built prompt (old behavior)
-    detectFrontendPrompts('npcDialogue', req as unknown as Record<string, unknown>)
+    // Detect if client sent a pre-built prompt (old behavior)
+    detectClientPrompts('npcDialogue', req as unknown as Record<string, unknown>)
 
     if (!req.npcName || !req.persona || !req.scenarioContext || !req.messages || !Array.isArray(req.messages)) {
       throw new APIError(
@@ -1178,7 +1178,7 @@ ${advocates.map(a => `- ${a.id} (${a.lens})`).join('\n')}
 
 // ---- AI Provider Proxy Endpoints -------------------------------------------
 // These endpoints proxy requests to external AI APIs to avoid browser CORS
-// restrictions. The frontend sends the API key and request body; the backend
+// restrictions. The client sends the API key and request body; the backend
 // forwards the request server-side and returns the raw API response.
 
 interface ProxyClaudeRequest {

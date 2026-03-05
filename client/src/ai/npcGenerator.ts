@@ -2,7 +2,7 @@
 // NPC Dialogue Generation System
 // ---------------------------------------------------------------------------
 // Generates in-character NPC responses by calling the backend /api/npc-dialogue
-// endpoint, which builds the system prompt internally. The frontend sends
+// endpoint, which builds the system prompt internally. The client sends
 // structured persona data and conversation history — no prompt building here.
 // ---------------------------------------------------------------------------
 

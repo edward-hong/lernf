@@ -53,12 +53,12 @@ Deployment successful!
   URL: https://production-lernf-xxxxx.encr.app
 ```
 
-Copy this URL - you'll need it for frontend configuration.
+Copy this URL - you'll need it for client configuration.
 
-### 5. Configure Frontend Environment
+### 5. Configure Client Environment
 
 ```bash
-cd frontend
+cd client
 
 # Create production environment file
 echo "VITE_API_URL=https://production-lernf-xxxxx.encr.app" > .env.production
@@ -66,10 +66,10 @@ echo "VITE_API_URL=https://production-lernf-xxxxx.encr.app" > .env.production
 # Replace xxxxx with your actual Encore Cloud URL from step 4
 ```
 
-### 6. Deploy Frontend (First Time)
+### 6. Deploy Client (First Time)
 
 ```bash
-cd frontend
+cd client
 vercel --prod
 ```
 
@@ -121,10 +121,10 @@ npm run deploy:production
 # or: encore cloud deploy --env production
 ```
 
-### Deploy Frontend Updates
+### Deploy Client Updates
 
 ```bash
-cd frontend
+cd client
 npm run deploy:production
 # or: vercel --prod
 ```
@@ -138,10 +138,10 @@ npm run deploy:preview
 # or: encore cloud deploy --env preview
 ```
 
-### Frontend Preview
+### Client Preview
 
 ```bash
-cd frontend
+cd client
 npm run deploy:preview
 # Creates preview deployment automatically
 ```
@@ -163,7 +163,7 @@ encore secret set --env production SECRET_NAME
 encore secret set --env production DeepseekApiKey
 ```
 
-### Frontend (Vercel)
+### Client (Vercel)
 
 Managed via Vercel CLI or dashboard:
 
@@ -194,7 +194,7 @@ encore logs --env production
 encore logs --env production --endpoint chat
 ```
 
-### Frontend (Vercel)
+### Client (Vercel)
 
 ```bash
 # View deployment logs
@@ -217,7 +217,7 @@ encore cloud deployments --env production
 encore cloud rollback --env production --deployment [deployment-id]
 ```
 
-### Frontend
+### Client
 
 Vercel keeps all deployments:
 
@@ -231,7 +231,7 @@ Vercel keeps all deployments:
 
 ### CORS Errors
 
-**Symptom:** Frontend can't reach backend, CORS errors in console
+**Symptom:** Client can't reach backend, CORS errors in console
 
 **Solution:**
 
@@ -251,7 +251,7 @@ Vercel keeps all deployments:
 
 ### Environment Variables Not Working
 
-**Symptom:** Frontend shows `undefined` for env vars
+**Symptom:** Client shows `undefined` for env vars
 
 **Solution:**
 
@@ -269,7 +269,7 @@ Custom domains managed in Encore Cloud dashboard:
 2. Add custom domain (e.g., `api.lernf.com`)
 3. Update DNS records as instructed
 
-#### Frontend (Vercel)
+#### Client (Vercel)
 
 ```bash
 vercel domains add lernf.com

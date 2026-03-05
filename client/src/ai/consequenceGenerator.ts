@@ -243,7 +243,7 @@ function buildFallbackConsequence(
 
 /**
  * Calls the backend /api/generate-consequence endpoint which builds the
- * consequence prompt internally. Frontend sends structured data.
+ * consequence prompt internally. Client sends structured data.
  * Returns the parsed raw response or null on failure.
  */
 async function callConsequenceAPI(

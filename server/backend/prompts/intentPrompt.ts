@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 // Builds the prompt for analyzing behavioral intent of an AI assistant's
 // response across 6 dimensions. This is the authoritative source —
-// the frontend sends only the message to analyze.
+// the client sends only the message to analyze.
 // ---------------------------------------------------------------------------
 
 /**

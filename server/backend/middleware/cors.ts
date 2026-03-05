@@ -1,5 +1,5 @@
 /**
- * CORS configuration for cross-origin requests from the Vercel frontend.
+ * CORS configuration for cross-origin requests from the Vercel client.
  *
  * NOTE: In Encore.ts, CORS is primarily handled via the `global_cors`
  * field in `encore.app` at the project root. This module exports the
