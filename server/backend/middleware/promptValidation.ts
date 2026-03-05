@@ -1,9 +1,9 @@
 /**
- * Middleware to detect if frontend is still sending pre-built prompts
+ * Middleware to detect if client is still sending pre-built prompts
  * (which we want to prevent — prompts should be built in backend)
  */
 
-export function detectFrontendPrompts(endpoint: string, requestBody: Record<string, unknown>): void {
+export function detectClientPrompts(endpoint: string, requestBody: Record<string, unknown>): void {
   const suspiciousFields = ['systemPrompt', 'fullPrompt']
 
   for (const field of suspiciousFields) {

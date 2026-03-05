@@ -344,7 +344,7 @@ function scoresAreConsistent(
 
 /**
  * Calls the backend /api/evaluate-grip endpoint which builds the GRIP
- * evaluation prompt internally. Frontend sends structured data (scenario info,
+ * evaluation prompt internally. Client sends structured data (scenario info,
  * formatted strings) and receives the raw evaluation result.
  */
 async function callGripAPI(

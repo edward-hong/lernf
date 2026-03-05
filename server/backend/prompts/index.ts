@@ -1,8 +1,8 @@
 /**
  * Central registry of all AI prompts used in the application.
- * All prompt engineering should happen in the backend, not frontend.
+ * All prompt engineering should happen in the backend, not client.
  *
- * Frontend sends structured data; backend constructs all prompts.
+ * Client sends structured data; backend constructs all prompts.
  */
 
 export { buildNpcSystemPrompt, encodeBehaviorTraits } from './npcPrompt'

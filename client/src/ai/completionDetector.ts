@@ -114,7 +114,7 @@ function buildCompletionSignals(definition: ScenarioDefinition): string {
 
 /**
  * Calls the backend /api/evaluate-completion endpoint which builds the
- * completion prompt internally. Frontend sends structured scenario data.
+ * completion prompt internally. Client sends structured scenario data.
  * Returns null on failure (the caller should treat this as "not complete").
  */
 async function callCompletionAPI(

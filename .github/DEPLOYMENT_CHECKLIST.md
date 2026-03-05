@@ -4,13 +4,13 @@
 
 - [ ] All tests passing (`encore test`)
 - [ ] Secrets set in production environment
-- [ ] CORS configured with production frontend URL
+- [ ] CORS configured with production client URL
 - [ ] Health endpoint returns 200 OK
 - [ ] No hardcoded secrets in code
 - [ ] Error logging configured
 - [ ] Rate limiting configured (if needed)
 
-## Frontend (Vercel)
+## Client (Vercel)
 
 - [ ] Build succeeds locally (`npm run build`)
 - [ ] Environment variables set in Vercel
@@ -21,9 +21,9 @@
 
 ## Integration
 
-- [ ] Backend health check accessible from frontend
+- [ ] Backend health check accessible from client
 - [ ] CORS working (no errors in browser console)
-- [ ] API calls succeed from production frontend
+- [ ] API calls succeed from production client
 - [ ] AI provider settings work
 - [ ] Scenario library loads
 - [ ] Live chat works

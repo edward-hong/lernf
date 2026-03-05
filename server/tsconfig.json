@@ -23,5 +23,5 @@
     "stripe/**/*.ts",
     "encore.gen/**/*.ts"
   ],
-  "exclude": ["node_modules", "frontend"]
+  "exclude": ["node_modules", "client"]
 }

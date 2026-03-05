@@ -2,11 +2,11 @@
 // NPC System Prompt Builder (Backend)
 // ---------------------------------------------------------------------------
 // Builds persona-encoded system prompts for NPC dialogue. This is the
-// authoritative source of NPC prompt engineering — the frontend sends
+// authoritative source of NPC prompt engineering — the client sends
 // structured persona data and the backend constructs the full prompt.
 // ---------------------------------------------------------------------------
 
-// ---- Types (mirrored from frontend scenario types) -------------------------
+// ---- Types (mirrored from client scenario types) -------------------------
 
 export interface BehaviorParameters {
   agreeability: number
