@@ -249,16 +249,18 @@ export function Layout() {
                 {renderDesktopDropdown(toolsSection)}
               </SignedIn>
 
-              <Link
-                to="/settings"
-                className={`text-sm font-medium transition-colors ${
-                  location.pathname === '/settings'
-                    ? 'text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Settings
-              </Link>
+              <SignedIn>
+                <Link
+                  to="/settings"
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === '/settings'
+                      ? 'text-blue-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Settings
+                </Link>
+              </SignedIn>
 
               <Link
                 to="/pricing"
@@ -317,16 +319,18 @@ export function Layout() {
               {renderMobileSection(toolsSection)}
             </SignedIn>
 
-            <Link
-              to="/settings"
-              className={`block px-4 py-3 text-sm font-medium border-t border-gray-100 ${
-                location.pathname === '/settings'
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-700'
-              }`}
-            >
-              Settings
-            </Link>
+            <SignedIn>
+              <Link
+                to="/settings"
+                className={`block px-4 py-3 text-sm font-medium border-t border-gray-100 ${
+                  location.pathname === '/settings'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700'
+                }`}
+              >
+                Settings
+              </Link>
+            </SignedIn>
 
             <Link
               to="/pricing"
