@@ -2,11 +2,11 @@ node_modules
 .env
 .env.local
 .env.*.local
-encore.gen
 .secrets.local.cue
 encore.gen.go
 encore.gen.cue
 /.encore
-/encore.gen
 dist/
 *.tsbuildinfo
+server/encore.gen
+server/.encore
