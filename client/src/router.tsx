@@ -42,6 +42,8 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ defa
 const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })))
 const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })))
 const CheckoutCancel = lazy(() => import('./pages/CheckoutCancel').then(m => ({ default: m.CheckoutCancel })))
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })))
 
 /** Suspense fallback for lazy-loaded routes. */
 function LazyFallback() {
@@ -168,6 +170,15 @@ export const router = createBrowserRouter([
       {
         path: 'checkout/cancel',
         element: <Lazy><CheckoutCancel /></Lazy>,
+      },
+      // Legal
+      {
+        path: 'terms',
+        element: <Lazy><TermsPage /></Lazy>,
+      },
+      {
+        path: 'privacy',
+        element: <Lazy><PrivacyPolicyPage /></Lazy>,
       },
       // Settings
       {
