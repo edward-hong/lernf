@@ -141,13 +141,15 @@ export function PricingPage() {
               <span className="text-4xl font-bold text-gray-900">$15</span>
               <span className="text-gray-500">/seat/month</span>
             </div>
+            <span className="inline-block mt-2 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-0.5">
+              Save 25% per seat vs. Individual
+            </span>
           </div>
 
           <ul className="space-y-3 mb-6 flex-1">
             <Feature>All individual features</Feature>
-            <Feature>Team dashboard</Feature>
-            <Feature>Shared scenario library</Feature>
-            <Feature>GRIP assessments for teams</Feature>
+            <Feature>Manage team seats from one subscription</Feature>
+            <Feature>Priority support</Feature>
           </ul>
 
           {/* Seat selector */}
