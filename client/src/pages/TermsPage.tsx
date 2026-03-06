@@ -1,14 +1,6 @@
 export function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      {/* Disclaimer banner */}
-      <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-sm text-amber-800">
-          This document is a draft and has not been reviewed by a legal
-          professional.
-        </p>
-      </div>
-
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
         Terms of Use
       </h1>

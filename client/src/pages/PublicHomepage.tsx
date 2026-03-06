@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { SignInButton } from '@clerk/clerk-react'
 
 const features = [
@@ -80,6 +81,17 @@ export function PublicHomepage() {
               Learn More
             </a>
           </div>
+          <p className="text-xs text-gray-400 mt-4">
+            By signing up, you agree to our{' '}
+            <Link to="/terms" className="text-gray-500 hover:underline">
+              Terms of Use
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="text-gray-500 hover:underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
@@ -153,6 +165,17 @@ export function PublicHomepage() {
               Get Started
             </button>
           </SignInButton>
+          <p className="text-xs text-gray-400 mt-4">
+            By signing up, you agree to our{' '}
+            <Link to="/terms" className="text-gray-500 hover:underline">
+              Terms of Use
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="text-gray-500 hover:underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
       </section>
     </div>
