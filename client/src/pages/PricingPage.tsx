@@ -211,6 +211,19 @@ export function PricingPage() {
           )}
         </div>
       </div>
+
+      {/* Legal disclaimer */}
+      <p className="text-center text-xs text-gray-500 mt-8">
+        By subscribing, you agree to our{' '}
+        <Link to="/terms" className="text-blue-600 hover:underline">
+          Terms of Use
+        </Link>{' '}
+        and{' '}
+        <Link to="/privacy" className="text-blue-600 hover:underline">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 // src/components/Layout.tsx
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Footer } from '../Footer/Footer'
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 
 interface DropdownItem {
@@ -173,7 +174,7 @@ export function Layout() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
@@ -359,9 +360,11 @@ export function Layout() {
         )}
       </header>
 
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   )
 }
