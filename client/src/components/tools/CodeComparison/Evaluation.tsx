@@ -1,4 +1,4 @@
-import ReactMarkdown from 'react-markdown'
+import { MarkdownRenderer } from '../../MarkdownRenderer'
 
 interface EvaluationProps {
   evaluation: string
@@ -12,7 +12,7 @@ function Evaluation({ evaluation, onReset }: EvaluationProps) {
 
       <div className="my-5">
         <div className="bg-gray-50 py-5 px-[60px] rounded-lg border-l-4 border-blue-500 leading-[1.8] whitespace-pre-wrap text-gray-700">
-          <ReactMarkdown>{evaluation}</ReactMarkdown>
+          <MarkdownRenderer content={evaluation} />
         </div>
       </div>
 

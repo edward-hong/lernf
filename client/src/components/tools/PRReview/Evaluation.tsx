@@ -1,5 +1,6 @@
 import React from 'react'
 import type { EvaluationResult, Issue, PRScenario } from '../../../types/pr'
+import { MarkdownRenderer } from '../../MarkdownRenderer'
 
 interface Props {
   evaluation: EvaluationResult
@@ -57,11 +58,12 @@ const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
               <h4 className="m-0 mb-2 text-gray-800 text-base">
                 {issue.title}
               </h4>
-              <p className="m-0 mb-3 text-gray-600 leading-[1.6]">
-                {issue.explanation}
-              </p>
+              <div className="m-0 mb-3 text-gray-600 leading-[1.6]">
+                <MarkdownRenderer content={issue.explanation} />
+              </div>
               <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
-                <strong className="text-gray-800">Fix:</strong> {issue.fix}
+                <strong className="text-gray-800">Fix:</strong>{' '}
+                <MarkdownRenderer content={issue.fix} className="inline" />
               </div>
             </div>
           ))}
@@ -89,11 +91,12 @@ const Evaluation: React.FC<Props> = ({ evaluation, onReset }) => {
               <h4 className="m-0 mb-2 text-gray-800 text-base">
                 {issue.title}
               </h4>
-              <p className="m-0 mb-3 text-gray-600 leading-[1.6]">
-                {issue.explanation}
-              </p>
+              <div className="m-0 mb-3 text-gray-600 leading-[1.6]">
+                <MarkdownRenderer content={issue.explanation} />
+              </div>
               <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
-                <strong className="text-gray-800">Fix:</strong> {issue.fix}
+                <strong className="text-gray-800">Fix:</strong>{' '}
+                <MarkdownRenderer content={issue.fix} className="inline" />
               </div>
             </div>
           ))}

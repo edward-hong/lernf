@@ -1,11 +1,11 @@
 import { memo } from 'react'
-import ReactMarkdown from 'react-markdown'
 import type {
   ScenarioMessage,
   ScenarioColorConfig,
   ColorClasses,
 } from '../../../types/scenario'
 import { getPersonaColors } from '../../../utils/colors'
+import { MarkdownRenderer } from '../../MarkdownRenderer'
 
 interface MessageBubbleProps {
   message: ScenarioMessage
@@ -60,9 +60,9 @@ function MessageBubbleInner({ message, colors }: MessageBubbleProps) {
           className={`w-full rounded-lg px-3 sm:px-4 py-3 text-sm ${messageColors.bg} ${messageColors.label}`}
         >
           <span className="sr-only">System message: </span>
-          <p className="whitespace-pre-wrap">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
-          </p>
+          <div className="whitespace-pre-wrap">
+            <MarkdownRenderer content={message.content} />
+          </div>
         </div>
       </div>
     )
@@ -93,9 +93,15 @@ function MessageBubbleInner({ message, colors }: MessageBubbleProps) {
           )}
 
           {/* Content */}
-          <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
+          {isUser ? (
+            <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
+          ) : (
+            <div className="text-sm text-gray-800 break-words">
+              <MarkdownRenderer content={message.content} />
+            </div>
+          )}
 
           {/* Actions */}
           {message.actions.length > 0 && (

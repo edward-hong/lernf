@@ -17,6 +17,7 @@ import { intentToColor, getIntentLabel } from '../../utils/colorBlending'
 import { smoothIntent } from '../../utils/intentSmoothing'
 import { INTENT_COLOR_ANCHORS } from '../../constants/intentColors'
 import type { IntentVector } from '../../types/intent'
+import { MarkdownRenderer } from '../MarkdownRenderer'
 
 export function LiveChat() {
   const {
@@ -199,9 +200,9 @@ export function LiveChat() {
                           </div>
 
                           {/* Message content */}
-                          <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap break-words">
-                            {message.content}
-                          </p>
+                          <div className="mt-1 text-sm text-gray-800 break-words">
+                            <MarkdownRenderer content={message.content} />
+                          </div>
 
                           {/* Intent tooltip */}
                           {!isAnalyzing &&

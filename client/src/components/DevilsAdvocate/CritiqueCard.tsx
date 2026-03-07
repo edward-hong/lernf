@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import type { Critique, Advocate } from '../../types/advocate'
+import { MarkdownRenderer } from '../MarkdownRenderer'
 
 interface CritiqueCardProps {
   critique: Critique
@@ -31,7 +32,7 @@ const CritiqueCard: React.FC<CritiqueCardProps> = ({ critique, advocate }) => {
 
       <div className="prose prose-sm max-w-none">
         {expanded || !needsExpand ? (
-          <p className="whitespace-pre-wrap">{critique.content}</p>
+          <MarkdownRenderer content={critique.content} />
         ) : (
           <>
             <p>{preview}...</p>
