@@ -12,8 +12,7 @@ import {
   EvaluationSpinner,
   InlineError,
 } from '../../components/tools/Scenario/LoadingStates'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { MarkdownRenderer } from '../../components/MarkdownRenderer'
 import { ErrorBoundary } from '../../components/ErrorHandling/ErrorBoundary'
 import {
   evaluateCompletion,
@@ -314,21 +313,8 @@ function ScenarioPlayerInner({ scenarioId }: ScenarioPlayerProps) {
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
             Scenario Briefing
           </h2>
-          <div
-            className="prose prose-sm max-w-none text-gray-700
-            [&_p]:mb-3 [&_p]:leading-relaxed
-            [&_strong]:font-semibold [&_strong]:text-gray-900
-            [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
-            [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3
-            [&_li]:mb-1 [&_li]:leading-relaxed
-            [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-3
-            [&_code]:bg-gray-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
-            [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-4 [&_h3]:mb-2
-          "
-          >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {scenario.definition.setupContext}
-            </ReactMarkdown>
+          <div className="prose prose-sm max-w-none text-gray-700">
+            <MarkdownRenderer content={scenario.definition.setupContext} />
           </div>
         </div>
 

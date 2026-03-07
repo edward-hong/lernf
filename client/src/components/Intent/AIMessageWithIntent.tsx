@@ -16,6 +16,7 @@ import { smoothIntent } from '../../utils/intentSmoothing'
 import { getPersonaColors } from '../../utils/colors'
 import { IntentTooltip } from './IntentTooltip'
 import { ProviderIndicator } from '../Provider/ProviderIndicator'
+import { MarkdownRenderer } from '../MarkdownRenderer'
 
 interface AIMessageWithIntentProps {
   message: ScenarioMessage
@@ -88,9 +89,9 @@ function AIMessageWithIntentInner({
             >
               {message.speakerName}
             </span>
-            <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-              {message.content}
-            </p>
+            <div className="text-sm text-gray-800 break-words">
+              <MarkdownRenderer content={message.content} />
+            </div>
             {message.actions.length > 0 && (
               <div className="mt-2 space-y-1">
                 {message.actions.map((action, idx) => (
@@ -172,9 +173,9 @@ function AIMessageWithIntentInner({
           </div>
 
           {/* Message content */}
-          <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
+          <div className="mt-1 text-sm text-gray-800 break-words">
+            <MarkdownRenderer content={message.content} />
+          </div>
 
           {/* Actions */}
           {message.actions.length > 0 && (
