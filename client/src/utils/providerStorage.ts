@@ -2,7 +2,7 @@ import type {
   AIProviderSettings,
   ProviderConfig,
 } from '../types/aiProvider';
-import { obfuscate, deobfuscate } from './encryption';
+import { encrypt, decrypt, obfuscate, deobfuscate } from './encryption';
 
 const STORAGE_KEY = 'lernf-ai-provider-settings';
 const STORAGE_VERSION = 1;
@@ -33,14 +33,50 @@ export function getDefaultSettings(): AIProviderSettings {
 
 /**
  * Saves AI provider settings to localStorage.
- * Encrypts API keys before storing.
+ * Encrypts API keys with AES-GCM before storing.
  *
  * @param settings - Settings to save
  * @returns Whether save was successful
  */
-export function saveProviderSettings(settings: AIProviderSettings): boolean {
+export async function saveProviderSettings(settings: AIProviderSettings): Promise<boolean> {
   try {
-    // Create a copy with encrypted API keys
+    // Encrypt each API key with AES-GCM
+    const encryptedProviders: AIProviderSettings['providers'] = {};
+
+    for (const [key, config] of Object.entries(settings.providers)) {
+      if (config) {
+        encryptedProviders[key as keyof typeof encryptedProviders] = {
+          ...config,
+          apiKey: await encrypt(config.apiKey),
+        } as ProviderConfig;
+      }
+    }
+
+    const encryptedSettings: AIProviderSettings = {
+      ...settings,
+      providers: encryptedProviders,
+      lastUpdated: new Date(),
+    };
+
+    const toStore: StoredSettings = {
+      version: STORAGE_VERSION,
+      settings: encryptedSettings,
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    return true;
+  } catch (error) {
+    console.error('Failed to save provider settings:', error);
+    return false;
+  }
+}
+
+/**
+ * Synchronous save using legacy XOR obfuscation.
+ * Used only where async is not possible (e.g. debounced auto-save).
+ */
+export function saveProviderSettingsSync(settings: AIProviderSettings): boolean {
+  try {
     const encryptedSettings: AIProviderSettings = {
       ...settings,
       providers: Object.entries(settings.providers).reduce(
@@ -64,6 +100,10 @@ export function saveProviderSettings(settings: AIProviderSettings): boolean {
     };
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+
+    // Kick off an async re-encrypt with AES-GCM in the background
+    saveProviderSettings(settings).catch(() => {});
+
     return true;
   } catch (error) {
     console.error('Failed to save provider settings:', error);
@@ -73,9 +113,54 @@ export function saveProviderSettings(settings: AIProviderSettings): boolean {
 
 /**
  * Loads AI provider settings from localStorage.
- * Decrypts API keys after loading.
+ * Decrypts API keys after loading (supports both v2 AES-GCM and legacy XOR).
  *
  * @returns Loaded settings, or default settings if none exist
+ */
+export async function loadProviderSettingsAsync(): Promise<AIProviderSettings> {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+
+    if (!stored) {
+      return getDefaultSettings();
+    }
+
+    const parsed: StoredSettings = JSON.parse(stored);
+
+    if (parsed.version !== STORAGE_VERSION) {
+      console.warn('Settings version mismatch, using defaults');
+      return getDefaultSettings();
+    }
+
+    // Decrypt API keys (handles both v2 AES-GCM and legacy XOR)
+    const decryptedProviders: AIProviderSettings['providers'] = {};
+
+    for (const [key, config] of Object.entries(parsed.settings.providers)) {
+      if (config) {
+        decryptedProviders[key as keyof typeof decryptedProviders] = {
+          ...config,
+          apiKey: await decrypt(config.apiKey),
+          lastValidated: config.lastValidated
+            ? new Date(config.lastValidated)
+            : undefined,
+        } as ProviderConfig;
+      }
+    }
+
+    return {
+      ...parsed.settings,
+      providers: decryptedProviders,
+      lastUpdated: new Date(parsed.settings.lastUpdated),
+    };
+  } catch (error) {
+    console.error('Failed to load provider settings:', error);
+    return getDefaultSettings();
+  }
+}
+
+/**
+ * Synchronous load using legacy XOR deobfuscation.
+ * Kept for backward compatibility where async is not feasible.
  */
 export function loadProviderSettings(): AIProviderSettings {
   try {
@@ -87,13 +172,11 @@ export function loadProviderSettings(): AIProviderSettings {
 
     const parsed: StoredSettings = JSON.parse(stored);
 
-    // Version migration logic (if needed in future)
     if (parsed.version !== STORAGE_VERSION) {
       console.warn('Settings version mismatch, using defaults');
       return getDefaultSettings();
     }
 
-    // Decrypt API keys
     const decryptedSettings: AIProviderSettings = {
       ...parsed.settings,
       providers: Object.entries(parsed.settings.providers).reduce(
@@ -102,7 +185,6 @@ export function loadProviderSettings(): AIProviderSettings {
             acc[key as keyof typeof acc] = {
               ...config,
               apiKey: deobfuscate(config.apiKey),
-              // Convert string dates back to Date objects
               lastValidated: config.lastValidated
                 ? new Date(config.lastValidated)
                 : undefined,
@@ -166,7 +248,7 @@ export function updateProviderConfig(
       delete settings.providers[providerId];
     }
 
-    return saveProviderSettings(settings);
+    return saveProviderSettingsSync(settings);
   } catch (error) {
     console.error('Failed to update provider config:', error);
     return false;
@@ -185,7 +267,7 @@ export function updatePrimaryProvider(
   try {
     const settings = loadProviderSettings();
     settings.primaryProvider = providerId;
-    return saveProviderSettings(settings);
+    return saveProviderSettingsSync(settings);
   } catch (error) {
     console.error('Failed to update primary provider:', error);
     return false;
@@ -204,7 +286,7 @@ export function updateBackupProviders(
   try {
     const settings = loadProviderSettings();
     settings.backupProviders = backups;
-    return saveProviderSettings(settings);
+    return saveProviderSettingsSync(settings);
   } catch (error) {
     console.error('Failed to update backup providers:', error);
     return false;

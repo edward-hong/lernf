@@ -25,6 +25,24 @@ export function getErrorMessage(error: AIProviderError): {
         canRetry: true,
       };
 
+    case 'billing':
+      return {
+        title: 'Insufficient Credits',
+        message: `Your ${error.provider} account has insufficient credits.`,
+        action:
+          'Top up your account balance with the provider and try again.',
+        canRetry: false,
+      };
+
+    case 'provider_error':
+      return {
+        title: 'Provider Issue',
+        message: `${error.provider} is experiencing issues. This is not a Lernf problem.`,
+        action:
+          'Try again shortly, or switch to a different provider in Settings.',
+        canRetry: true,
+      };
+
     case 'network':
       return {
         title: 'Network Error',

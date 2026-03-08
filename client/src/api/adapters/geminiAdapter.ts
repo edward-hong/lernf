@@ -1,5 +1,6 @@
 import type { ProviderConfig } from '../../types/aiProvider';
 import type { AIRequest, AIResponse, AIProviderError } from '../../types/aiRequest';
+import { parseProxyError } from './proxyErrorParser';
 
 /**
  * Calls Google Gemini API with the given request.
@@ -90,6 +91,10 @@ async function handleGeminiError(
     errorData = { message: response.statusText };
   }
 
+  // Try to parse structured error from backend proxy
+  const structured = parseProxyError(errorData, 'gemini');
+  if (structured) return structured;
+
   const nested = errorData.error as
     | Record<string, unknown>
     | undefined;
@@ -104,15 +109,15 @@ async function handleGeminiError(
 
   if (response.status === 401 || response.status === 403) {
     error.errorType = 'auth';
-    error.message = 'Invalid API key';
+    error.message = 'Your Gemini API key appears invalid. Check it in Settings.';
     error.canRetry = false;
   } else if (response.status === 429) {
     error.errorType = 'rate_limit';
     error.message = 'Rate limit exceeded (Free tier: 15 requests/minute)';
     error.canRetry = true;
   } else if (response.status >= 500) {
-    error.errorType = 'network';
-    error.message = 'Gemini server error';
+    error.errorType = 'provider_error';
+    error.message = 'Gemini is having issues. Not a Lernf problem.';
     error.canRetry = true;
   } else if (response.status === 400) {
     error.errorType = 'invalid_request';

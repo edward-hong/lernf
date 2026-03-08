@@ -1353,6 +1353,74 @@ ${advocates.map(a => `- ${a.id} (${a.lens})`).join('\n')}
 // restrictions. The client sends the API key and request body; the backend
 // forwards the request server-side and returns the raw API response.
 
+import { stripApiKeys } from './utils/keyMasking'
+
+/**
+ * Classifies a provider HTTP error into a structured error with safe messaging.
+ * Strips API keys from error data to prevent leaking secrets in responses.
+ */
+function classifyProxyError(
+  status: number,
+  errorData: Record<string, unknown>,
+  provider: string
+): never {
+  const safeError = stripApiKeys(JSON.stringify(errorData))
+
+  if (status === 401 || status === 403) {
+    throw new APIError(
+      ErrCode.Unauthenticated,
+      JSON.stringify({
+        errorType: 'AUTH',
+        message: 'Invalid or expired API key. Please check your key and try again.',
+        provider,
+      })
+    )
+  }
+
+  if (status === 429) {
+    throw new APIError(
+      ErrCode.ResourceExhausted,
+      JSON.stringify({
+        errorType: 'RATE_LIMIT',
+        message: 'Rate limited by the AI provider. Please wait a moment and try again.',
+        provider,
+      })
+    )
+  }
+
+  if (status === 402 || safeError.toLowerCase().includes('insufficient')) {
+    throw new APIError(
+      ErrCode.ResourceExhausted,
+      JSON.stringify({
+        errorType: 'BILLING',
+        message: 'Insufficient credits on your API account. Please top up with the provider.',
+        provider,
+      })
+    )
+  }
+
+  if (status >= 500) {
+    throw new APIError(
+      ErrCode.Unavailable,
+      JSON.stringify({
+        errorType: 'PROVIDER_ERROR',
+        message: 'The AI provider is experiencing issues. This is not a Lernf problem — try again shortly.',
+        provider,
+      })
+    )
+  }
+
+  // Fallback
+  throw new APIError(
+    ErrCode.Unavailable,
+    JSON.stringify({
+      errorType: 'UNKNOWN',
+      message: 'Something went wrong. If this persists, check your API key or try a different provider.',
+      provider,
+    })
+  )
+}
+
 interface ProxyClaudeRequest {
   apiKey: string
   model: string
@@ -1399,10 +1467,7 @@ export const proxyClaude = api(
     const data = await response.json()
 
     if (!response.ok) {
-      throw new APIError(
-        response.status === 401 ? ErrCode.Unauthenticated : ErrCode.Unavailable,
-        JSON.stringify(data)
-      )
+      classifyProxyError(response.status, data, 'claude')
     }
 
     return { success: true, data }
@@ -1443,10 +1508,7 @@ export const proxyOpenAI = api(
     const data = await response.json()
 
     if (!response.ok) {
-      throw new APIError(
-        response.status === 401 ? ErrCode.Unauthenticated : ErrCode.Unavailable,
-        JSON.stringify(data)
-      )
+      classifyProxyError(response.status, data, 'openai')
     }
 
     return { success: true, data }
@@ -1493,12 +1555,7 @@ export const proxyGemini = api(
     const data = await response.json()
 
     if (!response.ok) {
-      throw new APIError(
-        response.status === 401 || response.status === 403
-          ? ErrCode.Unauthenticated
-          : ErrCode.Unavailable,
-        JSON.stringify(data)
-      )
+      classifyProxyError(response.status, data, 'gemini')
     }
 
     return { success: true, data }
