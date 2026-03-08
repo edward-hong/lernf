@@ -286,7 +286,7 @@ interface DeepseekResponse {
 }
 
 export const deepseek = api(
-  { method: 'POST', path: '/api/deepseek', expose: true },
+  { method: 'POST', path: '/api/deepseek', expose: true, auth: true },
   async (req: DeepseekRequest): Promise<DeepseekResponse> => {
     if (!req.prompt) {
       throw new APIError(ErrCode.InvalidArgument, 'Prompt is required')
@@ -333,7 +333,7 @@ interface NpcDialogueResponse {
 }
 
 export const npcDialogue = api(
-  { method: 'POST', path: '/api/npc-dialogue', expose: true },
+  { method: 'POST', path: '/api/npc-dialogue', expose: true, auth: true },
   async (req: NpcDialogueRequest): Promise<NpcDialogueResponse> => {
     // Detect if client sent a pre-built prompt (old behavior)
     detectClientPrompts('npcDialogue', req as unknown as Record<string, unknown>)
@@ -420,7 +420,7 @@ interface GeneratePrResponse {
 }
 
 export const generatePr = api(
-  { method: 'POST', path: '/api/generate-pr', expose: true },
+  { method: 'POST', path: '/api/generate-pr', expose: true, auth: true },
   async (req: GeneratePrRequest): Promise<GeneratePrResponse> => {
     const language = req.language || 'react'
 
@@ -479,7 +479,7 @@ interface EvaluatePrResponse {
 }
 
 export const evaluatePr = api(
-  { method: 'POST', path: '/api/evaluate-pr', expose: true },
+  { method: 'POST', path: '/api/evaluate-pr', expose: true, auth: true },
   async (req: EvaluatePrRequest): Promise<EvaluatePrResponse> => {
     const { userFindings, correctIssues } = req
 
@@ -520,7 +520,7 @@ interface GenerateComparisonResponse {
 }
 
 export const generateComparison = api(
-  { method: 'POST', path: '/api/generate-comparison', expose: true },
+  { method: 'POST', path: '/api/generate-comparison', expose: true, auth: true },
   async (req: GenerateComparisonRequest): Promise<GenerateComparisonResponse> => {
     const language = req.language || 'javascript'
 
@@ -569,7 +569,7 @@ interface EvaluateComparisonResponse {
 }
 
 export const evaluateComparison = api(
-  { method: 'POST', path: '/api/evaluate-comparison', expose: true },
+  { method: 'POST', path: '/api/evaluate-comparison', expose: true, auth: true },
   async (req: EvaluateComparisonRequest): Promise<EvaluateComparisonResponse> => {
     if (!req.context || !req.optionA || !req.optionB || !req.selectedOption || !req.reasoning) {
       throw new APIError(
@@ -624,7 +624,7 @@ interface EvaluateCompletionResponse {
 }
 
 export const evaluateCompletion = api(
-  { method: 'POST', path: '/api/evaluate-completion', expose: true },
+  { method: 'POST', path: '/api/evaluate-completion', expose: true, auth: true },
   async (
     req: EvaluateCompletionRequest
   ): Promise<EvaluateCompletionResponse> => {
@@ -688,7 +688,7 @@ interface EvaluateGripResponse {
 }
 
 export const evaluateGrip = api(
-  { method: 'POST', path: '/api/evaluate-grip', expose: true },
+  { method: 'POST', path: '/api/evaluate-grip', expose: true, auth: true },
   async (req: EvaluateGripRequest): Promise<EvaluateGripResponse> => {
     if (!req.scenarioTitle || !req.conversationHistory) {
       throw new APIError(
@@ -755,7 +755,7 @@ interface GenerateConsequenceResponse {
 }
 
 export const generateConsequence = api(
-  { method: 'POST', path: '/api/generate-consequence', expose: true },
+  { method: 'POST', path: '/api/generate-consequence', expose: true, auth: true },
   async (
     req: GenerateConsequenceRequest
   ): Promise<GenerateConsequenceResponse> => {
@@ -815,7 +815,7 @@ interface ChatResponse {
 }
 
 export const chat = api(
-  { method: 'POST', path: '/api/chat', expose: true },
+  { method: 'POST', path: '/api/chat', expose: true, auth: true },
   async (req: ChatRequest): Promise<ChatResponse> => {
     if (
       !req.messages ||
@@ -857,7 +857,7 @@ interface AnalyzeIntentResponse {
 }
 
 export const analyzeIntent = api(
-  { method: 'POST', path: '/api/analyze-intent', expose: true },
+  { method: 'POST', path: '/api/analyze-intent', expose: true, auth: true },
   async (req: AnalyzeIntentRequest): Promise<AnalyzeIntentResponse> => {
     if (!req.message) {
       throw new APIError(ErrCode.InvalidArgument, 'message is required')
@@ -940,7 +940,7 @@ const sessions = new Map<string, {
 }>()
 
 export const startAdvocateSession = api(
-  { method: 'POST', path: '/api/advocates/start', expose: true },
+  { method: 'POST', path: '/api/advocates/start', expose: true, auth: true },
   async (req: StartAdvocateSessionRequest): Promise<StartAdvocateSessionResponse> => {
     if (!req.proposal || req.proposal.length < 100) {
       throw new APIError(
@@ -1009,7 +1009,7 @@ export const startAdvocateSession = api(
 
 // Continue deliberation (Round 2, 3, etc.)
 export const continueDeliberation = api(
-  { method: 'POST', path: '/api/advocates/continue', expose: true },
+  { method: 'POST', path: '/api/advocates/continue', expose: true, auth: true },
   async (req: ContinueDeliberationRequest): Promise<ContinueDeliberationResponse> => {
     if (!req.sessionId) {
       throw new APIError(ErrCode.InvalidArgument, 'sessionId required')
@@ -1140,7 +1140,7 @@ interface GetSessionResponse {
 }
 
 export const getSession = api(
-  { method: 'POST', path: '/api/advocates/session', expose: true },
+  { method: 'POST', path: '/api/advocates/session', expose: true, auth: true },
   async (req: GetSessionRequest): Promise<GetSessionResponse> => {
     const session = sessions.get(req.sessionId)
 
@@ -1190,7 +1190,7 @@ interface EndSessionResponse {
 }
 
 export const endAdvocateSession = api(
-  { method: 'POST', path: '/api/advocates/end', expose: true },
+  { method: 'POST', path: '/api/advocates/end', expose: true, auth: true },
   async (req: EndSessionRequest): Promise<EndSessionResponse> => {
     const session = sessions.get(req.sessionId)
 
