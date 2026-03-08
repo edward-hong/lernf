@@ -1,5 +1,8 @@
 import { api, APIError, ErrCode } from 'encore.dev/api'
 import { secret } from 'encore.dev/config'
+import { getAuthData } from '~encore/auth'
+import { isAdmin } from '../auth/admin'
+import { checkUsageCap, recordTokenUsage } from '../usage/usage'
 import { buildGeneratePrPrompt, GENERATE_PR_SYSTEM_PROMPT } from './prompts/generatePrPrompt'
 import { buildEvaluateCompletionPrompt } from './prompts/evaluateCompletionPrompt'
 import { buildNpcSystemPrompt } from './prompts/npcPrompt'
@@ -39,12 +42,28 @@ interface DeepseekMessage {
   content: string
 }
 
+interface DeepseekResult {
+  content: string
+  promptTokens: number
+  completionTokens: number
+}
+
 async function callDeepseek(
   messages: DeepseekMessage[],
   temperature: number,
   maxTokens: number,
   jsonMode = false
 ): Promise<string> {
+  const result = await callDeepseekWithUsage(messages, temperature, maxTokens, jsonMode)
+  return result.content
+}
+
+async function callDeepseekWithUsage(
+  messages: DeepseekMessage[],
+  temperature: number,
+  maxTokens: number,
+  jsonMode = false
+): Promise<DeepseekResult> {
   const body: Record<string, unknown> = {
     model: 'deepseek-chat',
     messages,
@@ -71,7 +90,37 @@ async function callDeepseek(
   }
 
   const data = await response.json()
-  return data.choices[0].message.content
+  return {
+    content: data.choices[0].message.content,
+    promptTokens: data.usage?.prompt_tokens ?? 0,
+    completionTokens: data.usage?.completion_tokens ?? 0,
+  }
+}
+
+/**
+ * Check trial cap before an AI call and record usage after.
+ * If the user is not authenticated, skips usage tracking.
+ */
+async function withUsageTracking<T>(
+  fn: () => Promise<{ result: T; promptTokens: number; completionTokens: number }>
+): Promise<T> {
+  const authData = getAuthData()
+  if (!authData) {
+    const { result } = await fn()
+    return result
+  }
+
+  // Check cap before the call
+  await checkUsageCap(authData.userID, authData.email)
+
+  const { result, promptTokens, completionTokens } = await fn()
+
+  // Record usage asynchronously — don't block response
+  recordTokenUsage(authData.userID, authData.email, promptTokens, completionTokens).catch(
+    (err) => console.error('[usage] Failed to record token usage:', err)
+  )
+
+  return result
 }
 
 function cleanJsonOutput(text: string): string {
@@ -247,19 +296,25 @@ export const deepseek = api(
       req.prompt.includes('Format as JSON') ||
       req.prompt.includes('Return ONLY valid JSON')
 
-    let output = await callDeepseek(
-      [{ role: 'user', content: req.prompt }],
-      0.7,
-      8192,
-      isJsonRequest
-    )
+    return withUsageTracking(async () => {
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: req.prompt }],
+        0.7,
+        8192,
+        isJsonRequest
+      )
 
-    // Clean markdown code blocks if trying to parse as JSON
-    if (isJsonRequest) {
-      output = cleanJsonOutput(output)
-    }
+      let output = ds.content
+      if (isJsonRequest) {
+        output = cleanJsonOutput(output)
+      }
 
-    return { success: true, output }
+      return {
+        result: { success: true, output } as DeepseekResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -290,51 +345,66 @@ export const npcDialogue = api(
       )
     }
 
-    // Build prompt in backend using the engineered prompt
-    const systemPrompt = buildNpcSystemPrompt(req.persona, req.scenarioContext)
+    return withUsageTracking(async () => {
+      // Build prompt in backend using the engineered prompt
+      const systemPrompt = buildNpcSystemPrompt(req.persona, req.scenarioContext)
 
-    console.log('[NPC Dialogue] Using backend-built system prompt')
-    console.log('[NPC Dialogue] NPC:', req.npcName)
-    console.log('[NPC Dialogue] Prompt length:', systemPrompt.length)
-    console.log('[NPC Dialogue] Has anti-solving rules:', systemPrompt.includes('DO NOT'))
+      console.log('[NPC Dialogue] Using backend-built system prompt')
+      console.log('[NPC Dialogue] NPC:', req.npcName)
+      console.log('[NPC Dialogue] Prompt length:', systemPrompt.length)
+      console.log('[NPC Dialogue] Has anti-solving rules:', systemPrompt.includes('DO NOT'))
 
-    const apiMessages: DeepseekMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...req.messages.map((m) => ({ role: m.role, content: m.content })),
-    ]
+      const apiMessages: DeepseekMessage[] = [
+        { role: 'system', content: systemPrompt },
+        ...req.messages.map((m) => ({ role: m.role, content: m.content })),
+      ]
 
-    let output = await callDeepseek(apiMessages, 0.8, 300)
+      let totalPromptTokens = 0
+      let totalCompletionTokens = 0
 
-    // Categorize and detect problematic NPC responses
-    const responseType = categorizeNPCResponse(output)
-    console.log('[NPC Dialogue] Response type:', responseType)
+      let ds = await callDeepseekWithUsage(apiMessages, 0.8, 300)
+      totalPromptTokens += ds.promptTokens
+      totalCompletionTokens += ds.completionTokens
+      let output = ds.content
 
-    const isSolving = AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(output))
+      // Categorize and detect problematic NPC responses
+      const responseType = categorizeNPCResponse(output)
+      console.log('[NPC Dialogue] Response type:', responseType)
 
-    if (isSolving || isProblematicResponse(responseType)) {
-      console.warn('[NPC Dialogue] AUTO-SOLVING DETECTED')
-      console.warn('[NPC Dialogue] User message:', req.messages[req.messages.length - 1]?.content.substring(0, 100))
-      console.warn('[NPC Dialogue] Bad response:', output.substring(0, 200))
-      console.warn('[NPC Dialogue] Matched pattern:', AUTO_SOLVING_PATTERNS.find(p => p.test(output)))
-      console.warn('[NPC Dialogue] Response category:', responseType)
+      const isSolving = AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(output))
 
-      // Add strong corrective message and regenerate
-      apiMessages.push({
-        role: 'system',
-        content: AUTO_SOLVE_CORRECTION,
-      })
+      if (isSolving || isProblematicResponse(responseType)) {
+        console.warn('[NPC Dialogue] AUTO-SOLVING DETECTED')
+        console.warn('[NPC Dialogue] User message:', req.messages[req.messages.length - 1]?.content.substring(0, 100))
+        console.warn('[NPC Dialogue] Bad response:', output.substring(0, 200))
+        console.warn('[NPC Dialogue] Matched pattern:', AUTO_SOLVING_PATTERNS.find(p => p.test(output)))
+        console.warn('[NPC Dialogue] Response category:', responseType)
 
-      output = await callDeepseek(apiMessages, 0.95, 200)
+        // Add strong corrective message and regenerate
+        apiMessages.push({
+          role: 'system',
+          content: AUTO_SOLVE_CORRECTION,
+        })
 
-      // If STILL auto-solving after retry, force a question
-      const stillSolving = AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(output))
-      if (stillSolving) {
-        console.error('[NPC Dialogue] Still auto-solving after retry, using fallback')
-        output = FALLBACK_PROBE
+        ds = await callDeepseekWithUsage(apiMessages, 0.95, 200)
+        totalPromptTokens += ds.promptTokens
+        totalCompletionTokens += ds.completionTokens
+        output = ds.content
+
+        // If STILL auto-solving after retry, force a question
+        const stillSolving = AUTO_SOLVING_PATTERNS.some(pattern => pattern.test(output))
+        if (stillSolving) {
+          console.error('[NPC Dialogue] Still auto-solving after retry, using fallback')
+          output = FALLBACK_PROBE
+        }
       }
-    }
 
-    return { success: true, output: output.trim() }
+      return {
+        result: { success: true, output: output.trim() } as NpcDialogueResponse,
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+      }
+    })
   }
 )
 
@@ -354,25 +424,28 @@ export const generatePr = api(
   async (req: GeneratePrRequest): Promise<GeneratePrResponse> => {
     const language = req.language || 'react'
 
-    const prompt = buildGeneratePrPrompt(language)
+    return withUsageTracking(async () => {
+      const prompt = buildGeneratePrPrompt(language)
 
-    const rawContent = await callDeepseek(
-      [
-        {
-          role: 'system',
-          content: GENERATE_PR_SYSTEM_PROMPT,
-        },
-        { role: 'user', content: prompt },
-      ],
-      0.3,
-      3000, // Even smaller limit
-      true
-    )
+      const ds = await callDeepseekWithUsage(
+        [
+          { role: 'system', content: GENERATE_PR_SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
+        ],
+        0.3,
+        3000,
+        true
+      )
 
-    const cleanContent = cleanJsonOutput(rawContent)
-    const scenario = JSON.parse(cleanContent)
+      const cleanContent = cleanJsonOutput(ds.content)
+      const scenario = JSON.parse(cleanContent)
 
-    return { success: true, scenario }
+      return {
+        result: { success: true, scenario } as GeneratePrResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -451,19 +524,25 @@ export const generateComparison = api(
   async (req: GenerateComparisonRequest): Promise<GenerateComparisonResponse> => {
     const language = req.language || 'javascript'
 
-    const prompt = buildComparisonPrompt(language)
+    return withUsageTracking(async () => {
+      const prompt = buildComparisonPrompt(language)
 
-    const rawContent = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0.7,
-      2000,
-      true
-    )
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: prompt }],
+        0.7,
+        2000,
+        true
+      )
 
-    const cleanContent = cleanJsonOutput(rawContent)
-    const scenario = JSON.parse(cleanContent)
+      const cleanContent = cleanJsonOutput(ds.content)
+      const scenario = JSON.parse(cleanContent)
 
-    return { success: true, scenario }
+      return {
+        result: { success: true, scenario } as GenerateComparisonResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -499,25 +578,31 @@ export const evaluateComparison = api(
       )
     }
 
-    const prompt = buildEvaluateComparisonPrompt(
-      {
-        context: req.context,
-        optionA: req.optionA,
-        optionB: req.optionB,
-        correctAnswer: req.correctAnswer,
-        reason: req.reason,
-      },
-      req.reasoning,
-      req.selectedOption
-    )
+    return withUsageTracking(async () => {
+      const prompt = buildEvaluateComparisonPrompt(
+        {
+          context: req.context,
+          optionA: req.optionA,
+          optionB: req.optionB,
+          correctAnswer: req.correctAnswer,
+          reason: req.reason,
+        },
+        req.reasoning,
+        req.selectedOption
+      )
 
-    const output = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0,
-      1500
-    )
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: prompt }],
+        0,
+        1500
+      )
 
-    return { success: true, evaluation: output.trim() }
+      return {
+        result: { success: true, evaluation: ds.content.trim() } as EvaluateComparisonResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -550,30 +635,36 @@ export const evaluateCompletion = api(
       )
     }
 
-    const prompt = buildEvaluateCompletionPrompt(
-      req.scenarioDescription,
-      req.conversationHistory,
-      req.completionSignals,
-    )
+    return withUsageTracking(async () => {
+      const prompt = buildEvaluateCompletionPrompt(
+        req.scenarioDescription,
+        req.conversationHistory,
+        req.completionSignals,
+      )
 
-    const rawOutput = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0.3,
-      500,
-      true
-    )
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: prompt }],
+        0.3,
+        500,
+        true
+      )
 
-    const cleaned = cleanJsonOutput(rawOutput)
-    const result = JSON.parse(cleaned)
+      const cleaned = cleanJsonOutput(ds.content)
+      const result = JSON.parse(cleaned)
 
-    return {
-      success: true,
-      result: {
-        scenarioComplete: Boolean(result.scenarioComplete),
-        reasoning: result.reasoning || '',
-        suggestedPrompt: result.suggestedPrompt || '',
-      },
-    }
+      return {
+        result: {
+          success: true,
+          result: {
+            scenarioComplete: Boolean(result.scenarioComplete),
+            reasoning: result.reasoning || '',
+            suggestedPrompt: result.suggestedPrompt || '',
+          },
+        } as EvaluateCompletionResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -606,35 +697,41 @@ export const evaluateGrip = api(
       )
     }
 
-    // Build prompt in backend
-    const prompt = buildGripEvaluationPrompt(
-      req.scenarioTitle,
-      req.scenarioCategory,
-      req.scenarioEngineBriefing,
-      req.conversationHistory,
-      req.signalsSummary,
-      req.hiddenFactorStatus,
-      req.evaluationGuidance,
-      req.userTurnCount,
-      req.minTurnsForFullEvaluation,
-    )
+    return withUsageTracking(async () => {
+      // Build prompt in backend
+      const prompt = buildGripEvaluationPrompt(
+        req.scenarioTitle,
+        req.scenarioCategory,
+        req.scenarioEngineBriefing,
+        req.conversationHistory,
+        req.signalsSummary,
+        req.hiddenFactorStatus,
+        req.evaluationGuidance,
+        req.userTurnCount,
+        req.minTurnsForFullEvaluation,
+      )
 
-    console.log('[Evaluate GRIP] Using backend-built prompt')
-    console.log('[Evaluate GRIP] Scenario:', req.scenarioTitle)
-    console.log('[Evaluate GRIP] Prompt length:', prompt.length)
-    console.log('[Evaluate GRIP] User turns:', req.userTurnCount)
+      console.log('[Evaluate GRIP] Using backend-built prompt')
+      console.log('[Evaluate GRIP] Scenario:', req.scenarioTitle)
+      console.log('[Evaluate GRIP] Prompt length:', prompt.length)
+      console.log('[Evaluate GRIP] User turns:', req.userTurnCount)
 
-    const rawOutput = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0,
-      4000,
-      true
-    )
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: prompt }],
+        0,
+        4000,
+        true
+      )
 
-    const cleaned = cleanJsonOutput(rawOutput)
-    const result = JSON.parse(cleaned)
+      const cleaned = cleanJsonOutput(ds.content)
+      const result = JSON.parse(cleaned)
 
-    return { success: true, result }
+      return {
+        result: { success: true, result } as EvaluateGripResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -669,34 +766,40 @@ export const generateConsequence = api(
       )
     }
 
-    // Build prompt in backend
-    const prompt = buildConsequenceGenerationPrompt(
-      req.scenarioTitle,
-      req.scenarioCategory,
-      req.scenarioSetupContext,
-      req.conversationSummary,
-      req.gripScores,
-      req.compositeScore,
-      req.band,
-      req.hiddenFactorStatus,
-      req.weakDimensions,
-    )
+    return withUsageTracking(async () => {
+      // Build prompt in backend
+      const prompt = buildConsequenceGenerationPrompt(
+        req.scenarioTitle,
+        req.scenarioCategory,
+        req.scenarioSetupContext,
+        req.conversationSummary,
+        req.gripScores,
+        req.compositeScore,
+        req.band,
+        req.hiddenFactorStatus,
+        req.weakDimensions,
+      )
 
-    console.log('[Generate Consequence] Using backend-built prompt')
-    console.log('[Generate Consequence] Scenario:', req.scenarioTitle)
-    console.log('[Generate Consequence] Prompt length:', prompt.length)
+      console.log('[Generate Consequence] Using backend-built prompt')
+      console.log('[Generate Consequence] Scenario:', req.scenarioTitle)
+      console.log('[Generate Consequence] Prompt length:', prompt.length)
 
-    const rawOutput = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0.7,
-      2000,
-      true
-    )
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: prompt }],
+        0.7,
+        2000,
+        true
+      )
 
-    const cleaned = cleanJsonOutput(rawOutput)
-    const result = JSON.parse(cleaned)
+      const cleaned = cleanJsonOutput(ds.content)
+      const result = JSON.parse(cleaned)
 
-    return { success: true, result }
+      return {
+        result: { success: true, result } as GenerateConsequenceResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -725,14 +828,20 @@ export const chat = api(
       )
     }
 
-    const apiMessages: DeepseekMessage[] = req.messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
+    return withUsageTracking(async () => {
+      const apiMessages: DeepseekMessage[] = req.messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }))
 
-    const output = await callDeepseek(apiMessages, 0.7, 500)
+      const ds = await callDeepseekWithUsage(apiMessages, 0.7, 500)
 
-    return { success: true, output: output.trim() }
+      return {
+        result: { success: true, output: ds.content.trim() } as ChatResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -754,22 +863,28 @@ export const analyzeIntent = api(
       throw new APIError(ErrCode.InvalidArgument, 'message is required')
     }
 
-    // Build prompt in backend
-    const prompt = buildIntentAnalysisPrompt(req.message)
+    return withUsageTracking(async () => {
+      // Build prompt in backend
+      const prompt = buildIntentAnalysisPrompt(req.message)
 
-    console.log('[Analyze Intent] Using backend-built prompt')
-    console.log('[Analyze Intent] Message length:', req.message.length)
+      console.log('[Analyze Intent] Using backend-built prompt')
+      console.log('[Analyze Intent] Message length:', req.message.length)
 
-    const rawOutput = await callDeepseek(
-      [{ role: 'user', content: prompt }],
-      0,
-      500,
-      true
-    )
+      const ds = await callDeepseekWithUsage(
+        [{ role: 'user', content: prompt }],
+        0,
+        500,
+        true
+      )
 
-    const output = cleanJsonOutput(rawOutput)
+      const output = cleanJsonOutput(ds.content)
 
-    return { success: true, output }
+      return {
+        result: { success: true, output } as AnalyzeIntentResponse,
+        promptTokens: ds.promptTokens,
+        completionTokens: ds.completionTokens,
+      }
+    })
   }
 )
 
@@ -841,46 +956,54 @@ export const startAdvocateSession = api(
       )
     }
 
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return withUsageTracking(async () => {
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    // Generate Round 1 critiques
-    const critiquePromises = req.advocates.map(async (advocate) => {
-      const prompt = buildAdvocatePrompt(advocate.lens, req.proposal)
+      let totalPromptTokens = 0
+      let totalCompletionTokens = 0
 
-      const content = await callDeepseek(
-        [{ role: 'user', content: prompt }],
-        0.8,
-        500,
-        false
-      )
+      // Generate Round 1 critiques
+      const critiquePromises = req.advocates.map(async (advocate) => {
+        const prompt = buildAdvocatePrompt(advocate.lens, req.proposal)
+
+        const ds = await callDeepseekWithUsage(
+          [{ role: 'user', content: prompt }],
+          0.8,
+          500,
+          false
+        )
+
+        totalPromptTokens += ds.promptTokens
+        totalCompletionTokens += ds.completionTokens
+
+        return {
+          advocateId: advocate.id,
+          content: ds.content.trim()
+        }
+      })
+
+      const critiques = await Promise.all(critiquePromises)
+
+      // Store session in memory
+      sessions.set(sessionId, {
+        proposal: req.proposal,
+        advocates: req.advocates,
+        rounds: [
+          {
+            roundNumber: 1,
+            critiques
+          }
+        ]
+      })
+
+      console.log(`[Advocates] Session ${sessionId} created with ${req.advocates.length} advocates`)
 
       return {
-        advocateId: advocate.id,
-        content: content.trim()
+        result: { success: true, sessionId, critiques } as StartAdvocateSessionResponse,
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
       }
     })
-
-    const critiques = await Promise.all(critiquePromises)
-
-    // Store session in memory
-    sessions.set(sessionId, {
-      proposal: req.proposal,
-      advocates: req.advocates,
-      rounds: [
-        {
-          roundNumber: 1,
-          critiques
-        }
-      ]
-    })
-
-    console.log(`[Advocates] Session ${sessionId} created with ${req.advocates.length} advocates`)
-
-    return {
-      success: true,
-      sessionId,
-      critiques
-    }
   }
 )
 
@@ -905,86 +1028,100 @@ export const continueDeliberation = api(
       throw new APIError(ErrCode.NotFound, 'Session not found')
     }
 
-    const { proposal, advocates, rounds } = session
-    const currentRound = rounds.length + 1
+    return withUsageTracking(async () => {
+      const { proposal, advocates, rounds } = session
+      const currentRound = rounds.length + 1
 
-    console.log(`[Advocates] Session ${req.sessionId} continuing to round ${currentRound}`)
+      let totalPromptTokens = 0
+      let totalCompletionTokens = 0
 
-    // Analyze user's intent (SILENTLY - don't show to user yet)
-    const previousCritiques = rounds[rounds.length - 1].critiques.map(c => c.content)
+      console.log(`[Advocates] Session ${req.sessionId} continuing to round ${currentRound}`)
 
-    const intentPrompt = buildUserIntentAnalysisPrompt(req.userResponse, previousCritiques)
-    const intentRaw = await callDeepseek(
-      [{ role: 'user', content: intentPrompt }],
-      0,
-      500,
-      true
-    )
+      // Analyze user's intent (SILENTLY - don't show to user yet)
+      const previousCritiques = rounds[rounds.length - 1].critiques.map(c => c.content)
 
-    let userIntent: UserIntentScores & { interpretation: string }
-    try {
-      const cleaned = intentRaw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      userIntent = JSON.parse(cleaned)
-    } catch {
-      console.warn('[Advocates] Failed to parse user intent, using defaults')
-      userIntent = {
-        cooperative: 0.5,
-        defensive: 0.5,
-        epistemic: 0.5,
-        persuasive: 0.5,
-        interpretation: 'Unable to analyze response'
-      }
-    }
-
-    console.log(`[Advocates] User intent - Defensive: ${userIntent.defensive.toFixed(2)}, Epistemic: ${userIntent.epistemic.toFixed(2)}`)
-
-    // Build conversation history for advocates
-    const conversationHistory: Array<{ role: string; content: string }> = []
-
-    // Add previous rounds' user messages
-    rounds.forEach((round) => {
-      if (round.userMessage) {
-        conversationHistory.push({ role: 'user', content: round.userMessage })
-      }
-    })
-
-    // Add current user response
-    conversationHistory.push({ role: 'user', content: req.userResponse })
-
-    // Generate new critiques from all advocates
-    const critiquePromises = advocates.map(async (advocate) => {
-      const prompt = buildAdvocatePrompt(advocate.lens, proposal, conversationHistory)
-
-      const content = await callDeepseek(
-        [{ role: 'user', content: prompt }],
-        0.8,
+      const intentPrompt = buildUserIntentAnalysisPrompt(req.userResponse, previousCritiques)
+      const intentDs = await callDeepseekWithUsage(
+        [{ role: 'user', content: intentPrompt }],
+        0,
         500,
-        false
+        true
       )
+      totalPromptTokens += intentDs.promptTokens
+      totalCompletionTokens += intentDs.completionTokens
+
+      let userIntent: UserIntentScores & { interpretation: string }
+      try {
+        const cleaned = intentDs.content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        userIntent = JSON.parse(cleaned)
+      } catch {
+        console.warn('[Advocates] Failed to parse user intent, using defaults')
+        userIntent = {
+          cooperative: 0.5,
+          defensive: 0.5,
+          epistemic: 0.5,
+          persuasive: 0.5,
+          interpretation: 'Unable to analyze response'
+        }
+      }
+
+      console.log(`[Advocates] User intent - Defensive: ${userIntent.defensive.toFixed(2)}, Epistemic: ${userIntent.epistemic.toFixed(2)}`)
+
+      // Build conversation history for advocates
+      const conversationHistory: Array<{ role: string; content: string }> = []
+
+      // Add previous rounds' user messages
+      rounds.forEach((round) => {
+        if (round.userMessage) {
+          conversationHistory.push({ role: 'user', content: round.userMessage })
+        }
+      })
+
+      // Add current user response
+      conversationHistory.push({ role: 'user', content: req.userResponse })
+
+      // Generate new critiques from all advocates
+      const critiquePromises = advocates.map(async (advocate) => {
+        const prompt = buildAdvocatePrompt(advocate.lens, proposal, conversationHistory)
+
+        const ds = await callDeepseekWithUsage(
+          [{ role: 'user', content: prompt }],
+          0.8,
+          500,
+          false
+        )
+
+        totalPromptTokens += ds.promptTokens
+        totalCompletionTokens += ds.completionTokens
+
+        return {
+          advocateId: advocate.id,
+          content: ds.content.trim()
+        }
+      })
+
+      const newCritiques = await Promise.all(critiquePromises)
+
+      // Store this round (with user intent)
+      rounds.push({
+        roundNumber: currentRound,
+        userMessage: req.userResponse,
+        userIntent,
+        critiques: newCritiques
+      })
+
+      sessions.set(req.sessionId, session)
 
       return {
-        advocateId: advocate.id,
-        content: content.trim()
+        result: {
+          success: true,
+          roundNumber: currentRound,
+          critiques: newCritiques
+        } as ContinueDeliberationResponse,
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
       }
     })
-
-    const newCritiques = await Promise.all(critiquePromises)
-
-    // Store this round (with user intent)
-    rounds.push({
-      roundNumber: currentRound,
-      userMessage: req.userResponse,
-      userIntent,
-      critiques: newCritiques
-    })
-
-    sessions.set(req.sessionId, session)
-
-    return {
-      success: true,
-      roundNumber: currentRound,
-      critiques: newCritiques
-    }
   }
 )
 
@@ -1061,73 +1198,81 @@ export const endAdvocateSession = api(
       throw new APIError(ErrCode.NotFound, 'Session not found')
     }
 
-    const { proposal, advocates, rounds } = session
+    return withUsageTracking(async () => {
+      const { proposal, advocates, rounds } = session
 
-    console.log(`[Advocates] Ending session ${req.sessionId} with ${rounds.length} rounds`)
+      let totalPromptTokens = 0
+      let totalCompletionTokens = 0
 
-    // Collect all user responses with their intent
-    const roundByRound = rounds
-      .filter(r => r.userMessage && r.userIntent)
-      .map(r => ({
-        roundNumber: r.roundNumber,
-        userMessage: r.userMessage!,
-        intent: r.userIntent!
-      }))
+      console.log(`[Advocates] Ending session ${req.sessionId} with ${rounds.length} rounds`)
 
-    // Build trend arrays
-    const trends = {
-      defensiveness: roundByRound.map(r => r.intent.defensive),
-      epistemicOpenness: roundByRound.map(r => r.intent.epistemic),
-      cooperation: roundByRound.map(r => r.intent.cooperative),
-      persuasive: roundByRound.map(r => r.intent.persuasive)
-    }
+      // Collect all user responses with their intent
+      const roundByRound = rounds
+        .filter(r => r.userMessage && r.userIntent)
+        .map(r => ({
+          roundNumber: r.roundNumber,
+          userMessage: r.userMessage!,
+          intent: r.userIntent!
+        }))
 
-    // Generate pattern analysis
-    let pattern: PatternAnalysis
-    try {
-      const patternPrompt = buildPatternAnalysisPrompt(roundByRound)
-      const patternRaw = await callDeepseek(
-        [{ role: 'user', content: patternPrompt }],
-        0.3,
-        800,
-        true
-      )
-      const cleaned = patternRaw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      pattern = JSON.parse(cleaned)
-    } catch (error) {
-      console.warn('[Advocates] Failed to generate pattern analysis')
-      pattern = {
-        overallPattern: 'Unable to analyze pattern',
-        turningPoint: null,
-        taizongParallel: 'Analysis unavailable',
-        trajectory: 'stable'
+      // Build trend arrays
+      const trends = {
+        defensiveness: roundByRound.map(r => r.intent.defensive),
+        epistemicOpenness: roundByRound.map(r => r.intent.epistemic),
+        cooperation: roundByRound.map(r => r.intent.cooperative),
+        persuasive: roundByRound.map(r => r.intent.persuasive)
       }
-    }
 
-    // Detect key dismissals
-    let keyDismissals: KeyDismissal[] = []
-    try {
-      const allCritiques = rounds.flatMap(r =>
-        r.critiques.map(c => ({ content: c.content, advocateId: c.advocateId }))
-      )
-      const userResponses = roundByRound.map(r => r.userMessage)
+      // Generate pattern analysis
+      let pattern: PatternAnalysis
+      try {
+        const patternPrompt = buildPatternAnalysisPrompt(roundByRound)
+        const patternDs = await callDeepseekWithUsage(
+          [{ role: 'user', content: patternPrompt }],
+          0.3,
+          800,
+          true
+        )
+        totalPromptTokens += patternDs.promptTokens
+        totalCompletionTokens += patternDs.completionTokens
+        const cleaned = patternDs.content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        pattern = JSON.parse(cleaned)
+      } catch (error) {
+        console.warn('[Advocates] Failed to generate pattern analysis')
+        pattern = {
+          overallPattern: 'Unable to analyze pattern',
+          turningPoint: null,
+          taizongParallel: 'Analysis unavailable',
+          trajectory: 'stable'
+        }
+      }
 
-      const dismissalPrompt = buildDismissalDetectionPrompt(allCritiques, userResponses)
-      const dismissalRaw = await callDeepseek(
-        [{ role: 'user', content: dismissalPrompt }],
-        0.3,
-        800,
-        true
-      )
-      const cleaned = dismissalRaw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsed = JSON.parse(cleaned)
-      keyDismissals = parsed.dismissals || []
-    } catch (error) {
-      console.warn('[Advocates] Failed to detect dismissals')
-    }
+      // Detect key dismissals
+      let keyDismissals: KeyDismissal[] = []
+      try {
+        const allCritiques = rounds.flatMap(r =>
+          r.critiques.map(c => ({ content: c.content, advocateId: c.advocateId }))
+        )
+        const userResponses = roundByRound.map(r => r.userMessage)
 
-    // Build transcript
-    let transcript = `DEVIL'S ADVOCATES SESSION
+        const dismissalPrompt = buildDismissalDetectionPrompt(allCritiques, userResponses)
+        const dismissalDs = await callDeepseekWithUsage(
+          [{ role: 'user', content: dismissalPrompt }],
+          0.3,
+          800,
+          true
+        )
+        totalPromptTokens += dismissalDs.promptTokens
+        totalCompletionTokens += dismissalDs.completionTokens
+        const cleaned = dismissalDs.content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        const parsed = JSON.parse(cleaned)
+        keyDismissals = parsed.dismissals || []
+      } catch (error) {
+        console.warn('[Advocates] Failed to detect dismissals')
+      }
+
+      // Build transcript
+      let transcript = `DEVIL'S ADVOCATES SESSION
 Session ID: ${req.sessionId}
 Date: ${new Date().toISOString()}
 
@@ -1141,38 +1286,43 @@ ${advocates.map(a => `- ${a.id} (${a.lens})`).join('\n')}
 
 `
 
-    rounds.forEach(round => {
-      transcript += `ROUND ${round.roundNumber}:\n\n`
+      rounds.forEach(round => {
+        transcript += `ROUND ${round.roundNumber}:\n\n`
 
-      round.critiques.forEach(critique => {
-        transcript += `${critique.advocateId}:\n${critique.content}\n\n`
+        round.critiques.forEach(critique => {
+          transcript += `${critique.advocateId}:\n${critique.content}\n\n`
+        })
+
+        if (round.userMessage) {
+          transcript += `YOUR RESPONSE:\n${round.userMessage}\n\n`
+        }
+
+        transcript += '---\n\n'
       })
 
-      if (round.userMessage) {
-        transcript += `YOUR RESPONSE:\n${round.userMessage}\n\n`
+      transcript += `ANALYSIS:\n\n${pattern.overallPattern}\n\n`
+      transcript += `Trajectory: ${pattern.trajectory}\n`
+      if (pattern.turningPoint) {
+        transcript += `Turning point: Round ${pattern.turningPoint}\n`
       }
 
-      transcript += '---\n\n'
+      console.log(`[Advocates] Session analysis complete - Trajectory: ${pattern.trajectory}`)
+
+      return {
+        result: {
+          success: true,
+          analysis: {
+            roundByRound,
+            trends,
+            pattern,
+            keyDismissals
+          },
+          transcript
+        } as EndSessionResponse,
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+      }
     })
-
-    transcript += `ANALYSIS:\n\n${pattern.overallPattern}\n\n`
-    transcript += `Trajectory: ${pattern.trajectory}\n`
-    if (pattern.turningPoint) {
-      transcript += `Turning point: Round ${pattern.turningPoint}\n`
-    }
-
-    console.log(`[Advocates] Session analysis complete - Trajectory: ${pattern.trajectory}`)
-
-    return {
-      success: true,
-      analysis: {
-        roundByRound,
-        trends,
-        pattern,
-        keyDismissals
-      },
-      transcript
-    }
   }
 )
 

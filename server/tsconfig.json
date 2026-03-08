@@ -21,6 +21,7 @@
     "backend/**/*.ts",
     "user/**/*.ts",
     "stripe/**/*.ts",
+    "usage/**/*.ts",
     "encore.gen/**/*.ts"
   ],
   "exclude": ["node_modules", "client"]
