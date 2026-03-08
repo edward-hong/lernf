@@ -25,7 +25,7 @@ const DevilsAdvocateSession: React.FC = () => {
     return (
       <div className="min-h-screen bg-white">
         <div className="border-b border-gray-200">
-          <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h1 className="text-4xl font-bold">Devil's Advocates</h1>
           </div>
         </div>
@@ -44,7 +44,7 @@ const DevilsAdvocateSession: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="border-b border-gray-200 mb-8">
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-4xl font-bold mb-2">Devil's Advocates</h1>
           <p className="text-xl text-gray-600">
             "You are my mirror" (以人為鏡) - Emperor Taizong to Wei Zheng
@@ -53,7 +53,7 @@ const DevilsAdvocateSession: React.FC = () => {
       </div>
 
       {/* Progress indicator */}
-      <div className="max-w-4xl mx-auto px-6 mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div className="flex items-center gap-2">
           {(['setup', 'proposal', 'deliberation', 'summary'] as const).map((s, i) => {
             const stepIndex = ['setup', 'proposal', 'deliberation', 'summary'].indexOf(step)

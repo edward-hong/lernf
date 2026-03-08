@@ -53,7 +53,8 @@ export function LiveChat() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
           <Link to="/" className="hover:text-blue-600 transition-colors">
@@ -96,6 +97,7 @@ export function LiveChat() {
               {intentVisualizationEnabled ? 'Intent: ON' : 'Intent: OFF'}
             </button>
           </div>
+        </div>
         </div>
       </div>
 
