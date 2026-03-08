@@ -53,7 +53,7 @@ export interface AIResponse {
  */
 export interface AIProviderError {
   provider: string;
-  errorType: 'auth' | 'rate_limit' | 'network' | 'invalid_request' | 'unknown';
+  errorType: 'auth' | 'rate_limit' | 'billing' | 'network' | 'provider_error' | 'invalid_request' | 'unknown';
   message: string;
   canRetry: boolean;
   originalError?: unknown;

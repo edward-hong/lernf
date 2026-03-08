@@ -1,5 +1,6 @@
 import type { ProviderConfig } from '../../types/aiProvider';
 import type { AIRequest, AIResponse, AIProviderError } from '../../types/aiRequest';
+import { parseProxyError } from './proxyErrorParser';
 
 /**
  * Calls OpenAI API with the given request.
@@ -80,6 +81,10 @@ async function handleOpenAIError(
     errorData = { message: response.statusText };
   }
 
+  // Try to parse structured error from backend proxy
+  const structured = parseProxyError(errorData, 'openai');
+  if (structured) return structured;
+
   const nested = errorData.error as
     | Record<string, unknown>
     | undefined;
@@ -94,16 +99,15 @@ async function handleOpenAIError(
 
   if (response.status === 401) {
     error.errorType = 'auth';
-    error.message = 'Invalid API key';
+    error.message = 'Your OpenAI API key appears invalid. Check it in Settings.';
     error.canRetry = false;
   } else if (response.status === 429) {
     error.errorType = 'rate_limit';
-    error.message =
-      (nested?.message as string) || 'Rate limit exceeded';
+    error.message = 'Rate limited — wait a moment and retry.';
     error.canRetry = true;
   } else if (response.status >= 500) {
-    error.errorType = 'network';
-    error.message = 'OpenAI server error';
+    error.errorType = 'provider_error';
+    error.message = 'OpenAI is having issues. Not a Lernf problem.';
     error.canRetry = true;
   } else if (response.status === 400) {
     error.errorType = 'invalid_request';

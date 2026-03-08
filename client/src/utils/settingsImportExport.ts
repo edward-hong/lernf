@@ -1,8 +1,9 @@
 import type { AIProviderSettings } from '../types/aiProvider';
 import {
   loadProviderSettings,
-  saveProviderSettings,
+  saveProviderSettingsSync,
 } from './providerStorage';
+import { maskApiKey } from './keyMasking';
 
 /**
  * Exports settings to JSON file (with API keys partially hidden for security)
@@ -18,7 +19,7 @@ export function exportSettings(): void {
         if (config) {
           acc[key as keyof typeof acc] = {
             ...config,
-            apiKey: config.apiKey.slice(0, 10) + '...[HIDDEN]',
+            apiKey: maskApiKey(config.apiKey) + '[HIDDEN]',
           } as typeof config;
         }
         return acc;
@@ -79,7 +80,7 @@ export function importSettings(file: File): Promise<boolean> {
           lastUpdated: new Date(),
         } as AIProviderSettings;
 
-        saveProviderSettings(merged);
+        saveProviderSettingsSync(merged);
         resolve(true);
       } catch (error) {
         console.error('Import failed:', error);

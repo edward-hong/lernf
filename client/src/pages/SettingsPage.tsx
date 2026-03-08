@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { AIProviderSettings } from '../types/aiProvider';
 import {
   loadProviderSettings,
-  saveProviderSettings,
+  saveProviderSettingsSync,
 } from '../utils/providerStorage';
 import { exportSettings, importSettings } from '../utils/settingsImportExport';
 import { ProviderCard } from '../components/settings/ProviderCard';
@@ -36,7 +36,7 @@ export function SettingsPage() {
 
   const handleSave = () => {
     setSaveStatus('saving');
-    const success = saveProviderSettings(settings);
+    const success = saveProviderSettingsSync(settings);
     if (success) {
       setSaveStatus('saved');
       setHasUnsavedChanges(false);
@@ -62,7 +62,7 @@ export function SettingsPage() {
         lastUpdated: new Date(),
       };
       setSettings(defaultSettings);
-      saveProviderSettings(defaultSettings);
+      saveProviderSettingsSync(defaultSettings);
       setHasUnsavedChanges(false);
     }
   };
