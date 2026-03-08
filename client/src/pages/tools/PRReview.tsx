@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import { authFetch } from '../../api/config'
 import type { PRScenario, EvaluationResult } from '../../types/pr'
 import DiffLine from '../../components/tools/PRReview/DiffLine'
 import Evaluation from '../../components/tools/PRReview/Evaluation'
@@ -24,8 +24,6 @@ const PRReview: React.FC = () => {
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null)
   const [evaluating, setEvaluating] = useState(false)
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-
   const generatePR = async () => {
     setLoading(true)
     setScenario(null)
@@ -33,15 +31,22 @@ const PRReview: React.FC = () => {
     setEvaluation(null)
 
     try {
-      const response = await axios.post(`${API_URL}/api/generate-pr`, {
-        language: 'react',
+      const response = await authFetch('/api/generate-pr', {
+        method: 'POST',
+        body: JSON.stringify({ language: 'react' }),
       })
 
-      if (!response.data.success) {
+      if (!response.ok) {
         throw new Error('Server returned error')
       }
 
-      const scenario = response.data.scenario
+      const responseData = await response.json()
+
+      if (!responseData.success) {
+        throw new Error('Server returned error')
+      }
+
+      const scenario = responseData.scenario
 
       // Convert new backend format to expected client format
       if (scenario.code && !scenario.diff) {
@@ -108,12 +113,20 @@ const PRReview: React.FC = () => {
     setEvaluating(true)
 
     try {
-      const response = await axios.post(`${API_URL}/api/evaluate-pr`, {
-        userFindings: Array.from(markedLines),
-        correctIssues: scenario.issues,
+      const response = await authFetch('/api/evaluate-pr', {
+        method: 'POST',
+        body: JSON.stringify({
+          userFindings: Array.from(markedLines),
+          correctIssues: scenario.issues,
+        }),
       })
 
-      setEvaluation(response.data.results)
+      if (!response.ok) {
+        throw new Error('Failed to evaluate review')
+      }
+
+      const data = await response.json()
+      setEvaluation(data.results)
     } catch (error) {
       console.error('Error evaluating PR:', error)
       alert('Failed to evaluate review. Please try again.')

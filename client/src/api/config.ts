@@ -3,6 +3,8 @@
  * Uses VITE_API_URL from environment variables.
  */
 
+import { getTokenGetter } from '../utils/authTokenStore';
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export const apiConfig = {
@@ -24,6 +26,30 @@ export function getApiUrl(path: string): string {
   // In production, build the full URL
   const cleanPath = path.startsWith("/") ? path.slice(1) : path;
   return `${apiConfig.baseURL}/${cleanPath}`;
+}
+
+/**
+ * Authenticated fetch helper. Automatically attaches a Clerk Bearer token
+ * (when available) and resolves the API URL via getApiUrl().
+ *
+ * Use this for all calls to protected backend endpoints.
+ * Health-check and BYOK proxy endpoints do NOT need this.
+ */
+export async function authFetch(
+  path: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const tokenGetter = getTokenGetter();
+  const token = tokenGetter ? await tokenGetter() : null;
+
+  return fetch(getApiUrl(path), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
 }
 
 /**

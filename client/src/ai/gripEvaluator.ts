@@ -7,7 +7,7 @@
 // Phase 1 type definitions.
 // ---------------------------------------------------------------------------
 
-import { getApiUrl } from '../api/config'
+import { authFetch } from '../api/config'
 import type {
   ScenarioDefinition,
   ScenarioMessage,
@@ -359,9 +359,8 @@ async function callGripAPI(
   minTurnsForFullEvaluation: number,
 ): Promise<RawAIEvaluation | null> {
   try {
-    const response = await fetch(getApiUrl('/api/evaluate-grip'), {
+    const response = await authFetch('/api/evaluate-grip', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         scenarioTitle,
         scenarioCategory,

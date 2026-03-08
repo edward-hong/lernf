@@ -7,7 +7,7 @@
 // to avoid redundant API calls.
 // ---------------------------------------------------------------------------
 
-import { getApiUrl } from '../api/config'
+import { authFetch } from '../api/config'
 import type {
   IntentVector,
   IntentDimension,
@@ -127,9 +127,8 @@ export async function analyzeIntent(
   // 2. Call backend endpoint (prompt is built in backend)
   let intent: IntentVector
   try {
-    const response = await fetch(getApiUrl('/api/analyze-intent'), {
+    const response = await authFetch('/api/analyze-intent', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message }),
     })
 
