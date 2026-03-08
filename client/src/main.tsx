@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
+import { ErrorBoundary } from './components/ErrorHandling/ErrorBoundary'
 import { router } from './router'
 import { validateDeployment } from './utils/deploymentCheck'
 import './main.css'
@@ -53,10 +54,12 @@ const clerkAppearance = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} appearance={clerkAppearance}>
-      <RouterProvider router={router} />
-      <SpeedInsights />
-      <Analytics />
-    </ClerkProvider>
+    <ErrorBoundary fullPage>
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} appearance={clerkAppearance}>
+        <RouterProvider router={router} />
+        <SpeedInsights />
+        <Analytics />
+      </ClerkProvider>
+    </ErrorBoundary>
   </StrictMode>
 )
