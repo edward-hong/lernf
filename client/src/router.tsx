@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { AboutPage } from './pages/AboutPage'
 import { Layout } from './components/Layout/Layout'
 import { ProgressDashboard } from './components/Progress/ProgressDashboard'
+import { RouteErrorFallback } from './components/ErrorHandling/RouteErrorFallback'
 
 // Lazy-loaded routes for non-critical pages (code-split)
 const CodeComparison = lazy(() => import('./pages/tools/CodeComparison'))
@@ -90,6 +91,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
+    errorElement: <RouteErrorFallback />,
     children: [
       {
         index: true,
