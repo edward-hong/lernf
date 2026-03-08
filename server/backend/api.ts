@@ -21,6 +21,7 @@ import {
   type PatternAnalysis
 } from './prompts/userIntentPrompt'
 import { detectClientPrompts } from './middleware/promptValidation'
+import { sanitiseUserInput, sanitiseMessages } from './middleware/inputSanitisation'
 import {
   categorizeNPCResponse,
   isProblematicResponse,
@@ -292,13 +293,15 @@ export const deepseek = api(
       throw new APIError(ErrCode.InvalidArgument, 'Prompt is required')
     }
 
+    const cleanPrompt = sanitiseUserInput(req.prompt, 'deepseek')
+
     const isJsonRequest =
-      req.prompt.includes('Format as JSON') ||
-      req.prompt.includes('Return ONLY valid JSON')
+      cleanPrompt.includes('Format as JSON') ||
+      cleanPrompt.includes('Return ONLY valid JSON')
 
     return withUsageTracking(async () => {
       const ds = await callDeepseekWithUsage(
-        [{ role: 'user', content: req.prompt }],
+        [{ role: 'user', content: cleanPrompt }],
         0.7,
         8192,
         isJsonRequest
@@ -345,6 +348,8 @@ export const npcDialogue = api(
       )
     }
 
+    const cleanMessages = sanitiseMessages(req.messages, 'npcDialogue')
+
     return withUsageTracking(async () => {
       // Build prompt in backend using the engineered prompt
       const systemPrompt = buildNpcSystemPrompt(req.persona, req.scenarioContext)
@@ -356,7 +361,7 @@ export const npcDialogue = api(
 
       const apiMessages: DeepseekMessage[] = [
         { role: 'system', content: systemPrompt },
-        ...req.messages.map((m) => ({ role: m.role, content: m.content })),
+        ...cleanMessages.map((m) => ({ role: m.role, content: m.content })),
       ]
 
       let totalPromptTokens = 0
@@ -375,7 +380,7 @@ export const npcDialogue = api(
 
       if (isSolving || isProblematicResponse(responseType)) {
         console.warn('[NPC Dialogue] AUTO-SOLVING DETECTED')
-        console.warn('[NPC Dialogue] User message:', req.messages[req.messages.length - 1]?.content.substring(0, 100))
+        console.warn('[NPC Dialogue] User message:', cleanMessages[cleanMessages.length - 1]?.content.substring(0, 100))
         console.warn('[NPC Dialogue] Bad response:', output.substring(0, 200))
         console.warn('[NPC Dialogue] Matched pattern:', AUTO_SOLVING_PATTERNS.find(p => p.test(output)))
         console.warn('[NPC Dialogue] Response category:', responseType)
@@ -578,6 +583,8 @@ export const evaluateComparison = api(
       )
     }
 
+    const cleanReasoning = sanitiseUserInput(req.reasoning, 'evaluateComparison')
+
     return withUsageTracking(async () => {
       const prompt = buildEvaluateComparisonPrompt(
         {
@@ -587,7 +594,7 @@ export const evaluateComparison = api(
           correctAnswer: req.correctAnswer,
           reason: req.reason,
         },
-        req.reasoning,
+        cleanReasoning,
         req.selectedOption
       )
 
@@ -635,10 +642,12 @@ export const evaluateCompletion = api(
       )
     }
 
+    const cleanConversationHistory = sanitiseUserInput(req.conversationHistory, 'evaluateCompletion')
+
     return withUsageTracking(async () => {
       const prompt = buildEvaluateCompletionPrompt(
         req.scenarioDescription,
-        req.conversationHistory,
+        cleanConversationHistory,
         req.completionSignals,
       )
 
@@ -697,14 +706,17 @@ export const evaluateGrip = api(
       )
     }
 
+    const cleanConversationHistory = sanitiseUserInput(req.conversationHistory, 'evaluateGrip')
+    const cleanSignalsSummary = sanitiseUserInput(req.signalsSummary, 'evaluateGrip')
+
     return withUsageTracking(async () => {
       // Build prompt in backend
       const prompt = buildGripEvaluationPrompt(
         req.scenarioTitle,
         req.scenarioCategory,
         req.scenarioEngineBriefing,
-        req.conversationHistory,
-        req.signalsSummary,
+        cleanConversationHistory,
+        cleanSignalsSummary,
         req.hiddenFactorStatus,
         req.evaluationGuidance,
         req.userTurnCount,
@@ -766,13 +778,15 @@ export const generateConsequence = api(
       )
     }
 
+    const cleanConversationSummary = sanitiseUserInput(req.conversationSummary, 'generateConsequence')
+
     return withUsageTracking(async () => {
       // Build prompt in backend
       const prompt = buildConsequenceGenerationPrompt(
         req.scenarioTitle,
         req.scenarioCategory,
         req.scenarioSetupContext,
-        req.conversationSummary,
+        cleanConversationSummary,
         req.gripScores,
         req.compositeScore,
         req.band,
@@ -828,8 +842,10 @@ export const chat = api(
       )
     }
 
+    const cleanMessages = sanitiseMessages(req.messages, 'chat')
+
     return withUsageTracking(async () => {
-      const apiMessages: DeepseekMessage[] = req.messages.map((m) => ({
+      const apiMessages: DeepseekMessage[] = cleanMessages.map((m) => ({
         role: m.role,
         content: m.content,
       }))
@@ -863,12 +879,14 @@ export const analyzeIntent = api(
       throw new APIError(ErrCode.InvalidArgument, 'message is required')
     }
 
+    const cleanMessage = sanitiseUserInput(req.message, 'analyzeIntent')
+
     return withUsageTracking(async () => {
       // Build prompt in backend
-      const prompt = buildIntentAnalysisPrompt(req.message)
+      const prompt = buildIntentAnalysisPrompt(cleanMessage)
 
       console.log('[Analyze Intent] Using backend-built prompt')
-      console.log('[Analyze Intent] Message length:', req.message.length)
+      console.log('[Analyze Intent] Message length:', cleanMessage.length)
 
       const ds = await callDeepseekWithUsage(
         [{ role: 'user', content: prompt }],
@@ -956,6 +974,8 @@ export const startAdvocateSession = api(
       )
     }
 
+    const cleanProposal = sanitiseUserInput(req.proposal, 'startAdvocateSession')
+
     return withUsageTracking(async () => {
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
@@ -964,7 +984,7 @@ export const startAdvocateSession = api(
 
       // Generate Round 1 critiques
       const critiquePromises = req.advocates.map(async (advocate) => {
-        const prompt = buildAdvocatePrompt(advocate.lens, req.proposal)
+        const prompt = buildAdvocatePrompt(advocate.lens, cleanProposal)
 
         const ds = await callDeepseekWithUsage(
           [{ role: 'user', content: prompt }],
@@ -986,7 +1006,7 @@ export const startAdvocateSession = api(
 
       // Store session in memory
       sessions.set(sessionId, {
-        proposal: req.proposal,
+        proposal: cleanProposal,
         advocates: req.advocates,
         rounds: [
           {
@@ -1022,6 +1042,8 @@ export const continueDeliberation = api(
       )
     }
 
+    const cleanUserResponse = sanitiseUserInput(req.userResponse, 'continueDeliberation')
+
     // Retrieve session
     const session = sessions.get(req.sessionId)
     if (!session) {
@@ -1040,7 +1062,7 @@ export const continueDeliberation = api(
       // Analyze user's intent (SILENTLY - don't show to user yet)
       const previousCritiques = rounds[rounds.length - 1].critiques.map(c => c.content)
 
-      const intentPrompt = buildUserIntentAnalysisPrompt(req.userResponse, previousCritiques)
+      const intentPrompt = buildUserIntentAnalysisPrompt(cleanUserResponse, previousCritiques)
       const intentDs = await callDeepseekWithUsage(
         [{ role: 'user', content: intentPrompt }],
         0,
@@ -1078,7 +1100,7 @@ export const continueDeliberation = api(
       })
 
       // Add current user response
-      conversationHistory.push({ role: 'user', content: req.userResponse })
+      conversationHistory.push({ role: 'user', content: cleanUserResponse })
 
       // Generate new critiques from all advocates
       const critiquePromises = advocates.map(async (advocate) => {
@@ -1105,7 +1127,7 @@ export const continueDeliberation = api(
       // Store this round (with user intent)
       rounds.push({
         roundNumber: currentRound,
-        userMessage: req.userResponse,
+        userMessage: cleanUserResponse,
         userIntent,
         critiques: newCritiques
       })
