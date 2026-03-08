@@ -8,7 +8,7 @@ export interface MarkdownPageProps {
 
 export function MarkdownPage({ content }: MarkdownPageProps) {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div
         className="prose prose-gray max-w-none
         [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-8 [&_h1]:mb-4

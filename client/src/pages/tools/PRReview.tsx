@@ -142,7 +142,7 @@ const PRReview: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[1200px] mx-auto py-10 px-5 min-h-screen">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-screen">
       <header className="text-center mb-10">
         <h1 className="text-4xl text-gray-800 mb-2">PR Review Practice</h1>
         <p className="text-gray-500 text-lg">
