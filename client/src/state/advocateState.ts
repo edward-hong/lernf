@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { authFetch } from '../api/config'
 import type { Advocate, AdvocateSession, SessionAnalysis } from '../types/advocate'
 
 interface AdvocateState {
@@ -59,11 +60,8 @@ export const useAdvocateStore = create<AdvocateState>()(
         set({ loading: true, error: null })
 
         try {
-          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-
-          const response = await fetch(`${API_URL}/api/advocates/start`, {
+          const response = await authFetch('/api/advocates/start', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               proposal,
               advocates: advocates.map(a => ({
@@ -114,11 +112,8 @@ export const useAdvocateStore = create<AdvocateState>()(
         set({ loading: true, error: null })
 
         try {
-          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-
-          const apiResponse = await fetch(`${API_URL}/api/advocates/continue`, {
+          const apiResponse = await authFetch('/api/advocates/continue', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId: session.id,
               userResponse: response
@@ -167,11 +162,8 @@ export const useAdvocateStore = create<AdvocateState>()(
         set({ loading: true, error: null })
 
         try {
-          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-
-          const response = await fetch(`${API_URL}/api/advocates/end`, {
+          const response = await authFetch('/api/advocates/end', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               sessionId: session.id
             })

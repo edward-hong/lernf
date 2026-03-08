@@ -3,7 +3,7 @@
  * Run this after deployment to ensure everything is connected properly.
  */
 
-import { checkBackendHealth, getApiUrl } from '../api/config';
+import { checkBackendHealth, getApiUrl, authFetch } from '../api/config';
 
 export async function validateDeployment(): Promise<{
   success: boolean;
@@ -29,9 +29,8 @@ export async function validateDeployment(): Promise<{
 
   // Check 3: API connectivity
   try {
-    const response = await fetch(getApiUrl('/api/chat'), {
+    const response = await authFetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [{ role: 'user', content: 'test' }],
         max_tokens: 10,

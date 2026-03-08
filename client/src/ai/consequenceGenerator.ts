@@ -8,7 +8,7 @@
 // narrative that surfaces second-order effects the user didn't anticipate.
 // ---------------------------------------------------------------------------
 
-import { getApiUrl } from '../api/config'
+import { authFetch } from '../api/config'
 import type {
   ScenarioDefinition,
   ScenarioMessage,
@@ -258,9 +258,8 @@ async function callConsequenceAPI(
   weakDimensions: string[],
 ): Promise<RawConsequenceResponse | null> {
   try {
-    const response = await fetch(getApiUrl('/api/generate-consequence'), {
+    const response = await authFetch('/api/generate-consequence', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         scenarioTitle,
         scenarioCategory,

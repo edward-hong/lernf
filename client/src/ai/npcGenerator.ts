@@ -6,7 +6,7 @@
 // structured persona data and conversation history — no prompt building here.
 // ---------------------------------------------------------------------------
 
-import { getApiUrl } from '../api/config'
+import { authFetch } from '../api/config'
 import type {
   PersonaDefinition,
   ScenarioMessage,
@@ -135,9 +135,8 @@ async function callNpcDialogueAPI(
   scenarioContext: string,
   messages: ChatMessage[],
 ): Promise<string> {
-  const response = await fetch(getApiUrl('/api/npc-dialogue'), {
+  const response = await authFetch('/api/npc-dialogue', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       npcName,
       persona: {

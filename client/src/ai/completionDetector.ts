@@ -7,7 +7,7 @@
 // state, turn counting, and request deduplication.
 // ---------------------------------------------------------------------------
 
-import { getApiUrl } from '../api/config'
+import { authFetch } from '../api/config'
 import type { ScenarioDefinition, ScenarioMessage } from '../types/scenario'
 
 // ---- Types ----------------------------------------------------------------
@@ -123,9 +123,8 @@ async function callCompletionAPI(
   completionSignals: string,
 ): Promise<CompletionEvaluation | null> {
   try {
-    const response = await fetch(getApiUrl('/api/evaluate-completion'), {
+    const response = await authFetch('/api/evaluate-completion', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         scenarioDescription,
         conversationHistory,

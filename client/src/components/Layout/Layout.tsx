@@ -2,7 +2,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { Footer } from '../Footer/Footer'
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react'
+import { setTokenGetter } from '../../utils/authTokenStore'
 
 interface DropdownItem {
   path: string
@@ -17,9 +18,15 @@ interface NavSection {
 
 export function Layout() {
   const location = useLocation()
+  const { getToken } = useAuth()
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
+
+  // Initialise the auth token store so non-React code can obtain Clerk JWTs
+  useEffect(() => {
+    setTokenGetter(getToken)
+  }, [getToken])
 
   const toolsSection: NavSection = {
     label: 'Tools',

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getApiUrl } from '../../api/config'
+import { authFetch } from '../../api/config'
 import CodeBlock from '../../components/tools/CodeComparison/CodeBlock'
 import Evaluation from '../../components/tools/CodeComparison/Evaluation'
 import LanguageSelector from '../../components/tools/CodeComparison/LanguageSelector'
@@ -26,9 +26,8 @@ function CodeComparison() {
     setEvaluation(null)
 
     try {
-      const response = await fetch(getApiUrl('/api/generate-comparison'), {
+      const response = await authFetch('/api/generate-comparison', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language }),
       })
 
@@ -72,9 +71,8 @@ function CodeComparison() {
     setEvaluating(true)
 
     try {
-      const response = await fetch(getApiUrl('/api/evaluate-comparison'), {
+      const response = await authFetch('/api/evaluate-comparison', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           context: scenario.context,
           optionA: scenario.optionA,
