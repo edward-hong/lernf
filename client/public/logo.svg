@@ -1,23 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&amp;display=swap');
     </style>
   </defs>
   
-  <!-- Wordmark -->
+  <!-- Background -->
+  <rect width="512" height="512" fill="#111111" rx="64" />
+  
+  <!-- Terminal prompt -->
   <text 
-    x="50" 
-    y="145" 
-    font-family="'JetBrains Mono', monospace" 
+    x="40" 
+    y="340" 
+    font-family="'Space Mono', monospace" 
     font-weight="700" 
-    font-size="120" 
-    fill="#1a1a1a" 
-    letter-spacing="-2"
+    font-size="100" 
+    fill="#666666"
+  >&gt;</text>
+  
+  <!-- Lettermark -->
+  <text 
+    x="130" 
+    y="340" 
+    font-family="'Space Mono', monospace" 
+    font-weight="700" 
+    font-size="100" 
+    fill="#ffffff" 
+    letter-spacing="-1"
   >lernf</text>
   
-  <!-- Cursor blink accent -->
-  <rect x="598" y="45" width="4" height="105" fill="#1a1a1a" rx="1">
-    <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite" />
-  </rect>
+  <!-- Underscore rule -->
+  <rect x="130" y="355" width="345" height="3" fill="#ffffff" />
 </svg>
